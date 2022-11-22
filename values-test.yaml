@@ -1,0 +1,50 @@
+---
+kubepromstack:
+  prometheus:
+    prometheusSpec:
+      retention: "30d"
+      retentionSize: "50GB"
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            resources:
+              requests:
+                storage: "55Gi"
+
+  ## suppress noisy alerts in Prometheus
+  defaultRules:
+    disabled:
+      NodeFilesystemSpaceFillingUp: true
+      KubeAPIErrorBudgetBurn: true
+      CPUThrottlingHigh: true
+
+  grafana:
+    ingress:
+      enabled: true
+      hosts:
+        - "amatsiuk-grafana.cognigy.ai"
+
+  ## AlertManager routing configuration
+  alertmanager:
+    config:
+      receivers:
+        - name: 'null'
+        - name: 'pagerduty'
+          pagerduty_configs:
+            - routing_key: cdd0c64d20024e05c04d760514dec612
+              severity: '{{ if .CommonLabels.severity }}{{ .CommonLabels.severity | toLower}}{{ else }}warning{{ end }}'
+        - name: 'msteams-runtime'
+          webhook_configs:
+            - send_resolved: true
+              url: 'http://prometheus-msteams:2000/runtime'
+
+## Cognigy Dashboards
+cognigy-dashboards:
+  products:
+    ai:
+      enabled: true
+    la:
+      enabled: true #enable dashboard for liveagent
+
+
+

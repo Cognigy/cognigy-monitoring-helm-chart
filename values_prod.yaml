@@ -1,0 +1,61 @@
+---
+## kube-prometheus-stack variables
+## see cognigy-monitoring/values.yaml for details
+kubepromstack:
+  prometheus:
+    prometheusSpec:
+      ## Retention for Prometheus metrics in days
+      retention: "7d"
+      ## Maximum retention size of Prometheus metrics, oldest data removed first
+      retentionSize: "10GB"
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            resources:
+              requests:
+                ## PVC size for Prometheus
+                storage: "15Gi"
+
+  ## Grafana Configuration
+  grafana:
+    adminUser: admin
+    ## admin User password, change to a secure password
+    adminPassword: strongpassword
+    ingress:
+      ## set to expose grafana via an ingress
+      enabled: true
+      ## specify Grafana external host
+      hosts:
+        - ""
+
+  ## AlertManager routing configuration
+  alertmanager:
+    config:
+      receivers:
+        - name: 'null'
+        ## Uncomment/Configure receiver as required
+        #- name: 'pagerduty'
+        #  pagerduty_configs:
+        #    - routing_key: PAGERDUTY_ROUTING_KEY
+        #      severity: '{{ if .CommonLabels.severity }}{{ .CommonLabels.severity | toLower}}{{ else }}warning{{ end }}'
+        #- name: 'msteams-runtime'
+        #  webhook_configs:
+        #    - send_resolved: true
+        #      url: 'http://prometheus-msteams:2000/runtime'
+
+
+## enable Grafana dashobards for separate products
+## see cognigy-monitoring/values.yaml for details
+cognigy-dashboards:
+  products:
+    ## Enable Cognigy.AI product dashboards
+    ai:
+      enabled: true
+    ## Enable Live Agent Dashboards
+    la:
+      enabled: false
+    ## Enable VoiceGateway Dashboards
+    vg:
+      enabled: false
+
+

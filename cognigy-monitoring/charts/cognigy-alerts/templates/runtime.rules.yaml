@@ -1,0 +1,217 @@
+{{- $targetNamespace := .Values.appNamespacesTarget }}
+{{- if .Values.rules.runtime.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-cognigy-ai-runtime-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+    # General rules
+    - name: cognigy.runtime.alert.general
+      rules:
+      - alert: PodRestarts
+        expr: (kube_pod_container_status_restarts_total{container=~"service-ai|service-app-session-manager|service-execution|service-function-execution|service-function-scheduler|service-http|service-nlp-.*|service-parser|service-profiles|service-session-state-manager"} -  kube_pod_container_status_restarts_total{container=~"service-ai|service-app-session-manager|service-execution|service-function-execution|service-function-scheduler|service-http|service-nlp-.*|service-parser|service-profiles|service-session-state-manager"} offset 5m) > 0
+        for: 0m
+        labels:
+          severity: warning
+          group: runtime-custom-alert-rules
+        annotations:
+          summary: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} has restarted
+          description: "Pod {{`{{`}} $labels.container }} restarted on {{`{{`}} $labels.instance }}). \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+
+    # Service AI
+    {{- if not (.Values.rules.runtime.disabled.ServiceAI | default false ) }}
+    - name: cognigy.runtime.alert.ai
+      rules:
+      - alert: UncaughtErrorsAI
+        expr: sum(increase(cognigy_ai_uncaught_error_total[5m])) > 5
+        for: 1m
+        labels:
+          severity: warning
+          group: runtime-custom-alert-rules
+        annotations:
+          summary: service-ai had uncaught errors on (instance {{`{{`}} $labels.instance }})
+          description: "service-ai had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      - alert: HandoverErrorsAI
+        expr: sum(increase(cognigy_ai_handover_error_amount[5m])) > 5
+        for: 1m
+        labels:
+          severity: warning
+          group: runtime-custom-alert-rules
+        annotations:
+          summary: service-ai had handover errors (instance {{`{{`}} $labels.instance }})
+          description: "service-ai had handover errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      - alert: SessionStateErrorsAI
+        expr: sum(increase(cognigy_ai_session_state_retrieval_timeout_error_total[5m])) > 5
+        for: 1m
+        labels:
+          severity: warning
+          group: runtime-custom-alert-rules
+        annotations:
+          summary: service-ai had session state retrieval errors (instance {{`{{`}} $labels.instance }})
+          description: "service-ai had session state retrieval errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      - alert: TotalErrorsAI
+        expr: sum(increase(cognigy_ai_messages_error_total{entrypointType="snapshot"}[5m])) > 5
+        for: 1m
+        labels:
+          severity: warning
+          group: runtime-custom-alert-rules
+        annotations:
+          summary: service-ai had message errors (instance {{`{{`}} $labels.instance }})
+          description: "service-ai had message errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    {{- if not (.Values.rules.runtime.disabled.ServiceAppSessionManager | default false ) }}
+    # Service App Session Manager
+    - name: cognigy.runtime.alert.app-session-manager
+      rules:
+      - alert: UncaughtErrorsAppSessionManager
+        expr: sum(increase(cognigy_app_session_manager_uncaught_error_total[5m])) > 5
+        for: 1m
+        labels:
+          severity: warning
+          group: runtime-custom-alert-rules
+        annotations:
+          summary: service-app-session-manager had uncaught errors on (instance {{`{{`}} $labels.instance }})
+          description: "service-app-session-manager had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      - alert: PersistErrorsAppSessionManager
+        expr: sum(increase(cognigy_app_session_manager_persist_error_total[5m])) > 5
+        for: 1m
+        labels:
+          severity: warning
+          group: runtime-custom-alert-rules
+        annotations:
+          summary: service-app-session-manager had handover errors (instance {{`{{`}} $labels.instance }})
+          description: "service-app-session-manager had handover errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    {{- if not (.Values.rules.runtime.disabled.ServiceExecution | default false ) }}
+    # Service Execution
+    - name: cognigy.runtime.alert.execution
+      rules:
+      - alert: UncaughtErrorsExecution
+        expr: sum(increase(cognigy_execution_uncaught_error_total[5m])) > 5
+        for: 1m
+        labels:
+          severity: warning
+          group: runtime-custom-alert-rules
+        annotations:
+          summary: service-execution had uncaught errors on (instance {{`{{`}} $labels.instance }})
+          description: "service-execution had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    # This alert is not stable, especially not on environments with many different Extensions
+    #   - alert: ExtensionExecutionTime
+    #     expr: histogram_quantile(0.95, sum(rate(cognigy_execution_extension_processing_time_bucket[1m])) by (le)) / histogram_quantile(0.95, sum(rate(cognigy_execution_extension_processing_time_bucket[5m])) by (le)) > 1.5
+    #     for: 0m
+    #     labels:
+    #       severity: warning
+    #       group: runtime-custom-alert-rules
+    #     annotations:
+    #       summary: Extensions execution time increased by more than 100% (instance {{`{{`}} $labels.instance }})
+    #       description: "service-execution execution time increased by: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+
+    {{- if not (.Values.rules.runtime.disabled.ServiceFunctionExecution | default false ) }}
+    # Service Function Execution
+    - name: cognigy.runtime.alert.function-execution
+      rules:
+      - alert: UncaughtErrorsFunctionExecution
+        expr: sum(increase(cognigy_function_execution_uncaught_error_total[5m])) > 5
+        for: 1m
+        labels:
+          severity: warning
+          group: runtime-custom-alert-rules
+        annotations:
+          summary: service-function-execution had uncaught errors on (instance {{`{{`}} $labels.instance }})
+          description: "service-function-execution had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      - alert: FunctionSchedulerSchedulingConflict
+        expr: increase(cognigy_function_scheduler_scheduling_conflict_count[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          group: runtime-custom-alert-rules
+        annotations:
+          summary: functions scheduler scheduling conflicts on (instance {{`{{`}} $labels.instance }})
+          description: "Number of scheduling functions per organization has reached the limit. \n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    {{- if not (.Values.rules.runtime.disabled.ServiceHttp | default false ) }}
+    # Service HTTP
+    - name: cognigy.runtime.alert.http
+      rules:
+      - alert: UncaughtErrorsHTTP
+        expr: sum(increase(cognigy_http_uncaught_error_total[5m])) > 5
+        for: 1m
+        labels:
+          severity: warning
+          group: runtime-custom-alert-rules
+        annotations:
+          summary: service-http had uncaught errors on (instance {{`{{`}} $labels.instance }})
+          description: "service-http had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    {{- if not (.Values.rules.runtime.disabled.ServiceNlpMatcher | default false ) }}
+    # NLP Matcher
+    - name: cognigy.runtime.alert.nlp-matcher
+      rules:
+      - alert: MatcherFindKeyphraseError
+        expr: cognigy_matcher_findkeyphrases_error > 0
+        for: 0m
+        labels:
+          severity: warning
+          group: runtime-custom-alert-rules
+        annotations:
+          summary: NLP matcher had findKeyphrase error (instance {{`{{`}} $labels.instance }})
+          description: "NLP Matcher had findKeyphrase errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      - alert: MatcherInitializeLexiconError
+        expr: cognigy_matcher_initialize_lexicon_error > 0
+        for: 0m
+        labels:
+          severity: warning
+          group: runtime-custom-alert-rules
+        annotations:
+          summary: NLP matcher had initializeLexicon error (instance {{`{{`}} $labels.instance }})
+          description: "NLP Matcher had initializeLexicon errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    {{- if not (.Values.rules.runtime.disabled.ServicePlaybookExecution | default false ) }}
+    # Service Playbook Execution
+    - name: cognigy.runtime.alert.playbook-execution
+      rules:
+      - alert: UncaughtErrorsPlaybookExecution
+        expr: sum(increase(cognigy_playbook_execution_uncaught_error_total[5m])) > 5
+        for: 1m
+        labels:
+          severity: warning
+          group: runtime-custom-alert-rules
+        annotations:
+          summary: service-playbook-execution had uncaught errors on (instance {{`{{`}} $labels.instance }})
+          description: "service-playbook-execution had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    {{- if not (.Values.rules.runtime.disabled.ServiceSessionStateManager | default false ) }}
+    # Service Session State Manager
+    - name: cognigy.runtime.alert.session-state-manager
+      rules:
+      - alert: UncaughtErrorsSessionStateManager
+        expr: sum(increase(cognigy_session_state_manager_uncaught_error_total[5m])) > 5
+        for: 1m
+        labels:
+          severity: warning
+          group: runtime-custom-alert-rules
+        annotations:
+          summary: service-session-state-manager had uncaught errors on (instance {{`{{`}} $labels.instance }})
+          description: "service-session-state-manager had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      - alert: PersistErrorsAppSessionManager
+        expr: sum(increase(cognigy_session_state_manager_persist_error_total[5m])) > 5
+        for: 1m
+        labels:
+          severity: warning
+          group: runtime-custom-alert-rules
+        annotations:
+          summary: service-session-state-manager had handover errors (instance {{`{{`}} $labels.instance }})
+          description: "service-session-state-manager had handover errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+{{- end -}}
