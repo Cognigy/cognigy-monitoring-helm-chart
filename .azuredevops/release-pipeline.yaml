@@ -3,10 +3,8 @@ name: $(why)_helm_release_$(SourceBranchName)_$(Date:yyyyMMdd)
 trigger:
   batch: true
   branches:
-#    exclude:
-#      - "*"
-    include:
-      - "main" ## TEMP REMOVE LATER
+    exclude:
+      - "*"
   tags:
     include:
       - "*"
@@ -41,7 +39,7 @@ pool:
 stages:
   - stage: helmChartRelease
     displayName: Create a new release tag and Helm Chart release
-    #condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/') ## TEMP REENABLE LATER
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
     jobs:
       - job: createOciRelease
         displayName: Publish Helm Chart OCI Fragment
