@@ -1,0 +1,19 @@
+---
+{{- if .Values.monitors.traefik.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ .Release.Name }}-services-traefik
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: traefik
+  namespaceSelector:
+    matchNames:
+      - "{{ .Values.monitors.traefik.namespace }}"
+  podMetricsEndpoints:
+    - path: /metrics
+      port: metrics
+{{- end -}}

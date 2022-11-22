@@ -1,0 +1,19 @@
+---
+{{- if .Values.monitors.rabbitmq.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ .Release.Name }}-services-rabbitmq
+  labels:
+    {{- include "cognigy-monitoring.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: rabbitmq
+  namespaceSelector:
+    matchNames:
+      - "{{ .Values.monitors.rabbitmq.namespace }}"
+  podMetricsEndpoints:
+    - path: /metrics
+      port: metrics
+{{- end -}}

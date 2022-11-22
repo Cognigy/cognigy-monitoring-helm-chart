@@ -1,0 +1,24 @@
+---
+rbac:
+  ## Disable deprecated PodSecurityPolicy
+  pspEnabled: false
+
+serviceMonitor:
+  enabled: true
+  relabelings:
+    - sourceLabels: [__meta_kubernetes_pod_name]
+      action: replace
+      targetLabel: instance
+      regex: (.*redis.*)
+      replacement: "redis-persistent"
+
+# referenced via service
+redisAddress: redis://redis-persistent:6379
+
+auth:
+  # Use password authentication
+  enabled: true
+  # Use existing secret (ignores redisPassword)
+  secret:
+    name: "cognigy-redis-persistent-password"
+    key: "REDIS_PERSISTENT_PASSWORD"

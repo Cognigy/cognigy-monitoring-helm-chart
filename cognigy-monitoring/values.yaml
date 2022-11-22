@@ -1,0 +1,253 @@
+## Default values for cognigy-monitoring stack
+## This is a YAML-formatted file.
+
+### kube-promeheus-stack configuration
+kubepromstack:
+  enabled: true
+  # Create default rules for monitoring
+  defaultRules:
+    create: true
+    rules:
+      alertmanager: false
+      etcd: false
+      general: false
+      k8s: true
+      kubeApiserver: true
+      kubeApiserverAvailability: false
+      kubeApiserverHistogram: false # workaround due to duplicate
+      kubeApiserverBurnrate: false # workaround due to duplicate
+      kubeApiserverError: true
+      kubeApiserverSlos: false
+      kubelet: true
+      kubePrometheusGeneral: true
+      kubePrometheusNodeAlerting: false
+      kubePrometheusNodeRecording: true
+      kubernetesAbsent: true
+      kubernetesApps: false
+      kubernetesResources: false
+      kubernetesStorage: false
+      kubernetesSystem: false
+      kubeScheduler: true
+      kubeStateMetrics: true
+      network: false
+      node: true
+      prometheus: false
+      prometheusOperator: true
+      time: true
+  # disable kubeProxy monitoring,
+  # otherwise you need to change metricsBindAddress: 0.0.0.0:10249 in kube-proxy-config ConfigMap
+  kubeProxy:
+    enabled: false
+  # not supported on EKS
+  kubeControllerManager:
+    enabled: false
+  # not supported on EKS
+  kubeScheduler:
+    enabled: false
+
+  ### AlertManager Configuration
+  alertmanager:
+    config:
+      global:
+        resolve_timeout: 5m
+      inhibit_rules:
+        - source_matchers:
+            - 'severity = critical'
+          target_matchers:
+            - 'severity =~ warning|info'
+          equal: ['cluster', 'alertname']
+        - source_matchers:
+            - 'severity = warning'
+          target_matchers:
+            - 'severity = info'
+          equal: ['cluster', 'alertname']
+        - source_matchers:
+            - 'alertname = InfoInhibitor'
+          target_matchers:
+            - 'severity = info'
+          equal:
+            - 'namespace'
+      route:
+        receiver: 'pagerduty'
+        group_by: ['cluster', 'alertname', 'namespace']
+        group_wait: 30s
+        group_interval: 15m
+        repeat_interval: 12h
+        routes:
+          - receiver: 'null'
+            matchers:
+              - alertname =~ "InfoInhibitor|Watchdog"
+          - receiver: 'msteams-runtime'
+            matchers:
+              - group = runtime-custom-alert-rules
+      receivers:
+        - name: 'null'
+
+  ### Prometheus configuration
+  prometheus:
+    prometheusSpec:
+      ## disable label-based selectors, otherwise release: {{ .Release.Name }} is used
+      podMonitorSelectorNilUsesHelmValues: false
+      serviceMonitorSelectorNilUsesHelmValues: false
+      probeSelectorNilUsesHelmValues: false
+      ruleSelectorNilUsesHelmValues: false
+      ## Specify Retention and max retention size
+      retention: "7d"
+      retentionSize: "10GB"
+
+      ## External labels to add to any time series or alerts when communicating with external systems
+      ## in case you want to set a specific cluster name
+      externalLabels: {}
+
+      ## Prometheus StorageSpec for persistent data
+      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/user-guides/storage.md
+      ##
+      ## Using PersistentVolumeClaim
+      ##
+      #  volumeClaimTemplate:
+      #    spec:
+      #      storageClassName: gluster
+      #      accessModes: ["ReadWriteOnce"]
+      #      resources:
+      #        requests:
+      #          storage: 50Gi
+      #    selector: {}
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            resources:
+              requests:
+                storage: "15Gi"
+
+
+      ## Prometheus Pod resources
+      resources:
+        requests:
+          memory: 6000Mi
+          cpu: "0.8"
+        limits:
+          memory: 6000Mi
+          cpu: "2"
+
+  ### Grafana configuration
+  grafana:
+    ## Disable deprecated PodSecurityPolicy
+    rbac:
+      pspEnabled: false
+    ## Since Kibana is a stateful deployment, Recreate must be used,
+    # otherwise Pod will not be able to reconnect the PVC
+    deploymentStrategy:
+      type: Recreate
+
+    ## Administrator credentials when not using an existing secret (see below)
+    # if adminPassword is not set it will be automatically generated
+    adminUser: admin
+    ## adminPassword: strongpassword
+
+    ## ingress settings
+    # currently with defaults for traefik
+    ingress:
+      # If true, Grafana Ingress will be created
+      enabled: false
+
+      # To support kubernetes version >1.21
+      ingressClassName: traefik
+
+      # Annotations for Grafana Ingress
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+
+      # Labels to be added to the Ingress
+      labels: {}
+
+      ## Hostnames.
+      ## Must be provided if Ingress is enable.
+      ##
+      # hosts:
+      #   - grafana.domain.com
+      hosts:
+
+      ## Path for grafana ingress
+      path: /
+
+      ## TLS configuration for grafana Ingress
+      ## Secret must be manually created in the namespace
+      ##
+      tls:
+      - secretName: cognigy-traefik
+      #   hosts:
+      #   - grafana.example.com
+
+## Cognigy Product Dashboards, enable/disable dashboards according to your installation
+cognigy-dashboards:
+  enabled: true
+  products:
+    # Dashboards for Cognigy backend services
+    services:
+      enabled: true
+      dashboards:
+        traefik:
+          enabled: true
+        mongodb:
+          enabled: true
+        rabbitmq:
+          enabled: true
+        redis:
+          enabled: true
+        postgres:
+          enabled: false
+        mysql:
+          enabled: false
+    # Cognigy.AI product dashboards
+    ai:
+      enabled: true
+    # Cognigy Live Agent product dashboards
+    la:
+      enabled: false
+    # Cognigy VoiceGateway product dashboards
+    vg:
+      enabled: false
+
+## Prometheus Alerts for Cognigy products
+# enable/disable rules for separate products and alerts
+# check cognigy-alerts chart for details
+cognigy-alerts:
+  enabled: true
+  rules:
+    ai:
+      enabled: true
+    # Cognigy.AI runtime alerts, enable only if absolutely necessary
+    runtime:
+      enabled: false
+
+
+## Prometheus Monitors for backend services
+cognigy-monitors:
+  enabled: true
+  monitors:
+    rabbitmq:
+      enabled: true
+      namespace: "cognigy-ai"
+    traefik:
+      enabled: true
+      namespace: "cognigy-ai"
+
+## Some legacy clusters do not come with CPU Metrics out of the box, enable cadvisor for such clusters
+cadvisor:
+  enabled: false
+
+## MS Teams-based alerting for Cognigy.AI runtime alerts
+# enable only if runtime alerts are enabled
+prometheus-msteams:
+  enabled: false
+  resources:
+    limits:
+      cpu: 100m
+      memory: 64Mi
+    requests:
+      cpu: 25m
+      memory: 32Mi
+  connectors:
+    - runtime: MSTEAMS_RUNTIME_WEBHOOK_URL # specify MS Teams Webhook URL
