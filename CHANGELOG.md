@@ -1,5 +1,11 @@
 # Release Notes
 
+
+### 1.1.1
+**Released** November 24th, 2022
+#### Bugfixes
+- Fixed migration and installation documentation
+
 ### 1.1.0
 **Released** November 23th, 2022
 

@@ -15,17 +15,17 @@ This chart installs Cognigy Monitoring Stack which is based on [kube-prometheus-
 3. Install Monitoring Stack Helm Release:
 * Installing from Cognigy Container Registry (recommended), specify proper `HELM_CHART_VERSION` (check [CHANGELOG](CHANGELOG.md) for details) and `YOUR_VALUES_FILE.yaml`:
    * Login into Cognigy helm registry (provide your Cognigy Container Registry credentials):
-   ```
+   ```shell
    helm registry login cognigy.azurecr.io \
    --username <your-username> \
    --password <your-password>
    ```
    * Install Helm Chart into a separate `cognigy-ai` namespace:
-   ```
+   ```shell
    helm upgrade --install --create-namespace -n monitoring monitoring-stack oci://cognigy.azurecr.io/helm/cognigy-monitoring --version HELM_CHART_VERSION --values YOUR_VALUES_FILE.yaml
    ```
 * Alternatively you can install it from the local chart (not recommended):
-   ```
+   ```shell
    helm upgrade --install --create-namespace -n monitoring monitoring-stack ./cognigy-monitoring --values YOUR_VALUES_FILE.yaml 
    ```
 4. If Grafana ingress is disabled you can access the grafana directly by using kubectl port-forwarding: `kubectl port-forward svc/monitoring-stack-grafana 3000:80`. Then access Grafana via `http://localhost:3000`. Use Grafana credentials you have set in `YOUR_VALUES_FILE.yaml`
@@ -34,7 +34,7 @@ This chart installs Cognigy Monitoring Stack which is based on [kube-prometheus-
 ### Install Redis and MongoDB exporters
 
 1. Install Redis exporters for Redis and Redis-Persistent deployments, replace `COGNIGY_AI_NAMESPACE` with the namespace in which Cognigy.AI product is installed: 
-```bash
+```shell
 # redis
 helm upgrade --install prom-exporter-redis ./misc/charts/prometheus-redis-exporter \
   -n [COGNIGY_AI_NAMESPACE] \
@@ -46,7 +46,7 @@ helm upgrade --install prom-exporter-redis-persistent ./misc/charts/prometheus-r
   -f redis-persistent-values.yaml
 ```
 2. (Legacy single-pod MongoDB Installation only): If you do not have our [MongoDB Helm Chart](https://github.com/Cognigy/cognigy-mongodb-helm-chart/tree/master/charts/bitnami/mongodb) installed, or you still use deprecated [kustomize](https://github.com/Cognigy/kubernetes) installation, install MongoDB Helm Chart:
-```bash
+```shell
 helm upgrade --install prom-exporter-mongodb ./misc/charts/prometheus-mongodb-exporter \
   -n ${COGNIGY_AI_NAMESPACE} \
   -f ./mongodb-values.yaml
@@ -64,11 +64,15 @@ helm uninstall -n [COGNIGY_AI_NAMESPACE] prom-cognigy-redis-persistent
 helm uninstall -n [COGNIGY_AI_NAMESPACE] prom-cognigy-redis
 helm uninstall -n [COGNIGY_AI_NAMESPACE] prom-exporter-mongodb
 ```
-2. Uninstall legacy stack and clean up the CRDs:
+2. (Flux controller environments only): If you use Flux to deploy Cognigy products you need to suspend Flux `HelmReleases` for MOngoDB, Cognigy.AI and/or Live Agent during the upgrade process to avoid reconciliation errors.
+3. Uninstall legacy stack and clean up the CRDs:
 ```shell
 kubectl delete namespace monitoring
-kubectl delete MutatingWebhookConfiguration  prom-kube-prometheus-stack-admission
-# check the name of validatingwebhookconfigurations
+# check the name of MutatingWebhookConfiguration for the old prometheus stack 
+kubectl get -A MutatingWebhookConfiguration
+## delete the related MutatingWebhookConfiguration e.g prom-kube-prometheus-stack-admission or monitoring-stack-kubeproms-admission
+kubectl delete MutatingWebhookConfiguration prom-kube-prometheus-stack-admission
+# check the name of Validatingwebhookconfiguration for the old prometheus stack 
 kubectl get -A ValidatingWebhookConfiguration
 ## delete the related ValidatingWebhookConfiguration e.g prom-kube-prometheus-stack-admission or monitoring-stack-kubeproms-admission
 kubectl delete validatingwebhookconfigurations.admissionregistration.k8s.io prom-kube-prometheus-stack-admission
@@ -82,10 +86,14 @@ kubectl delete crd prometheusrules.monitoring.coreos.com
 kubectl delete crd servicemonitors.monitoring.coreos.com
 kubectl delete crd thanosrulers.monitoring.coreos.com
 ```
-
+4. Proceed with the [Installation](#Installation) section for installing the new monitoring stack 
+5. (Flux controller environments only): Resume suspended `HelmReleases` for MongoDB, Cognigy.AI and/or Live Agent. Also, skip the next step as Flux will recreate PodMonitors automatically during `resume` operation. 
+6. Since `PodMonitors` and `ServiceMonitors` Prometheus CRDs as well as `monitoring` namespace were deleted during clean-up of the legacy monitoring stack, you need to recreate `PodMonitors` for Cognigy.AI and/or Live Agent services. Trigger MongoDB, Cognigy.AI and/or Live Agent Helm releases updates by updating respective `values.yaml` files or reapply 
+[pod-monitors](https://github.com/Cognigy/kubernetes/tree/main/core/manifests/pod-monitors) manifests for legacy Kustomize installation. Check that `PodMonitors` and/or `ServiceMonitors` are created in respective namespaces.
+ 
 ## Uninstalling and Clean-up
 To uninstall the monitoring stack execute following steps.
-**IMPORTANT: all objects in monitoring namespace will be lost! If you have other objects in monitoring namespace created, make sure you have a corresponding backup!**
+**IMPORTANT: all objects in monitoring namespace and Prometheus CRDs will be lost! If you have other objects in monitoring namespace created, make sure you have a corresponding backup!**
 
 1. Uninstall Redis-persistent, Redis and MongoDB exporters (if any), replace `COGNIGY_AI_NAMESPACE` with the namespace in which Cognigy.AI product is installed:
 ```shell
@@ -95,12 +103,14 @@ helm uninstall -n [COGNIGY_AI_NAMESPACE] prom-exporter-mongodb
 ```
 
 2. To remove the monitoring stack execute:
-```bash
+```shell
 helm uninstall -n monitoring monitoring-stack
 kubectl delete namespace monitoring
 kubectl delete MutatingWebhookConfiguration monitoring-stack-kubeproms-admission
 kubectl delete validatingwebhookconfigurations.admissionregistration.k8s.io monitoring-stack-kubeproms-admission
-## Delete other kube-prometheus-stack CRDs
+```
+3. (Optionally): For a Clean-up, delete kube-prometheus-stack CRDs: 
+```shell
 kubectl delete crd alertmanagerconfigs.monitoring.coreos.com
 kubectl delete crd alertmanagers.monitoring.coreos.com
 kubectl delete crd podmonitors.monitoring.coreos.com
