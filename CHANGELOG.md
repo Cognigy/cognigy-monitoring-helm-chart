@@ -1,5 +1,13 @@
 # Release Notes
 
+### 1.2.0
+**Released** December 5th, 2022
+#### Bugfixes
+- Fixed Cognigy.AI dashoboards 
+
+#### Improvements
+- Added NLPv2 Dashboard
+- Added NGiNX optional service dashboard
 
 ### 1.1.1
 **Released** November 24th, 2022
@@ -25,4 +33,4 @@
 **Released** November 22th, 2022
 
 #### Bugfixes
-- Fixed release pipeline and Prometheus PVC configuration 
+- Fixed release pipeline and Prometheus PVC configuration

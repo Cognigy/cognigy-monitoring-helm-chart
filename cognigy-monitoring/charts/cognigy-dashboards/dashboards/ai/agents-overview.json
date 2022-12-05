@@ -3,7 +3,10 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -20,16 +23,17 @@
   },
   "editable": true,
   "fiscalYearStartMonth": 0,
-  "gnetId": null,
   "graphTooltip": 0,
-  "id": 78,
-  "iteration": 1668676931216,
+  "id": 41,
   "links": [],
   "liveNow": false,
   "panels": [
     {
       "collapsed": false,
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -38,17 +42,31 @@
       },
       "id": 6,
       "panels": [],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
       "title": "General",
       "type": "row"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -100,18 +118,26 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": true,
           "expr": "sum(increase(cognigy_endpoint_raw_messages_count{projectId=~\"$projectId\"}[1m])) by (projectId)",
           "interval": "",
           "legendFormat": "{{projectId}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -119,7 +145,10 @@
       "type": "timeseries"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -138,7 +167,7 @@
       },
       "gridPos": {
         "h": 12,
-        "w": 12,
+        "w": 6,
         "x": 12,
         "y": 1
       },
@@ -146,7 +175,8 @@
       "options": {
         "legend": {
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": true
         },
         "pieType": "pie",
         "reduceOptions": {
@@ -157,11 +187,16 @@
           "values": false
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "exemplar": true,
           "expr": "sum(cognigy_endpoint_raw_messages_count{projectId=~\"$projectId\"}) by (projectId)",
           "interval": "",
@@ -173,13 +208,87 @@
       "type": "piechart"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Messages Processed within the specified interval per Project",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "id": 46,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "sum(increase(cognigy_endpoint_raw_messages_count{projectId=~\"$projectId\"}[$__interval])) by (projectId)",
+          "interval": "",
+          "legendFormat": "{{projectId}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Messages Processed per Interval",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "90th Quantile of Message Processing Time per Project",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -236,29 +345,34 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "histogram_quantile(0.90, sum(rate(cognigy_endpoint_raw_messages_response_time_bucket{projectId=~\"$projectId\"}[1h])) by (le, projectId))",
+          "expr": "histogram_quantile(0.90, sum(increase(cognigy_endpoint_raw_messages_response_time_bucket{projectId=~\"$projectId\"}[1m])) by (le, projectId))",
           "interval": "",
           "legendFormat": "{{projectId}}",
+          "range": true,
           "refId": "A"
         }
       ],
-      "title": "Message Processing Time",
+      "title": "Message Processing Time (90th Percentile)",
       "type": "timeseries"
     },
     {
-      "cards": {
-        "cardPadding": null,
-        "cardRound": null
-      },
+      "cards": {},
       "color": {
         "cardColor": "#b4ff00",
         "colorScale": "sqrt",
@@ -267,7 +381,26 @@
         "mode": "spectrum"
       },
       "dataFormat": "timeseries",
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Heatmap of Message Processing Time per Project",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          }
+        },
+        "overrides": []
+      },
       "gridPos": {
         "h": 11,
         "w": 12,
@@ -281,13 +414,64 @@
       "legend": {
         "show": false
       },
+      "maxDataPoints": 123,
+      "options": {
+        "calculate": false,
+        "calculation": {},
+        "cellGap": 2,
+        "cellValues": {
+          "decimals": 0,
+          "unit": "short"
+        },
+        "color": {
+          "exponent": 0.5,
+          "fill": "#b4ff00",
+          "mode": "scheme",
+          "reverse": false,
+          "scale": "exponential",
+          "scheme": "Oranges",
+          "steps": 128
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1e-9
+        },
+        "legend": {
+          "show": false
+        },
+        "rowsFrame": {
+          "layout": "auto"
+        },
+        "showValue": "never",
+        "tooltip": {
+          "show": true,
+          "yHistogram": false
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "decimals": 0,
+          "reverse": false,
+          "unit": "ms"
+        }
+      },
+      "pluginVersion": "9.2.3",
       "reverseYBuckets": false,
       "targets": [
         {
-          "exemplar": true,
-          "expr": "histogram_quantile(0.90, sum(rate(cognigy_endpoint_raw_messages_response_time_bucket{projectId=~\"$projectId\"}[1h])) by (le, projectId))",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by(le) (increase(cognigy_endpoint_raw_messages_response_time_bucket{projectId=~\"$projectId\"}[1m]))",
+          "format": "heatmap",
+          "instant": false,
           "interval": "",
-          "legendFormat": "{{projectId}}",
+          "legendFormat": "{{le}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -300,24 +484,19 @@
       "xAxis": {
         "show": true
       },
-      "xBucketNumber": null,
-      "xBucketSize": null,
       "yAxis": {
-        "decimals": null,
         "format": "ms",
         "logBase": 1,
-        "max": null,
-        "min": null,
-        "show": true,
-        "splitFactor": null
+        "show": true
       },
-      "yBucketBound": "auto",
-      "yBucketNumber": null,
-      "yBucketSize": null
+      "yBucketBound": "auto"
     },
     {
       "collapsed": false,
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -326,17 +505,31 @@
       },
       "id": 8,
       "panels": [],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
       "title": "Flow Execution",
       "type": "row"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -389,40 +582,52 @@
         "y": 25
       },
       "id": 10,
-      "maxDataPoints": null,
       "options": {
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "pluginVersion": "8.2.3",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "histogram_quantile(0.90, sum(rate(cognigy_ai_message_processing_time_bucket{projectId=~\"$projectId\"}[1h])) by (le, projectId))",
+          "expr": "histogram_quantile(0.90, sum(increase(cognigy_ai_message_processing_time_bucket{projectId=~\"$projectId\"}[1m])) by (le, projectId))",
           "interval": "",
           "intervalFactor": 1,
           "legendFormat": "{{projectId}}",
+          "range": true,
           "refId": "A"
         }
       ],
-      "timeFrom": null,
-      "title": "Flow Execution Time Last Hour (90th Percentile)",
+      "title": "Flow Execution Time (90th Percentile)",
       "type": "timeseries"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Flow Execution Errors per Minute",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -478,18 +683,26 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "sum (increase(cognigy_ai_messages_error_total{projectId=~\"$projectId\"}[5m])) by (projectId)",
+          "expr": "sum (increase(cognigy_ai_messages_error_total{projectId=~\"$projectId\"}[1m])) by (projectId)",
           "interval": "",
           "legendFormat": "{{projectId}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -498,7 +711,10 @@
     },
     {
       "collapsed": false,
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -507,17 +723,32 @@
       },
       "id": 26,
       "panels": [],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
       "title": "Endpoint",
       "type": "row"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Endpoint Transformer Processing Time (90th Percentile) per Project",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -574,32 +805,45 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "histogram_quantile(0.90, sum(rate(cognigy_endpoint_transformer_execution_time_bucket{projectId=~\"$projectId\"}[1h])) by (le, projectId))",
+          "expr": "histogram_quantile(0.90, sum(increase(cognigy_endpoint_transformer_execution_time_bucket{projectId=~\"$projectId\"}[1m])) by (le, projectId))",
           "interval": "",
           "legendFormat": "{{projectId}}",
+          "range": true,
           "refId": "A"
         }
       ],
-      "title": "Endpoint Transformer Processing Time Last Hour (90th Percentile)",
+      "title": "Endpoint Transformer Processing Time (90th Percentile)",
       "type": "timeseries"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -655,18 +899,26 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "sum(increase(cognigy_endpoint_transformer_error_count{projectId=~\"$projectId\"}[5m])) by (projectId)",
+          "expr": "sum(increase(cognigy_endpoint_transformer_error_count{projectId=~\"$projectId\"}[1m])) by (projectId)",
           "interval": "",
           "legendFormat": "{{projectId}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -675,7 +927,10 @@
     },
     {
       "collapsed": false,
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -684,17 +939,32 @@
       },
       "id": 24,
       "panels": [],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
       "title": "Handover",
       "type": "row"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Handovers Started events per Minute",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -750,32 +1020,46 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "sum (increase(cognigy_ai_handover_amount{projectId=~\"$projectId\"}[5m])) by (projectId)",
+          "expr": "sum (increase(cognigy_ai_handover_amount{projectId=~\"$projectId\"}[1m])) by (projectId)",
           "interval": "",
           "legendFormat": "",
+          "range": true,
           "refId": "A"
         }
       ],
-      "title": "Handovers Started (Not working)",
+      "title": "Handovers Started / Minute",
       "type": "timeseries"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Handover Errors per Minute",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -831,27 +1115,38 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "sum (increase(cognigy_ai_handover_error_amount{projectId=~\"$projectId\"}[5m])) by (projectId)",
+          "expr": "sum (increase(cognigy_ai_handover_error_amount{projectId=~\"$projectId\"}[1m])) by (projectId)",
           "interval": "",
           "legendFormat": "{{projectId}}",
+          "range": true,
           "refId": "A"
         }
       ],
-      "title": "Handover Errors",
+      "title": "Handover Errors / Minute",
       "type": "timeseries"
     },
     {
       "collapsed": false,
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -860,11 +1155,23 @@
       },
       "id": 36,
       "panels": [],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
       "title": "Extensions",
       "type": "row"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -877,13 +1184,15 @@
               "viz": false
             }
           },
-          "mappings": []
+          "decimals": 0,
+          "mappings": [],
+          "unit": "short"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 6,
         "x": 0,
         "y": 63
       },
@@ -891,7 +1200,8 @@
       "options": {
         "legend": {
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": true
         },
         "pieType": "pie",
         "reduceOptions": {
@@ -902,11 +1212,16 @@
           "values": false
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "exemplar": true,
           "expr": "sum by (projectId) (cognigy_execution_extension_processing_time_count{projectId=~\"$projectId\"})",
           "interval": "",
@@ -914,17 +1229,91 @@
           "refId": "A"
         }
       ],
-      "title": "Extensions Usage (Not working)",
+      "title": "Extensions Used Total",
       "type": "piechart"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Extensions Usage per specified Interval",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 63
+      },
+      "id": 47,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "sum by (projectId) (increase(cognigy_execution_extension_processing_time_count{projectId=~\"$projectId\"}[$__interval]))",
+          "interval": "",
+          "legendFormat": "{{projectId}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Extensions Used per Interval",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -965,7 +1354,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "ms"
         },
         "overrides": []
       },
@@ -980,27 +1370,38 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "histogram_quantile(0.90, sum(rate(cognigy_execution_extension_processing_time_bucket{projectId=~\"$projectId\"}[1h])) by (le, projectId))",
+          "expr": "histogram_quantile(0.90, sum(increase(cognigy_execution_extension_processing_time_bucket{projectId=~\"$projectId\"}[1m])) by (le, projectId))",
           "interval": "",
           "legendFormat": "{{projectId}}",
+          "range": true,
           "refId": "A"
         }
       ],
-      "title": "Extensions Processing Time Last Hour (90th Percentile - not working)",
+      "title": "Extensions Processing Time (90th Percentile)",
       "type": "timeseries"
     },
     {
       "collapsed": false,
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1009,17 +1410,31 @@
       },
       "id": 12,
       "panels": [],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
       "title": "Functions",
       "type": "row"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -1075,18 +1490,26 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": true,
           "expr": "sum(increase(cognigy_function_scheduler_scheduled_functions_count{projectId=~\"$projectId\"}[5m])) by (projectId)",
           "interval": "",
           "legendFormat": "{{projectId}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -1094,7 +1517,10 @@
       "type": "timeseries"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "How often are extensions being used per Project.",
       "fieldConfig": {
         "defaults": {
@@ -1108,13 +1534,15 @@
               "viz": false
             }
           },
-          "mappings": []
+          "decimals": 0,
+          "mappings": [],
+          "unit": "short"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
-        "w": 12,
+        "h": 9,
+        "w": 6,
         "x": 12,
         "y": 72
       },
@@ -1122,7 +1550,8 @@
       "options": {
         "legend": {
           "displayMode": "table",
-          "placement": "right",
+          "placement": "bottom",
+          "showLegend": true,
           "values": [
             "value"
           ]
@@ -1136,30 +1565,115 @@
           "values": false
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": true,
           "expr": "sum(cognigy_function_execution_processing_time_count{projectId=~\"$projectId\"}) by (projectId)",
           "hide": false,
           "interval": "",
-          "legendFormat": "{{organisationId}}",
+          "legendFormat": "{{projectId}}",
+          "range": true,
           "refId": "B"
         }
       ],
-      "title": "Functions Usage by Project",
+      "title": "Functions Usage Total",
       "type": "piechart"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Functions Usage per Interval per Project.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 18,
+        "y": 72
+      },
+      "id": 48,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "values": [
+            "value"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by (projectId) (increase(cognigy_function_execution_processing_time_count{projectId=~\"$projectId\"}[$__interval]))",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{projectId}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Functions Usage per Interval",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -1215,18 +1729,26 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "sum(increase(cognigy_function_scheduler_scheduling_conflict_count{projectId=~\"$projectId\"}[5m])) by (projectId)",
+          "expr": "sum(increase(cognigy_function_scheduler_scheduling_conflict_count{projectId=~\"$projectId\"}[1m])) by (projectId)",
           "interval": "",
           "legendFormat": "",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -1234,7 +1756,8 @@
       "type": "timeseries"
     }
   ],
-  "schemaVersion": 31,
+  "refresh": false,
+  "schemaVersion": 37,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -1250,13 +1773,13 @@
             "$__all"
           ]
         },
-        "datasource": null,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "definition": "label_values(cognigy_endpoint_raw_messages_count, projectId)",
-        "description": null,
-        "error": null,
         "hide": 0,
         "includeAll": true,
-        "label": null,
         "multi": true,
         "name": "projectId",
         "options": [],
@@ -1273,12 +1796,13 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Agents Overview",
   "uid": "AUYFOWd4k",
-  "version": 13
+  "version": 1,
+  "weekStart": ""
 }

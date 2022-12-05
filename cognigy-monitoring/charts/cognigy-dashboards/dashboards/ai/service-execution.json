@@ -3,24 +3,37 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
         "type": "dashboard"
       }
     ]
   },
   "editable": true,
-  "gnetId": null,
+  "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 182,
+  "id": 16,
   "links": [],
+  "liveNow": false,
   "panels": [
     {
       "collapsed": false,
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -29,11 +42,23 @@
       },
       "id": 14,
       "panels": [],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
       "title": "General",
       "type": "row"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Number of uncaught errors in service-execution microservice",
       "fieldConfig": {
         "defaults": {
@@ -42,6 +67,8 @@
             "mode": "fixed"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -88,7 +115,7 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 11,
+        "w": 10,
         "x": 0,
         "y": 1
       },
@@ -96,15 +123,21 @@
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "hidden",
-          "placement": "bottom"
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "exemplar": true,
           "expr": "sum( rate(cognigy_execution_uncaught_error_total[5m]))",
           "interval": "",
@@ -116,7 +149,10 @@
       "type": "timeseries"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "How often are extensions being used per Organisation.",
       "fieldConfig": {
         "defaults": {
@@ -136,8 +172,8 @@
       },
       "gridPos": {
         "h": 11,
-        "w": 13,
-        "x": 11,
+        "w": 7,
+        "x": 10,
         "y": 1
       },
       "id": 20,
@@ -145,6 +181,7 @@
         "legend": {
           "displayMode": "table",
           "placement": "right",
+          "showLegend": true,
           "values": [
             "value"
           ]
@@ -158,15 +195,22 @@
           "values": false
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": true,
           "expr": "sum by (organisationId) (cognigy_execution_extension_processing_time_count)",
           "interval": "",
           "legendFormat": "{{organisation}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -174,7 +218,79 @@
       "type": "piechart"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "How often are extensions being used per Organisation.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 7,
+        "x": 17,
+        "y": 1
+      },
+      "id": 25,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value"
+          ]
+        },
+        "pieType": "donut",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "sum by (organisationId) (increase(cognigy_execution_extension_processing_time_count[$__interval]))",
+          "interval": "",
+          "legendFormat": "{{organisation}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Usage by Organisation per Interval",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -197,7 +313,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 3,
+        "w": 5,
         "x": 0,
         "y": 6
       },
@@ -217,9 +333,13 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.0.5",
+      "pluginVersion": "9.2.3",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "exemplar": true,
           "expr": "sum (cognigy_size_of_cached_extension_dir_sum)",
           "interval": "",
@@ -231,7 +351,10 @@
       "type": "stat"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "99th percentile of extension execution time",
       "fieldConfig": {
         "defaults": {
@@ -255,8 +378,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 3,
-        "x": 3,
+        "w": 5,
+        "x": 5,
         "y": 6
       },
       "id": 24,
@@ -275,9 +398,13 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.0.5",
+      "pluginVersion": "9.2.3",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "exemplar": true,
           "expr": "histogram_quantile(0.99, sum(rate(cognigy_execution_extension_processing_time_bucket[5m])) by (le))",
           "interval": "",
@@ -290,7 +417,10 @@
     },
     {
       "collapsed": false,
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -299,11 +429,23 @@
       },
       "id": 18,
       "panels": [],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
       "title": "Performance",
       "type": "row"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "How long did a Flow Node from an Extension take to execute?",
       "fieldConfig": {
         "defaults": {
@@ -311,6 +453,8 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
@@ -363,33 +507,52 @@
         "legend": {
           "calcs": [],
           "displayMode": "table",
-          "placement": "right"
+          "placement": "right",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "pluginVersion": "8.0.5",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "histogram_quantile(0.80, sum(rate(cognigy_execution_extension_processing_time_bucket[5m])) by (le))",
+          "expr": "histogram_quantile(0.80, sum(increase(cognigy_execution_extension_processing_time_bucket[1m])) by (le))",
           "hide": false,
           "interval": "",
           "legendFormat": "80th",
+          "range": true,
           "refId": "C"
         },
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "histogram_quantile(0.90, sum(rate(cognigy_execution_extension_processing_time_bucket[5m])) by (le))",
+          "expr": "histogram_quantile(0.90, sum(increase(cognigy_execution_extension_processing_time_bucket[1m])) by (le))",
           "hide": false,
           "interval": "",
           "legendFormat": "90th",
+          "range": true,
           "refId": "B"
         },
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": false,
-          "expr": "histogram_quantile(0.95, sum(rate(cognigy_execution_extension_processing_time_bucket[5m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(increase(cognigy_execution_extension_processing_time_bucket[1m])) by (le))",
           "hide": false,
           "instant": false,
           "interval": "",
@@ -397,23 +560,30 @@
           "refId": "A"
         },
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "histogram_quantile(0.99, sum(rate(cognigy_execution_extension_processing_time_bucket[5m])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(increase(cognigy_execution_extension_processing_time_bucket[1m])) by (le))",
           "hide": false,
           "interval": "",
           "legendFormat": "99th",
+          "range": true,
           "refId": "D"
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
       "title": "Extension execution time",
       "type": "timeseries"
     },
     {
       "collapsed": false,
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -422,11 +592,23 @@
       },
       "id": 10,
       "panels": [],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A"
+        }
+      ],
       "title": "Cache",
       "type": "row"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "How often we have copied extensions to the local file-system cache",
       "fieldConfig": {
         "defaults": {
@@ -472,9 +654,13 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.0.5",
+      "pluginVersion": "9.2.3",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "exemplar": true,
           "expr": "sum (rate(cognigy_cached_extension_copied[5m]))",
           "interval": "",
@@ -486,7 +672,10 @@
       "type": "stat"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Size of local file-system based cache for extensions",
       "fieldConfig": {
         "defaults": {
@@ -515,7 +704,8 @@
       "options": {
         "legend": {
           "displayMode": "list",
-          "placement": "right"
+          "placement": "right",
+          "showLegend": true
         },
         "pieType": "pie",
         "reduceOptions": {
@@ -526,11 +716,16 @@
           "values": false
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "exemplar": true,
           "expr": "cognigy_size_of_cached_extension_dir_sum",
           "interval": "",
@@ -542,7 +737,10 @@
       "type": "piechart"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "How often did the system cache an Extension in the locale file system?",
       "fieldConfig": {
         "defaults": {
@@ -571,7 +769,8 @@
       "options": {
         "legend": {
           "displayMode": "list",
-          "placement": "right"
+          "placement": "right",
+          "showLegend": true
         },
         "pieType": "pie",
         "reduceOptions": {
@@ -582,12 +781,17 @@
           "values": false
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "pluginVersion": "8.0.5",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "exemplar": true,
           "expr": "cognigy_cached_extension_copied",
           "format": "time_series",
@@ -602,7 +806,7 @@
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 30,
+  "schemaVersion": 37,
   "style": "dark",
   "tags": [
     "cognigy",
@@ -612,12 +816,13 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Service-Execution",
   "uid": "LeVtIAAnz",
-  "version": 9
+  "version": 1,
+  "weekStart": ""
 }
