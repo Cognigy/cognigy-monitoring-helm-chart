@@ -1,5 +1,10 @@
 # Release Notes
 
+### 1.2.1
+**Released** December 9th, 2022
+#### Bugfixes
+- Fixed NLPv2 and Agent Overview dashboards
+
 ### 1.2.0
 **Released** December 5th, 2022
 #### Bugfixes

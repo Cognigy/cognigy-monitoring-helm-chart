@@ -3,7 +3,10 @@
       "list": [
         {
           "builtIn": 1,
-          "datasource": "-- Grafana --",
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
           "enable": true,
           "hide": true,
           "iconColor": "rgba(0, 211, 255, 1)",
@@ -21,16 +24,17 @@
     "description": "Shows statistics of the NLP-v2 Shadow Mode",
     "editable": true,
     "fiscalYearStartMonth": 0,
-    "gnetId": null,
     "graphTooltip": 0,
-    "id": 118,
-    "iteration": 1669377105740,
+    "id": 42,
     "links": [],
     "liveNow": false,
     "panels": [
       {
         "collapsed": false,
-        "datasource": null,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "gridPos": {
           "h": 1,
           "w": 24,
@@ -40,11 +44,23 @@
         "id": 17,
         "panels": [],
         "repeat": "deployment",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "refId": "A"
+          }
+        ],
         "title": "NLP-v2 Stack Similarity Metrics for $deployment",
         "type": "row"
       },
       {
-        "datasource": null,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -70,7 +86,6 @@
           "y": 1
         },
         "id": 10,
-        "interval": null,
         "maxDataPoints": 2024,
         "options": {
           "colorMode": "value",
@@ -87,13 +102,19 @@
           "text": {},
           "textMode": "auto"
         },
-        "pluginVersion": "8.2.3",
+        "pluginVersion": "9.2.3",
         "targets": [
           {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
             "exemplar": true,
-            "expr": "sum(increase(cognigy_nlp_classifier_score_rpc_shadow_mode_total{container=\"$deployment\"}[$__range]))",
+            "expr": "sum(increase(cognigy_nlp_classifier_score_rpc_shadow_mode_total{container=\"$deployment\"}[$__range])) OR on() vector(0)",
             "interval": "",
             "legendFormat": "",
+            "range": true,
             "refId": "A"
           }
         ],
@@ -102,7 +123,10 @@
         "type": "stat"
       },
       {
-        "datasource": null,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "description": "",
         "fieldConfig": {
           "defaults": {
@@ -128,13 +152,12 @@
           "overrides": []
         },
         "gridPos": {
-          "h": 8,
+          "h": 7,
           "w": 3,
           "x": 0,
           "y": 9
         },
         "id": 12,
-        "interval": null,
         "maxDataPoints": 2024,
         "options": {
           "colorMode": "value",
@@ -151,219 +174,32 @@
           "text": {},
           "textMode": "auto"
         },
-        "pluginVersion": "8.2.3",
+        "pluginVersion": "9.2.3",
         "targets": [
           {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
             "exemplar": true,
-            "expr": "100 * (sum(increase(cognigy_nlp_classifier_intent_equality_total{container=\"$deployment\"}[$__range])) / sum(increase(cognigy_nlp_classifier_score_rpc_shadow_mode_total{container=\"$deployment\"}[$__range])))",
+            "expr": "100 * (sum(increase(cognigy_nlp_classifier_intent_equality_total{container=\"$deployment\"}[$__range])) / sum(increase(cognigy_nlp_classifier_score_rpc_shadow_mode_total{container=\"$deployment\"}[$__range]))) OR on() vector(0)",
             "hide": false,
             "interval": "",
             "legendFormat": "",
+            "range": true,
             "refId": "A"
           }
         ],
-        "title": "Percentage of Intent Inequality Occurrences",
+        "title": "% total times when intent was different",
         "transformations": [],
         "type": "stat"
       },
       {
-        "datasource": null,
-        "description": "",
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "thresholds"
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 1
-                }
-              ]
-            },
-            "unit": "percent"
-          },
-          "overrides": []
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
         },
-        "gridPos": {
-          "h": 8,
-          "w": 3,
-          "x": 3,
-          "y": 9
-        },
-        "id": 15,
-        "interval": null,
-        "maxDataPoints": 2024,
-        "options": {
-          "colorMode": "value",
-          "graphMode": "area",
-          "justifyMode": "auto",
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": "",
-            "values": false
-          },
-          "text": {},
-          "textMode": "auto"
-        },
-        "pluginVersion": "8.2.3",
-        "targets": [
-          {
-            "exemplar": true,
-            "expr": "100 * (sum(increase(cognigy_nlp_classifier_score_similarity_total{container=\"$deployment\"}[$__range])) / sum(increase(cognigy_nlp_classifier_score_rpc_shadow_mode_total{container=\"$deployment\"}[$__range])))",
-            "hide": false,
-            "instant": false,
-            "interval": "",
-            "legendFormat": "",
-            "refId": "A"
-          }
-        ],
-        "title": "Percentage of Score Dissimilarity Occurrences",
-        "transformations": [],
-        "type": "stat"
-      },
-      {
-        "datasource": null,
-        "description": "",
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "thresholds"
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 1
-                }
-              ]
-            },
-            "unit": "percent"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 3,
-          "x": 6,
-          "y": 9
-        },
-        "id": 14,
-        "interval": null,
-        "maxDataPoints": 2024,
-        "options": {
-          "colorMode": "value",
-          "graphMode": "area",
-          "justifyMode": "auto",
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": "",
-            "values": false
-          },
-          "text": {},
-          "textMode": "auto"
-        },
-        "pluginVersion": "8.2.3",
-        "targets": [
-          {
-            "exemplar": true,
-            "expr": "100 * (sum ( increase(cognigy_nlp_classifier_embedding_similarity_total{container=\"$deployment\"}[$__range])) / sum ( increase(cognigy_nlp_classifier_score_rpc_shadow_mode_total{container=\"$deployment\"}[$__range])))",
-            "hide": false,
-            "interval": "",
-            "legendFormat": "",
-            "refId": "A"
-          }
-        ],
-        "title": "Percentage of Embedding Dissimilarity Occurrences",
-        "transformations": [],
-        "type": "stat"
-      },
-      {
-        "datasource": null,
-        "description": "",
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "thresholds"
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 1
-                }
-              ]
-            },
-            "unit": "percent"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 3,
-          "x": 9,
-          "y": 9
-        },
-        "id": 13,
-        "interval": null,
-        "maxDataPoints": 2024,
-        "options": {
-          "colorMode": "value",
-          "graphMode": "area",
-          "justifyMode": "auto",
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": "",
-            "values": false
-          },
-          "text": {},
-          "textMode": "auto"
-        },
-        "pluginVersion": "8.2.3",
-        "targets": [
-          {
-            "exemplar": true,
-            "expr": "100 * (sum ( increase(cognigy_nlp_classifier_slot_name_differences_total{container=\"$deployment\"}[$__range])) / sum ( increase(cognigy_nlp_classifier_score_rpc_shadow_mode_total{container=\"$deployment\"}[$__range])))",
-            "hide": false,
-            "interval": "",
-            "legendFormat": "",
-            "refId": "A"
-          }
-        ],
-        "title": "Percentage of Slot Inequality Occurrences",
-        "transformations": [],
-        "type": "stat"
-      },
-      {
-        "datasource": null,
         "description": "The total number of differences that occurred in intent predictions within NLP-v1 and NLP-v2.",
         "fieldConfig": {
           "defaults": {
@@ -391,11 +227,10 @@
         "gridPos": {
           "h": 7,
           "w": 3,
-          "x": 0,
-          "y": 17
+          "x": 3,
+          "y": 9
         },
         "id": 4,
-        "interval": null,
         "maxDataPoints": 2024,
         "options": {
           "colorMode": "value",
@@ -412,29 +247,37 @@
           "text": {},
           "textMode": "auto"
         },
-        "pluginVersion": "8.2.3",
+        "pluginVersion": "9.2.3",
         "targets": [
           {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
             "exemplar": true,
             "expr": "sum ( increase(cognigy_nlp_classifier_intent_equality_total{container=\"$deployment\"}[$__range]))",
             "interval": "",
             "legendFormat": "",
+            "range": true,
             "refId": "A"
           }
         ],
-        "title": "Intent Inequality Count",
+        "title": "# total times when intent was different",
         "transparent": true,
         "type": "stat"
       },
       {
-        "datasource": null,
-        "description": "The total number of differences that occurred in intent prediction probabilities within NLP-v1 and NLP-v2.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "description": "",
         "fieldConfig": {
           "defaults": {
             "color": {
               "mode": "thresholds"
             },
-            "decimals": 0,
             "mappings": [],
             "thresholds": {
               "mode": "absolute",
@@ -448,71 +291,8 @@
                   "value": 1
                 }
               ]
-            }
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 7,
-          "w": 3,
-          "x": 3,
-          "y": 17
-        },
-        "id": 6,
-        "interval": null,
-        "maxDataPoints": 2024,
-        "options": {
-          "colorMode": "value",
-          "graphMode": "area",
-          "justifyMode": "auto",
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": "",
-            "values": false
-          },
-          "text": {},
-          "textMode": "auto"
-        },
-        "pluginVersion": "8.2.3",
-        "targets": [
-          {
-            "exemplar": true,
-            "expr": "sum ( increase(cognigy_nlp_classifier_score_similarity_total{container=\"$deployment\"}[$__range]))",
-            "interval": "",
-            "legendFormat": "",
-            "refId": "A"
-          }
-        ],
-        "title": "Score Dissimilarity Counter",
-        "transparent": true,
-        "type": "stat"
-      },
-      {
-        "datasource": null,
-        "description": "The total number of differences that occurred in the embeddings of input sentences within NLP-v1 and NLP-v2. NLP-v1 embeds the input sentences directly within the service, whereas NLP-v2 embeds them in a dedicated embedding service.",
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "thresholds"
             },
-            "decimals": 0,
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 1
-                }
-              ]
-            }
+            "unit": "percent"
           },
           "overrides": []
         },
@@ -520,10 +300,9 @@
           "h": 7,
           "w": 3,
           "x": 6,
-          "y": 17
+          "y": 9
         },
-        "id": 2,
-        "interval": null,
+        "id": 15,
         "maxDataPoints": 2024,
         "options": {
           "colorMode": "value",
@@ -540,23 +319,33 @@
           "text": {},
           "textMode": "auto"
         },
-        "pluginVersion": "8.2.3",
+        "pluginVersion": "9.2.3",
         "targets": [
           {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
             "exemplar": true,
-            "expr": "sum ( increase(cognigy_nlp_classifier_embedding_similarity_total{container=\"$deployment\"}[$__range]))",
+            "expr": "100 * (((sum(increase(cognigy_nlp_classifier_score_similarity_total{container=\"$deployment\"}[$__range])) OR on() vector(0)) + (sum(increase(cognigy_nlp_classifier_only_v1_scored{container=\"$deployment\"}[$__range])) OR on() vector(0)) + (sum(increase(cognigy_nlp_classifier_only_v2_scored{container=\"$deployment\"}[$__range])) OR on() vector(0))) / sum(increase(cognigy_nlp_classifier_score_rpc_shadow_mode_total{container=\"$deployment\"}[$__range])))",
+            "hide": false,
+            "instant": false,
             "interval": "",
             "legendFormat": "",
             "refId": "A"
           }
         ],
-        "title": "Embedding Dissimilarity Counter",
-        "transparent": true,
+        "title": "% total times when score was different",
+        "transformations": [],
         "type": "stat"
       },
       {
-        "datasource": null,
-        "description": "The total number of differences that occurred in detected slots within NLP-v1 and NLP-v2.",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "description": "This includes:\n- Times when score was different\n- Times when only NLP-v1 scored\n- Times when only NLP-v2 scored ",
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -584,10 +373,9 @@
           "h": 7,
           "w": 3,
           "x": 9,
-          "y": 17
+          "y": 9
         },
-        "id": 8,
-        "interval": null,
+        "id": 22,
         "maxDataPoints": 2024,
         "options": {
           "colorMode": "value",
@@ -604,53 +392,780 @@
           "text": {},
           "textMode": "auto"
         },
-        "pluginVersion": "8.2.3",
+        "pluginVersion": "9.2.3",
         "targets": [
           {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
             "exemplar": true,
-            "expr": "sum ( increase(cognigy_nlp_classifier_slot_name_differences_total{container=\"$deployment\"}[$__range]))",
+            "expr": "(sum(increase(cognigy_nlp_classifier_score_similarity_total{container=\"$deployment\"}[$__range])) OR on() vector(0)) + (sum(increase(cognigy_nlp_classifier_only_v1_scored{container=\"$deployment\"}[$__range])) OR on() vector(0)) + (sum(increase(cognigy_nlp_classifier_only_v2_scored{container=\"$deployment\"}[$__range])) OR on() vector(0))",
+            "interval": "",
+            "legendFormat": "",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "# total times when score was different",
+        "transparent": true,
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 1
+                }
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 3,
+          "x": 0,
+          "y": 16
+        },
+        "id": 14,
+        "maxDataPoints": 2024,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "auto"
+        },
+        "pluginVersion": "9.2.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
+            "exemplar": true,
+            "expr": "100 * (sum ( increase(cognigy_nlp_classifier_embedding_similarity_total{container=\"$deployment\"}[$__range])) / sum ( increase(cognigy_nlp_classifier_score_rpc_shadow_mode_total{container=\"$deployment\"}[$__range]))) OR on() vector(0)",
+            "hide": false,
+            "interval": "",
+            "legendFormat": "",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "% times when embedding was different",
+        "transformations": [],
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "description": "The total number of differences that occurred in the embeddings of input sentences within NLP-v1 and NLP-v2. NLP-v1 embeds the input sentences directly within the service, whereas NLP-v2 embeds them in a dedicated embedding service.",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "decimals": 0,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 1
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 3,
+          "x": 3,
+          "y": 16
+        },
+        "id": 2,
+        "maxDataPoints": 2024,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "auto"
+        },
+        "pluginVersion": "9.2.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
+            "exemplar": true,
+            "expr": "sum ( increase(cognigy_nlp_classifier_embedding_similarity_total{container=\"$deployment\"}[$__range])) OR on() vector(0)",
+            "interval": "",
+            "legendFormat": "",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "# times when embedding was different",
+        "transparent": true,
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 1
+                }
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 3,
+          "x": 6,
+          "y": 16
+        },
+        "id": 23,
+        "maxDataPoints": 2024,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "auto"
+        },
+        "pluginVersion": "9.2.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
+            "exemplar": true,
+            "expr": "100 * ((sum(increase(cognigy_nlp_classifier_score_similarity_total{container=\"$deployment\"}[$__range])) OR on() vector(0)) / sum(increase(cognigy_nlp_classifier_score_rpc_shadow_mode_total{container=\"$deployment\"}[$__range])))",
+            "hide": false,
+            "instant": false,
             "interval": "",
             "legendFormat": "",
             "refId": "A"
           }
         ],
-        "title": "Slot Difference Counter",
+        "title": "% times when score was different",
+        "transformations": [],
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "description": "The total number of differences that occurred in intent prediction probabilities within NLP-v1 and NLP-v2.",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "decimals": 0,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 1
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 3,
+          "x": 9,
+          "y": 16
+        },
+        "id": 6,
+        "maxDataPoints": 2024,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "auto"
+        },
+        "pluginVersion": "9.2.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
+            "exemplar": true,
+            "expr": "sum(increase(cognigy_nlp_classifier_score_similarity_total{container=\"$deployment\"}[$__range])) OR on() vector(0)",
+            "interval": "",
+            "legendFormat": "",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "# times when score was different",
+        "transparent": true,
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 1
+                }
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 3,
+          "x": 0,
+          "y": 23
+        },
+        "id": 13,
+        "maxDataPoints": 2024,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "auto"
+        },
+        "pluginVersion": "9.2.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
+            "exemplar": true,
+            "expr": "100 * (sum(increase(cognigy_nlp_classifier_slot_name_differences_total{container=\"$deployment\"}[$__range])) / sum (increase(cognigy_nlp_classifier_score_rpc_shadow_mode_total{container=\"$deployment\"}[$__range]))) OR on() vector(0)",
+            "hide": false,
+            "interval": "",
+            "legendFormat": "",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "% times when slots were different",
+        "transformations": [],
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "description": "The total number of differences that occurred in detected slots within NLP-v1 and NLP-v2.",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "decimals": 0,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 1
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 3,
+          "x": 3,
+          "y": 23
+        },
+        "id": 8,
+        "maxDataPoints": 2024,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "auto"
+        },
+        "pluginVersion": "9.2.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
+            "exemplar": true,
+            "expr": "sum ( increase(cognigy_nlp_classifier_slot_name_differences_total{container=\"$deployment\"}[$__range])) OR on() vector(0)",
+            "interval": "",
+            "legendFormat": "",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "# times when slots were different",
+        "transparent": true,
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 1
+                }
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 3,
+          "x": 6,
+          "y": 23
+        },
+        "id": 24,
+        "maxDataPoints": 2024,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "auto"
+        },
+        "pluginVersion": "9.2.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
+            "exemplar": true,
+            "expr": "100 * ((sum(increase(cognigy_nlp_classifier_only_v1_scored{container=\"$deployment\"}[$__range])) OR on() vector(0)) / sum(increase(cognigy_nlp_classifier_score_rpc_shadow_mode_total{container=\"$deployment\"}[$__range])))",
+            "hide": false,
+            "instant": false,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "A"
+          }
+        ],
+        "title": "% times when only NLP-v1 scored",
+        "transformations": [],
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "description": "Number of times where the NLP-v1 stack scored an intent, but the NLP-v2 stack did not",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "decimals": 0,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 1
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 3,
+          "x": 9,
+          "y": 23
+        },
+        "id": 21,
+        "maxDataPoints": 2024,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "auto"
+        },
+        "pluginVersion": "9.2.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
+            "exemplar": true,
+            "expr": "sum(increase(cognigy_nlp_classifier_only_v1_scored{container=\"$deployment\"}[$__range])) OR on() vector(0)",
+            "interval": "",
+            "legendFormat": "",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "# times when only NLP-v1 scored",
+        "transparent": true,
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 1
+                }
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 3,
+          "x": 6,
+          "y": 30
+        },
+        "id": 25,
+        "maxDataPoints": 2024,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "auto"
+        },
+        "pluginVersion": "9.2.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
+            "exemplar": true,
+            "expr": "100 * ((sum(increase(cognigy_nlp_classifier_only_v2_scored{container=\"$deployment\"}[$__range])) OR on() vector(0)) / sum(increase(cognigy_nlp_classifier_score_rpc_shadow_mode_total{container=\"$deployment\"}[$__range])))",
+            "hide": false,
+            "instant": false,
+            "interval": "",
+            "legendFormat": "",
+            "refId": "A"
+          }
+        ],
+        "title": "# times when only NLP-v2 scored",
+        "transformations": [],
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "description": "Number of times where the NLP-v2 stack scored an intent, but the NLP-v1 stack did not",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "decimals": 0,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 1
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 7,
+          "w": 3,
+          "x": 9,
+          "y": 30
+        },
+        "id": 20,
+        "maxDataPoints": 2024,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "text": {},
+          "textMode": "auto"
+        },
+        "pluginVersion": "9.2.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
+            "exemplar": true,
+            "expr": "sum(increase(cognigy_nlp_classifier_only_v2_scored{container=\"$deployment\"}[$__range])) OR on() vector(0)",
+            "interval": "",
+            "legendFormat": "",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "# times when only NLP-v2 scored",
         "transparent": true,
         "type": "stat"
       }
     ],
     "refresh": "",
-    "schemaVersion": 31,
+    "schemaVersion": 37,
     "style": "dark",
     "tags": [],
     "templating": {
       "list": [
         {
-          "allValue": null,
           "current": {
             "selected": true,
             "text": [
-              "All"
+              "service-nlp-classifier-score-en"
             ],
             "value": [
-              "$__all"
+              "service-nlp-classifier-score-en"
             ]
           },
-          "description": null,
-          "error": null,
           "hide": 0,
           "includeAll": true,
-          "label": null,
           "multi": true,
           "name": "deployment",
           "options": [
             {
-              "selected": true,
+              "selected": false,
               "text": "All",
               "value": "$__all"
             },
             {
-              "selected": false,
+              "selected": true,
               "text": "service-nlp-classifier-score-en",
               "value": "service-nlp-classifier-score-en"
             },
@@ -688,12 +1203,13 @@
       ]
     },
     "time": {
-      "from": "now-7d",
+      "from": "now-1h",
       "to": "now"
     },
     "timepicker": {},
     "timezone": "",
     "title": "NLP-v2 Shadow Mode Dashboard",
     "uid": "PlZTvQNV1",
-    "version": 3
+    "version": 2,
+    "weekStart": ""
   }
