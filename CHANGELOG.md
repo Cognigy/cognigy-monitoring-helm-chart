@@ -1,5 +1,10 @@
 # Release Notes
 
+### 1.2.2
+**Released** December 13th, 2022
+#### Bugfixes
+- Fixed and updated NLPv2 dashboards
+
 ### 1.2.1
 **Released** December 9th, 2022
 #### Bugfixes
