@@ -67,16 +67,23 @@ helm uninstall -n [COGNIGY_AI_NAMESPACE] prom-exporter-mongodb
 2. (Flux controller environments only): If you use Flux to deploy Cognigy products you need to suspend Flux `HelmReleases` for MOngoDB, Cognigy.AI and/or Live Agent during the upgrade process to avoid reconciliation errors.
 3. Uninstall legacy stack and clean up the CRDs:
 ```shell
+## Uninstall Helm Charts for legacy prometheus stack
+helm uninstall -n=monitoring prom-cadvisor
+helm uninstall -n=monitoring prom
+helm uninstall -n=monitoring prom-cognigy-dash
+helm uninstall -n=monitoring prom-cognigy-monitor
 kubectl delete namespace monitoring
-# check the name of MutatingWebhookConfiguration for the old prometheus stack 
+## Remove cadvisor metrics service (if still present):  
+kubectl delete -n=kube-system service prom-kube-prometheus-stack-kubelet 
+## Check the name of MutatingWebhookConfiguration for the old prometheus stack 
 kubectl get -A MutatingWebhookConfiguration
-## delete the related MutatingWebhookConfiguration e.g prom-kube-prometheus-stack-admission or monitoring-stack-kubeproms-admission
+## Remove the related MutatingWebhookConfiguration e.g prom-kube-prometheus-stack-admission or monitoring-stack-kubeproms-admission
 kubectl delete MutatingWebhookConfiguration prom-kube-prometheus-stack-admission
-# check the name of Validatingwebhookconfiguration for the old prometheus stack 
+## Check the name of Validatingwebhookconfiguration for the old prometheus stack 
 kubectl get -A ValidatingWebhookConfiguration
-## delete the related ValidatingWebhookConfiguration e.g prom-kube-prometheus-stack-admission or monitoring-stack-kubeproms-admission
+## Remove the related ValidatingWebhookConfiguration e.g prom-kube-prometheus-stack-admission or monitoring-stack-kubeproms-admission
 kubectl delete validatingwebhookconfigurations.admissionregistration.k8s.io prom-kube-prometheus-stack-admission
-## Delete other kube-prometheus-stack CRDs
+## Remove other kube-prometheus-stack CRDs
 kubectl delete crd alertmanagerconfigs.monitoring.coreos.com
 kubectl delete crd alertmanagers.monitoring.coreos.com
 kubectl delete crd podmonitors.monitoring.coreos.com

@@ -1,5 +1,12 @@
 # Release Notes
 
+### 1.2.3
+**Released** December 19th, 2022
+#### Bugfixes
+- Fixed duplication of cadvisor metrics.
+#### Changes
+To fix metrics duplication on an already installed monitoring stack execute: `kubectl delete -n=kube-system service prom-kube-prometheus-stack-kubelet`
+
 ### 1.2.2
 **Released** December 13th, 2022
 #### Bugfixes
