@@ -1,5 +1,16 @@
 # Release Notes
 
+### 1.3.0
+**Released** January 3rd, 2023
+#### Bugfixes
+- Fixed metrics on service-endpoint dashboard
+#### Changes
+- "Container Health" dashboard is introduced. "K8s service monitoring" dashboard is deprecated
+- ContainerOOMKilled alert introduced
+- RedisMemoryHigh RedisBlockedClients and RedisContainerRestarted alerts are introduced
+- EndpointMessageProcessingTimeIncreasing and EndpointMessageProcessingTimeHigh alerts are configurable 
+- ServiceHandoverErrorsHigh alert is introduced 
+
 ### 1.2.3
 **Released** December 19th, 2022
 #### Bugfixes

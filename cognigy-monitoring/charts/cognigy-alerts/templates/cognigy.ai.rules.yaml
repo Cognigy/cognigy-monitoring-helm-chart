@@ -91,7 +91,7 @@ spec:
           description: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.container {{`}}`}}) is restarting {{`{{`}} printf "%.2f" $value {{`}}`}} times / 10 minutes.
           runbook_url: {{ .Values.runbookUrl }}alert-name-kubepodcrashlooping
           summary: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} is crash looping.
-        expr: |-
+        expr: >
           increase(kube_pod_container_status_restarts_total{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"}[10m]) > 0
           and
           kube_pod_container_status_waiting{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"} == 1
@@ -128,7 +128,20 @@ spec:
           severity: warning
       {{- end }}
 
-      {{- if not (.Values.rules.ai.disabled.PodManyRestarts | default false ) }}
+      {{- if not (.Values.rules.ai.disabled.ContainerOOMKilled | default false ) }}
+      - alert: ContainerOOMKilled
+        expr: |-
+          (sum (kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}) by (container)) -
+          (sum (kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} offset 5m) by (container)) > 0
+        annotations:
+          summary: Container {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.container {{`}}`}} OOM Killed
+          description: "Container {{`{{`}} $labels.container }} OOMKilled in namespace {{`{{`}} $labels.namespace {{`}}`}}\n LABELS = {{`{{`}} $labels }}"
+        for: 3m
+        labels:
+          severity: warning
+      {{- end }}
+
+      {{- if not (.Values.rules.ai.disabled.CPUThrottlingBackendServiceHigh | default false ) }}
       - alert: CPUThrottlingBackendServiceHigh
         annotations:
           description: '{{`{{`}} $value | humanizePercentage {{`}}`}} throttling of CPU in namespace {{`{{`}} $labels.namespace {{`}}`}} for container {{`{{`}} $labels.container {{`}}`}} in pod {{`{{`}} $labels.pod {{`}}`}}.'
@@ -213,6 +226,36 @@ spec:
         annotations:
           summary: Redis down (instance {{`{{`}} $labels.instance }})
           description: "Redis instance is down\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      - alert: RedisMemoryHigh
+        expr: >
+          redis_memory_used_bytes{} * 100
+          /
+          redis_memory_max_bytes{}
+          > 90
+        for: 2m
+        labels:
+          severity: error
+        annotations:
+          summary: Redis instance {{ "{{ $labels.instance }}" }} is using too much memory
+          description: |
+            Redis instance {{ "{{ $labels.instance }}" }} is using {{ "{{ $value }}" }}% of its available memory.
+      - alert: RedisBlockedClients
+        expr: increase(redis_blocked_clients[5m]) > 0
+        for: 2m
+        labels:
+          severity: error
+        annotations:
+          summary: Redis instance {{ "{{ $labels.instance }}" }} has blocked clients
+          description: |
+            Redis instance {{ "{{ $labels.instance }}" }} has blocked {{ "{{ $value }}" }} clients
+      - alert: RedisContainerRestarted
+        expr: increase(kube_pod_container_status_restarts_total{container="redis"}[5m]) > 0
+        annotations:
+          summary: Redis container in pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} has restarted
+          description: "Redis container in pod {{`{{`}} $labels.pod }} has restarted\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+        for: 2m
+        labels:
+          severity: warning
   {{- end }}
 
   {{- if not (.Values.rules.ai.disabled.MongoDb | default false ) }}
@@ -264,29 +307,48 @@ spec:
           severity: warning
         annotations:
           summary: extension execution time is higher than 15 sec (instance {{`{{`}} $labels.instance }})
-          description: "Extension execution time on service-execution time is {{`{{`}} $value }} sec over last 15 minutes\n LABELS = {{`{{`}} $labels }}"
+          description: "Extension execution time on service-execution is {{`{{`}} $value }} sec over last 15 minutes\n LABELS = {{`{{`}} $labels }}"
   {{- end }}
 
   {{- if not (.Values.rules.ai.disabled.ServiceEndpoint | default false ) }}
   - name: cognigy.alert.endpoint
     rules:
       - alert: EndpointMessageProcessingTimeIncreasing
-        expr: 100 *(histogram_quantile(0.95, sum(rate(cognigy_endpoint_raw_messages_response_time_bucket[5m])) by (le)) -
-            histogram_quantile(0.95, sum(rate(cognigy_endpoint_raw_messages_response_time_bucket[5m] offset 15m)) by (le)))/
-            histogram_quantile(0.95, sum(rate(cognigy_endpoint_raw_messages_response_time_bucket[5m] offset 15m)) by (le)) > 50
+        expr: >
+              100 *(histogram_quantile({{ 0.95 }}, sum(rate(cognigy_endpoint_raw_messages_response_time_bucket[5m])) by (le)) -
+              histogram_quantile({{ $.Values.rules.ai.ServiceEndpoint.MessageProcessingTimeQuantile }}, sum(rate(cognigy_endpoint_raw_messages_response_time_bucket[5m] offset 15m)) by (le)))/
+              histogram_quantile({{ $.Values.rules.ai.ServiceEndpoint.MessageProcessingTimeQuantile }}, sum(rate(cognigy_endpoint_raw_messages_response_time_bucket[5m] offset 15m)) by (le)) >
+              {{ $.Values.rules.ai.ServiceEndpoint.MessageProcessingTimeIncreasingThreshold }}
         for: 15m
         labels:
           severity: warning
         annotations:
-          summary: Messages processing time constantly increasing on (instance {{`{{`}} $labels.instance }})
-          description: "Messages processing time constantly increasing in the last 15 minutes by {{`{{`}} $value }}%\n LABELS = {{`{{`}} $labels }}"
+          summary: Messages processing time has increased over {{ $.Values.rules.ai.ServiceEndpoint.MessageProcessingTimeIncreasingThreshold }}% in last 15 minutes on (instance {{`{{`}} $labels.instance }})
+          description: "Messages processing time has increased by {{`{{`}} $value }}% in the last 15 minutes\n LABELS = {{`{{`}} $labels }}"
       - alert: EndpointMessageProcessingTimeHigh
-        expr: histogram_quantile(0.95, sum(rate(cognigy_endpoint_raw_messages_response_time_bucket[5m])) by (le))/1000 > 10
+        expr: >
+              histogram_quantile( {{ $.Values.rules.ai.ServiceEndpoint.MessageProcessingTimeQuantile }},
+              sum(rate(cognigy_endpoint_raw_messages_response_time_bucket[5m])) by (le))/1000 >
+              {{ $.Values.rules.ai.ServiceEndpoint.MessageProcessingTimeThreshold }}
         for: 15m
         labels:
           severity: warning
         annotations:
-          summary: Messages processing is higher than 10 sec (instance {{`{{`}} $labels.instance }})
+          summary: Messages processing is higher than {{ $.Values.rules.ai.ServiceEndpoint.MessageProcessingTimeThreshold }} sec on (instance {{`{{`}} $labels.instance }})
           description: "Messages processing time is {{`{{`}} $value }} sec over last 15 minutes\n LABELS = {{`{{`}} $labels }}"
   {{- end }}
+
+  {{- if not (.Values.rules.ai.disabled.ServiceHandover | default false ) }}
+  - name: cognigy.alert.service-handover
+    rules:
+      - alert: ServiceHandoverErrorsHigh
+        expr: sum (increase(cognigy_ai_handover_error_amount[5m])) by (projectId) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: handover errors in (projectId {{`{{`}} $labels.projectId }}) is high
+          description: "Number of handover errors is {{`{{`}} $value }} in last 5 minutes\n LABELS = {{`{{`}} $labels }}"
+  {{- end }}
+
 {{- end -}}

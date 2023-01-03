@@ -11,6 +11,7 @@ rules:
     enabled: true
     disabled:
       PodManyRestarts: false
+      ContainerOOMKilled: false
       CPUThrottlingBackendServiceHigh: false
       Redis: false
       MongoDb: false
@@ -19,6 +20,14 @@ rules:
       FunctionExecution: false
       ServiceEndpoint: false
       ServiceExecution: false
+      ServiceHandover: false
+    ServiceEndpoint:
+      # Message processing Time quantile to analyze
+      MessageProcessingTimeQuantile: 0.95
+      # Threshold (sec) of Message processing Time for EndpointMessageProcessingTimeHigh to start firing
+      MessageProcessingTimeThreshold: 10
+      # Threshold of increase (%) of Message Processing Time for EndpointMessageProcessingTimeIncreasing to start firing
+      MessageProcessingTimeIncreasingThreshold: 50
   # Cognigy.AI runtime services rules
   runtime:
     enabled: true
