@@ -1,15 +1,20 @@
 # Release Notes
 
+### 1.3.1
+**Released** January 3rd, 2023
+#### Bugfixes
+- Fixed `RedisMemoryHigh` alert for environments without memory limit on Redis
+
 ### 1.3.0
 **Released** January 3rd, 2023
 #### Bugfixes
 - Fixed metrics on service-endpoint dashboard
 #### Changes
 - "Container Health" dashboard is introduced. "K8s service monitoring" dashboard is deprecated
-- ContainerOOMKilled alert introduced
-- RedisMemoryHigh RedisBlockedClients and RedisContainerRestarted alerts are introduced
-- EndpointMessageProcessingTimeIncreasing and EndpointMessageProcessingTimeHigh alerts are configurable 
-- ServiceHandoverErrorsHigh alert is introduced 
+- `ContainerOOMKilled` alert introduced
+- `RedisMemoryHigh`, `RedisBlockedClients` and `RedisContainerRestarted` alerts are introduced
+- `EndpointMessageProcessingTimeIncreasing` and `EndpointMessageProcessingTimeHigh` alerts are configurable 
+- `ServiceHandoverErrorsHigh` alert is introduced 
 
 ### 1.2.3
 **Released** December 19th, 2022

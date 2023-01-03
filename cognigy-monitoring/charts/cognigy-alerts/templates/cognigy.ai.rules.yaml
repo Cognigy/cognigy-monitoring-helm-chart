@@ -228,10 +228,7 @@ spec:
           description: "Redis instance is down\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
       - alert: RedisMemoryHigh
         expr: >
-          redis_memory_used_bytes{} * 100
-          /
-          redis_memory_max_bytes{}
-          > 90
+          (redis_memory_max_bytes{} > 0) and (redis_memory_used_bytes{} * 100/redis_memory_max_bytes{} > 90)
         for: 2m
         labels:
           severity: error
