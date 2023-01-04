@@ -1,0 +1,67 @@
+{{- $targetNamespace := .Values.appNamespacesTarget }}
+{{- if .Values.rules.rabbitmq.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-cognigy-rabbitmq-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+  - name: cognigy.alert.rabbitmq
+    rules:
+    - alert: RabbitmqMemoryHigh
+      expr: rabbitmq_process_resident_memory_bytes / rabbitmq_resident_memory_limit_bytes * 100 > 90
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Rabbitmq memory high (instance {{`{{`}} $labels.instance }})
+        description: "A node use more than 90% of allocated RAM\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+
+    - alert: RabbitMQ High watermark limit crossed
+      expr: rabbitmq_resident_memory_limit_bytes - rabbitmq_process_resident_memory_bytes < 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: High watermark limit has been crossed
+        description: High watermark limit has been crossed
+
+    - alert: RabbitMQ Ready message is getting high
+      expr: sum(rate(rabbitmq_queue_messages_ready[15m])) > 5
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: RabbitMQ Ready message is getting high
+        description: RabbitMQ Ready message is getting high
+
+    - alert: RabbitmqReadyQueueHigh
+      expr: rabbitmq_queue_messages_ready > 100
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: RabbitMQ Ready message is high
+        description: RabbitMQ Ready queue has crossed warning high threshold
+
+    - alert: RabbitmqReadyQueueHigh
+      expr: rabbitmq_queue_messages_ready > 1000
+      for: 10m
+      labels:
+        severity: critical
+      annotations:
+        summary: RabbitMQ Ready message is high
+        description: RabbitMQ Ready queue has crossed critical high threshold
+
+    - alert: RabbitMQ Unacked message is getting high
+      expr: sum(rate(rabbitmq_queue_messages_unacked[15m])) > 10
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: RabbitMQ Unacked message is getting high
+        description: RabbitMQ Unacked message is getting high
+
+{{- end -}}

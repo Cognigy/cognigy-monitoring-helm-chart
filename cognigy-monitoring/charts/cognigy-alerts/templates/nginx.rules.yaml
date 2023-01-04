@@ -1,0 +1,58 @@
+{{- $targetNamespace := .Values.appNamespacesTarget }}
+{{- if .Values.rules.nginx.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-cognigy-nginx-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+  - name: cognigy.alert.nginx
+    rules:
+    {{- if (.Values.rules.nginx.nginxHighHttp5xxErrorRate.enabled ) }}
+    - alert: NginxHighHttp5xxErrorRate
+      expr:  100 * ( sum( nginx_ingress_controller_requests{status=~"5.+"} ) / sum(nginx_ingress_controller_requests) ) > 5
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: Nginx high HTTP 5xx error rate (instance {{`{{`}} $labels.instance }})
+        description: "NGiNX service 5xx error rate is above 5% (> 5%)\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    {{- if (.Values.rules.nginx.nginxHighHttp4xxErrorRate.enabled ) }}
+    - alert: NginxHighHttp4xxErrorRate
+      expr: 100 * ( sum( nginx_ingress_controller_requests{status=~"4.+"} ) / sum(nginx_ingress_controller_requests) ) > 20
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: Nginx high HTTP 4xx error rate (instance {{`{{`}} $labels.instance }})
+        description: "NGiNX service 4xx error rate is above 20%\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    {{- if (.Values.rules.nginx.nginxLatencyHigh.enabled ) }}
+    - alert: NginxLatencyHigh
+      expr: histogram_quantile(0.99, sum(increase(nginx_ingress_controller_request_duration_seconds_bucket[2m])) by  (le, host)) > 3
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Nginx latency high for (host {{`{{`}} $labels.host }})
+        description: "Nginx p99 latency is higher than 3 seconds\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    {{- if (.Values.rules.nginx.nginxTlsCertExpireSoon.enabled ) }}
+    - alert: NginxTlsCertExpireSoon
+      expr: avg(nginx_ingress_controller_ssl_expire_time_seconds) by (host) - time() < 432000
+      for: 1h
+      labels:
+        severity: warning
+      annotations:
+        summary: TLS Certificate for (host {{`{{`}} $labels.host }}) on (instance {{`{{`}} $labels.instance }}) will expire within the next 5 Days
+        description: "TLS Certificate will expire in sec\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+{{- end -}}
+

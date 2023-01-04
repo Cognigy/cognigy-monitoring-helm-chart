@@ -1,42 +1,106 @@
 # Target namespace for alerts
 appNamespacesTarget: ".*"
 
-# Default Promethus Runbook URL
+# Default Prometheus Runbook URL
 runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
 
 # Enable/disable alert rules groups and separate alerts
 rules:
+  # generic kubernetes alert rules for Cognigy products
+  kubernetes:
+    enabled: true
+    kubePodCrashLooping:
+      enabled: true
+    kubePodNotReady:
+      enabled: true
+    podManyRestarts:
+      enabled: true
+    containerOOMKilled:
+      enabled: true
+    cpuThrottlingBackendServiceHigh:
+      enabled: true
+  # Traefik alert rules
+  traefik:
+    enabled: true
+    traefikHighHttp5xxErrorRateService:
+      enabled: true
+    traefikHighHttp4xxErrorRateService:
+      enabled: false
+    traefiklOpenConnectionsHigh:
+      enabled: true
+    traefikTlsCertExpireSoon:
+      enabled: true
+  # NGiNX Ingress alert rules (disabled by default)
+  nginx:
+    enabled: false
+    nginxHighHttp5xxErrorRate:
+      enabled: true
+    nginxHighHttp4xxErrorRate:
+      enabled: false
+    nginxLatencyHigh:
+      enabled: true
+    nginxTlsCertExpireSoon:
+      enabled: true
+  # RabbitMQ alert rules
+  rabbitmq:
+    enabled: true
+  # Redis alert rules
+  redis:
+    enabled: true
+  # MongoDB alert rules
+  mongodb:
+    enabled: true
+    mongodbDown:
+      enabled: true
+    mongodbReplicaMemberUnhealthy:
+      enabled: true
+    mongodbReplicationLag:
+      enabled: true
+    mongodbNumberCursorsOpen:
+      enabled: true
+    mongodbCursorsTimeouts:
+      enabled: true
+    mongodbTooManyConnections:
+      enabled: true
+    mongodbVirtualMemoryUsage:
+      enabled: true
+
   # Cognigy.AI alert rules
   ai:
     enabled: true
-    disabled:
-      PodManyRestarts: false
-      ContainerOOMKilled: false
-      CPUThrottlingBackendServiceHigh: false
-      Redis: false
-      MongoDb: false
-      RabbitMq: false
-      NlpMatcher: false
-      FunctionExecution: false
-      ServiceEndpoint: false
-      ServiceExecution: false
-      ServiceHandover: false
-    ServiceEndpoint:
+    nlpMatcher:
+      enabled: true
+    functionExecution:
+      enabled: true
+    serviceExecution:
+      enabled: true
+    serviceHandover:
+      enabled: true
+    serviceEndpoint:
+      enabled: true
       # Message processing Time quantile to analyze
-      MessageProcessingTimeQuantile: 0.95
+      messageProcessingTimeQuantile: 0.95
       # Threshold (sec) of Message processing Time for EndpointMessageProcessingTimeHigh to start firing
-      MessageProcessingTimeThreshold: 10
+      messageProcessingTimeThreshold: 10
       # Threshold of increase (%) of Message Processing Time for EndpointMessageProcessingTimeIncreasing to start firing
-      MessageProcessingTimeIncreasingThreshold: 50
+      messageProcessingTimeIncreasingThreshold: 50
+
   # Cognigy.AI runtime services rules
   runtime:
     enabled: true
-    disabled:
-      ServiceAI: false
-      ServiceAppSessionManager: false
-      ServiceExecution: false
-      ServiceFunctionExecution: false
-      ServiceHttp: false
-      ServiceNlpMatcher: false
-      ServicePlaybookExecution: false
-      ServiceSessionStateManager: false
+    serviceAI:
+      enabled: true
+    serviceAppSessionManager:
+      enabled: true
+    serviceExecution:
+      enabled: true
+    serviceFunctionExecution:
+      enabled: true
+    serviceHttp:
+      enabled: true
+    serviceNlpMatcher:
+      enabled: true
+    servicePlaybookExecution:
+      enabled: true
+    serviceSessionStateManager:
+      enabled: true

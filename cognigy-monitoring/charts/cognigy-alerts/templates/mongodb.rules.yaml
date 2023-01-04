@@ -1,0 +1,93 @@
+{{- $targetNamespace := .Values.appNamespacesTarget }}
+{{- if .Values.rules.mongodb.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-cognigy-mongodb-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+  - name: cognigy.alert.mongodb
+    rules:
+    {{- if (.Values.rules.mongodb.mongodbDown.enabled ) }}
+    - alert: MongodbDown
+      expr: mongodb_up == 0
+      for: 0m
+      labels:
+        severity: critical
+      annotations:
+        summary: MongoDB Down (instance {{`{{`}} $labels.instance }})
+        description: "MongoDB instance is down\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    {{- if (.Values.rules.mongodb.mongodbReplicaMemberUnhealthy.enabled ) }}
+    - alert: MongodbReplicaMemberUnhealthy
+      expr: mongodb_rs_members_health == 0
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: Mongodb replica member unhealthy (instance {{`{{`}} $labels.instance }})
+        description: "MongoDB replica member is not healthy\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    {{- if (.Values.rules.mongodb.mongodbReplicationLag.enabled ) }}
+    - alert: MongodbReplicationLag
+      expr: mongodb_rs_members_optimeDate{member_state="PRIMARY"} - on (set) group_right mongodb_rs_members_optimeDate{member_state="SECONDARY"} > 10
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: MongoDB replication lag (instance {{`{{`}} $labels.instance }})
+        description: "Mongodb replication lag is more than 10s\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    {{- if (.Values.rules.mongodb.mongodbNumberCursorsOpen.enabled ) }}
+    - alert: MongodbNumberCursorsOpen
+      expr: mongodb_ss_metrics_cursor_open{csr_type="total"} > 10 * 1000
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: MongoDB number cursors open (instance {{`{{`}} $labels.instance }})
+        description: "Too many cursors opened by MongoDB for clients (> 10k)\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    {{- if (.Values.rules.mongodb.mongodbCursorsTimeouts.enabled ) }}
+    - alert: MongodbCursorsTimeouts
+      expr: increase(mongodb_ss_metrics_cursor_timedOut[1m]) > 100
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: MongoDB cursors timeouts (instance {{`{{`}} $labels.instance }})
+        description: "Too many cursors are timing out\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    {{- if (.Values.rules.mongodb.mongodbTooManyConnections.enabled ) }}
+    - alert: MongodbTooManyConnections
+      expr: >
+        (sum (mongodb_ss_connections{conn_type="available"}) by (instance) -
+        sum (mongodb_ss_connections{conn_type="current"}) by (instance)) /
+        sum (mongodb_ss_connections{conn_type="available"}) by (instance) * 100 < 15
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: MongoDB too many connections (instance {{`{{`}} $labels.instance }})
+        description: "Too many connections (< 15% available)\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    {{- if (.Values.rules.mongodb.mongodbVirtualMemoryUsage.enabled ) }}
+    - alert: MongodbVirtualMemoryUsage
+      expr: (sum(mongodb_ss_mem_virtual) BY (instance) / sum(mongodb_ss_mem_resident) BY (instance)) > 3
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: MongoDB virtual memory usage (instance {{`{{`}} $labels.instance }})
+        description: "High memory usage\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+{{- end -}}

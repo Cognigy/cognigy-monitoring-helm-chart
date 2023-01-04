@@ -1,0 +1,52 @@
+{{- $targetNamespace := .Values.appNamespacesTarget }}
+{{- if .Values.rules.redis.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-cognigy-redis-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+  - name: cognigy.alert.redis
+    rules:
+    - alert: RedisDown
+      expr: redis_up == 0
+      for: 0m
+      labels:
+        severity: critical
+      annotations:
+        summary: Redis down (instance {{`{{`}} $labels.instance }})
+        description: "Redis instance is down\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+
+    - alert: RedisMemoryHigh
+      expr: >
+        (redis_memory_max_bytes{} > 0) and (redis_memory_used_bytes{} * 100/redis_memory_max_bytes{} > 90)
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Redis instance {{ "{{ $labels.instance }}" }} is using too much memory
+        description: |
+          Redis instance {{ "{{ $labels.instance }}" }} is using {{ "{{ $value }}" }}% of its available memory
+
+    - alert: RedisBlockedClients
+      expr: increase(redis_blocked_clients[5m]) > 0
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Redis instance {{ "{{ $labels.instance }}" }} has blocked clients
+        description: |
+          Redis instance {{ "{{ $labels.instance }}" }} has blocked {{ "{{ $value }}" }} clients
+
+    - alert: RedisContainerRestarted
+      expr: increase(kube_pod_container_status_restarts_total{container="redis"}[5m]) > 0
+      annotations:
+        summary: Redis container in pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} has restarted
+        description: "Redis container in pod {{`{{`}} $labels.pod }} has restarted\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      for: 2m
+      labels:
+        severity: warning
+
+{{- end -}}

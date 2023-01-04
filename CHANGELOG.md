@@ -1,5 +1,12 @@
 # Release Notes
 
+### 1.4.0
+**Released** January 4th, 2023
+#### Changes
+- Cognigy alerts are grouped by service
+- Traefik, NGiNX and MongoDB additional alerts groups are introduced
+- Alert names are consolidated
+
 ### 1.3.1
 **Released** January 3rd, 2023
 #### Bugfixes
@@ -48,7 +55,7 @@ To fix metrics duplication on an already installed monitoring stack execute: `ku
 - Fixed migration and installation documentation
 
 ### 1.1.0
-**Released** November 23th, 2022
+**Released** November 23rd, 2022
 
 #### Improvements
 - Added PostgreSQL optional dashboard for LA and VG products 
@@ -57,13 +64,13 @@ To fix metrics duplication on an already installed monitoring stack execute: `ku
 - Fixed missing dashboards for Pod services
 
 ### 1.0.2
-**Released** November 22th, 2022
+**Released** November 22nd, 2022
 
 #### Bugfixes
 - Fixed release pipeline and installation instructions
 
 ### 1.0.1
-**Released** November 22th, 2022
+**Released** November 22nd, 2022
 
 #### Bugfixes
 - Fixed release pipeline and Prometheus PVC configuration

@@ -22,7 +22,7 @@ spec:
           description: "Pod {{`{{`}} $labels.container }} restarted on {{`{{`}} $labels.instance }}). \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
 
     # Service AI
-    {{- if not (.Values.rules.runtime.disabled.ServiceAI | default false ) }}
+    {{- if (.Values.rules.runtime.serviceAI.enabled ) }}
     - name: cognigy.runtime.alert.ai
       rules:
       - alert: UncaughtErrorsAI
@@ -63,7 +63,7 @@ spec:
           description: "service-ai had message errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
     {{- end }}
 
-    {{- if not (.Values.rules.runtime.disabled.ServiceAppSessionManager | default false ) }}
+    {{- if (.Values.rules.runtime.serviceAppSessionManager.enabled ) }}
     # Service App Session Manager
     - name: cognigy.runtime.alert.app-session-manager
       rules:
@@ -87,7 +87,7 @@ spec:
           description: "service-app-session-manager had handover errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
     {{- end }}
 
-    {{- if not (.Values.rules.runtime.disabled.ServiceExecution | default false ) }}
+    {{- if (.Values.rules.runtime.serviceExecution.enabled ) }}
     # Service Execution
     - name: cognigy.runtime.alert.execution
       rules:
@@ -113,7 +113,7 @@ spec:
     #       summary: Extensions execution time increased by more than 100% (instance {{`{{`}} $labels.instance }})
     #       description: "service-execution execution time increased by: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
 
-    {{- if not (.Values.rules.runtime.disabled.ServiceFunctionExecution | default false ) }}
+    {{- if (.Values.rules.runtime.serviceFunctionExecution.enabled ) }}
     # Service Function Execution
     - name: cognigy.runtime.alert.function-execution
       rules:
@@ -137,7 +137,7 @@ spec:
           description: "Number of scheduling functions per organization has reached the limit. \n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
     {{- end }}
 
-    {{- if not (.Values.rules.runtime.disabled.ServiceHttp | default false ) }}
+    {{- if (.Values.rules.runtime.serviceHttp.enabled ) }}
     # Service HTTP
     - name: cognigy.runtime.alert.http
       rules:
@@ -152,7 +152,7 @@ spec:
           description: "service-http had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
     {{- end }}
 
-    {{- if not (.Values.rules.runtime.disabled.ServiceNlpMatcher | default false ) }}
+    {{- if (.Values.rules.runtime.serviceNlpMatcher.enabled ) }}
     # NLP Matcher
     - name: cognigy.runtime.alert.nlp-matcher
       rules:
@@ -176,7 +176,7 @@ spec:
           description: "NLP Matcher had initializeLexicon errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
     {{- end }}
 
-    {{- if not (.Values.rules.runtime.disabled.ServicePlaybookExecution | default false ) }}
+    {{- if (.Values.rules.runtime.servicePlaybookExecution.enabled ) }}
     # Service Playbook Execution
     - name: cognigy.runtime.alert.playbook-execution
       rules:
@@ -191,7 +191,7 @@ spec:
           description: "service-playbook-execution had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
     {{- end }}
 
-    {{- if not (.Values.rules.runtime.disabled.ServiceSessionStateManager | default false ) }}
+    {{- if (.Values.rules.runtime.serviceSessionStateManager.enabled ) }}
     # Service Session State Manager
     - name: cognigy.runtime.alert.session-state-manager
       rules:
