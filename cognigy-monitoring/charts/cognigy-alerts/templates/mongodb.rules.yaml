@@ -13,7 +13,7 @@ spec:
     {{- if (.Values.rules.mongodb.mongodbDown.enabled ) }}
     - alert: MongodbDown
       expr: mongodb_up == 0
-      for: 0m
+      for: 5m
       labels:
         severity: critical
       annotations:
@@ -24,7 +24,7 @@ spec:
     {{- if (.Values.rules.mongodb.mongodbReplicaMemberUnhealthy.enabled ) }}
     - alert: MongodbReplicaMemberUnhealthy
       expr: mongodb_rs_members_health == 0
-      for: 0m
+      for: 5m
       labels:
         severity: warning
       annotations:
@@ -35,7 +35,7 @@ spec:
     {{- if (.Values.rules.mongodb.mongodbReplicationLag.enabled ) }}
     - alert: MongodbReplicationLag
       expr: mongodb_rs_members_optimeDate{member_state="PRIMARY"} - on (set) group_right mongodb_rs_members_optimeDate{member_state="SECONDARY"} > 10
-      for: 0m
+      for: 5m
       labels:
         severity: warning
       annotations:
@@ -46,7 +46,7 @@ spec:
     {{- if (.Values.rules.mongodb.mongodbNumberCursorsOpen.enabled ) }}
     - alert: MongodbNumberCursorsOpen
       expr: mongodb_ss_metrics_cursor_open{csr_type="total"} > 10 * 1000
-      for: 2m
+      for: 5m
       labels:
         severity: warning
       annotations:
@@ -57,7 +57,7 @@ spec:
     {{- if (.Values.rules.mongodb.mongodbCursorsTimeouts.enabled ) }}
     - alert: MongodbCursorsTimeouts
       expr: increase(mongodb_ss_metrics_cursor_timedOut[1m]) > 100
-      for: 2m
+      for: 5m
       labels:
         severity: warning
       annotations:
@@ -71,7 +71,7 @@ spec:
         (sum (mongodb_ss_connections{conn_type="available"}) by (instance) -
         sum (mongodb_ss_connections{conn_type="current"}) by (instance)) /
         sum (mongodb_ss_connections{conn_type="available"}) by (instance) * 100 < 15
-      for: 2m
+      for: 5m
       labels:
         severity: warning
       annotations:
@@ -82,7 +82,7 @@ spec:
     {{- if (.Values.rules.mongodb.mongodbVirtualMemoryUsage.enabled ) }}
     - alert: MongodbVirtualMemoryUsage
       expr: (sum(mongodb_ss_mem_virtual) BY (instance) / sum(mongodb_ss_mem_resident) BY (instance)) > 3
-      for: 2m
+      for: 5m
       labels:
         severity: warning
       annotations:

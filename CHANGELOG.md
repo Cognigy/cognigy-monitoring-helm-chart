@@ -1,5 +1,11 @@
 # Release Notes
 
+### 1.4.1
+**Released** January 5th, 2023
+#### Bugfixes
+- Fixed `EndpointMessageProcessingTimeIncreasing` alert logic to avoid false positives
+- Fixed timeouts for various alerts to avoid false positives
+
 ### 1.4.0
 **Released** January 4th, 2023
 #### Changes

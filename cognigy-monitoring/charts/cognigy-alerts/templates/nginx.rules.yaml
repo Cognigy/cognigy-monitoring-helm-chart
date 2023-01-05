@@ -13,7 +13,7 @@ spec:
     {{- if (.Values.rules.nginx.nginxHighHttp5xxErrorRate.enabled ) }}
     - alert: NginxHighHttp5xxErrorRate
       expr:  100 * ( sum( nginx_ingress_controller_requests{status=~"5.+"} ) / sum(nginx_ingress_controller_requests) ) > 5
-      for: 1m
+      for: 15m
       labels:
         severity: warning
       annotations:
@@ -24,7 +24,7 @@ spec:
     {{- if (.Values.rules.nginx.nginxHighHttp4xxErrorRate.enabled ) }}
     - alert: NginxHighHttp4xxErrorRate
       expr: 100 * ( sum( nginx_ingress_controller_requests{status=~"4.+"} ) / sum(nginx_ingress_controller_requests) ) > 20
-      for: 1m
+      for: 15m
       labels:
         severity: warning
       annotations:
@@ -35,7 +35,7 @@ spec:
     {{- if (.Values.rules.nginx.nginxLatencyHigh.enabled ) }}
     - alert: NginxLatencyHigh
       expr: histogram_quantile(0.99, sum(increase(nginx_ingress_controller_request_duration_seconds_bucket[2m])) by  (le, host)) > 3
-      for: 2m
+      for: 15m
       labels:
         severity: warning
       annotations:
@@ -46,7 +46,7 @@ spec:
     {{- if (.Values.rules.nginx.nginxTlsCertExpireSoon.enabled ) }}
     - alert: NginxTlsCertExpireSoon
       expr: avg(nginx_ingress_controller_ssl_expire_time_seconds) by (host) - time() < 432000
-      for: 1h
+      for: 6h
       labels:
         severity: warning
       annotations:

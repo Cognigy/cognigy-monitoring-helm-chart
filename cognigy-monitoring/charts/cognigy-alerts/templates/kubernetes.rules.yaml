@@ -39,7 +39,7 @@ spec:
 
     - alert: HostCpuStealNoisyNeighbor
       expr: avg by(instance) (rate(node_cpu_seconds_total{mode="steal"}[5m])) * 100 > 10
-      for: 2m
+      for: 10m
       labels:
         severity: warning
       annotations:
@@ -127,7 +127,7 @@ spec:
         summary: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} restarts too often.
         description: "Pod {{`{{`}} $labels.pod }} restarts in the last 60 minutes \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
         runbook_url: {{ .Values.runbookUrl }}alert-name-kubepodcrashlooping
-      for: 2m
+      for: 5m
       labels:
         severity: warning
     {{- end }}
@@ -140,7 +140,7 @@ spec:
       annotations:
         summary: Container {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.container {{`}}`}} OOM Killed
         description: "Container {{`{{`}} $labels.container }} OOMKilled in namespace {{`{{`}} $labels.namespace {{`}}`}}\n LABELS = {{`{{`}} $labels }}"
-      for: 3m
+      for: 5m
       labels:
         severity: warning
     {{- end }}

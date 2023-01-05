@@ -12,7 +12,7 @@ spec:
     rules:
     - alert: RedisDown
       expr: redis_up == 0
-      for: 0m
+      for: 5m
       labels:
         severity: critical
       annotations:
@@ -22,7 +22,7 @@ spec:
     - alert: RedisMemoryHigh
       expr: >
         (redis_memory_max_bytes{} > 0) and (redis_memory_used_bytes{} * 100/redis_memory_max_bytes{} > 90)
-      for: 2m
+      for: 5m
       labels:
         severity: warning
       annotations:
@@ -32,7 +32,7 @@ spec:
 
     - alert: RedisBlockedClients
       expr: increase(redis_blocked_clients[5m]) > 0
-      for: 2m
+      for: 5m
       labels:
         severity: warning
       annotations:

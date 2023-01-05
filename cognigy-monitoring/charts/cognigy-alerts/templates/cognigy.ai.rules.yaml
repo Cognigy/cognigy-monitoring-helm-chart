@@ -13,7 +13,7 @@ spec:
     rules:
       - alert: MatcherFindKeyphraseError
         expr: cognigy_matcher_findkeyphrases_error > 0
-        for: 0m
+        for: 5m
         labels:
           severity: warning
         annotations:
@@ -52,16 +52,16 @@ spec:
     rules:
       - alert: EndpointMessageProcessingTimeIncreasing
         expr: >
-              100 *(histogram_quantile({{ 0.95 }}, sum(rate(cognigy_endpoint_raw_messages_response_time_bucket[5m])) by (le)) -
-              histogram_quantile({{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeQuantile }}, sum(rate(cognigy_endpoint_raw_messages_response_time_bucket[5m] offset 15m)) by (le)))/
-              histogram_quantile({{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeQuantile }}, sum(rate(cognigy_endpoint_raw_messages_response_time_bucket[5m] offset 15m)) by (le)) >
-              {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeIncreasingThreshold }}
+          100*((sum(rate(cognigy_endpoint_raw_messages_response_time_sum[15m]))/sum(rate(cognigy_endpoint_raw_messages_response_time_count[15m])))
+          - (sum(rate(cognigy_endpoint_raw_messages_response_time_sum[180m]))/sum(rate(cognigy_endpoint_raw_messages_response_time_count[180m]))))/
+          (sum(rate(cognigy_endpoint_raw_messages_response_time_sum[180m]))/sum(rate(cognigy_endpoint_raw_messages_response_time_count[180m]))) >
+          {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeIncreasingThreshold }}
         for: 15m
         labels:
           severity: warning
         annotations:
-          summary: Messages processing time has increased over {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeIncreasingThreshold }}% in last 15 minutes on (instance {{`{{`}} $labels.instance }})
-          description: "Messages processing time has increased by {{`{{`}} $value }}% in the last 15 minutes\n LABELS = {{`{{`}} $labels }}"
+          summary: Average message processing time has increased over {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeIncreasingThreshold }}% in last 15 minutes compared to previous 3 hours (instance {{`{{`}} $labels.instance }})
+          description: "Average message processing time has increased by {{`{{`}} $value }}% in the last 15 minutes\n LABELS = {{`{{`}} $labels }}"
       - alert: EndpointMessageProcessingTimeHigh
         expr: >
               histogram_quantile( {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeQuantile }},
@@ -71,8 +71,8 @@ spec:
         labels:
           severity: warning
         annotations:
-          summary: Messages processing is higher than {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeThreshold }} sec on (instance {{`{{`}} $labels.instance }})
-          description: "Messages processing time is {{`{{`}} $value }} sec over last 15 minutes\n LABELS = {{`{{`}} $labels }}"
+          summary: Message processing time is higher than {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeThreshold }} sec for {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeQuantile }}% of messages on (instance {{`{{`}} $labels.instance }})
+          description: "Message processing time is {{`{{`}} $value }} sec for {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeQuantile }}% of messages for last 15 minutes\n LABELS = {{`{{`}} $labels }}"
   {{- end }}
 
   {{- if (.Values.rules.ai.serviceHandover.enabled ) }}
