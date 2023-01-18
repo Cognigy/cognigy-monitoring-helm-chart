@@ -1,5 +1,20 @@
 # Release Notes
 
+### 1.6.0
+**Released** January 18th, 2023
+#### Changes
+- introduced `Horizontal Pod Autoscaler` dashboard
+- introduced `Flux Overview` and `Flux Control Plane` dashboards
+- added `HPAMaxReplicasReached` alert rule
+#### Bugfixes
+- fixed `MongodbReplicationLag` alert rule
+- fixed `defaultRules` groups and rules severity
+
+### 1.5.0
+**Released** January 16th, 2023
+#### Changes
+-  introduced `Analytics Collector` and `Analytics Conversations` dashboards
+
 ### 1.4.1
 **Released** January 5th, 2023
 #### Bugfixes

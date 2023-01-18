@@ -161,4 +161,16 @@ spec:
         severity: warning
     {{- end }}
 
+    {{- if (.Values.rules.kubernetes.hpaMaxReplicasReached.enabled ) }}
+    - alert: HPAMaxReplicasReached
+      annotations:
+        description: '"HorizontalPodAutoscaler {{`{{`}} $labels.horizontalpodautoscaler }} has reached the limit of max replicas, free replicas are:\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}".'
+        summary: HPA {{`{{`}} $labels.horizontalpodautoscaler }} reached max replicas.
+      expr: |-
+        kube_horizontalpodautoscaler_spec_max_replicas{} - kube_horizontalpodautoscaler_status_current_replicas{} == 0
+      for: 15m
+      labels:
+        severity: warning
+    {{- end }}
+
 {{- end -}}

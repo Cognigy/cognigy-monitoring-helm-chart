@@ -41,7 +41,7 @@ spec:
         max_over_time(alertmanager_config_last_reload_successful{job="{{ $alertmanagerJob }}",namespace="{{ $namespace }}"}[5m]) == 0
       for: 10m
       labels:
-        severity: critical
+        severity: warning
 {{- if .Values.defaultRules.additionalRuleLabels }}
 {{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
 {{- end }}
@@ -63,7 +63,7 @@ spec:
           count by (namespace,service) (max_over_time(alertmanager_cluster_members{job="{{ $alertmanagerJob }}",namespace="{{ $namespace }}"}[5m]))
       for: 15m
       labels:
-        severity: critical
+        severity: warning
 {{- if .Values.defaultRules.additionalRuleLabels }}
 {{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
 {{- end }}
@@ -99,7 +99,7 @@ spec:
 {{- end }}
         description: The minimum notification failure rate to {{`{{`}} $labels.integration {{`}}`}} sent from any instance in the {{`{{`}}$labels.job{{`}}`}} cluster is {{`{{`}} $value | humanizePercentage {{`}}`}}.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}/alertmanager/alertmanagerclusterfailedtosendalerts
-        summary: All Alertmanager instances in a cluster failed to send notifications to a critical integration.
+        summary: All Alertmanager instances in a cluster failed to send notifications to a warning integration.
       expr: |-
         min by (namespace,service, integration) (
           rate(alertmanager_notifications_failed_total{job="{{ $alertmanagerJob }}",namespace="{{ $namespace }}", integration=~`.*`}[5m])
@@ -109,7 +109,7 @@ spec:
         > 0.01
       for: 5m
       labels:
-        severity: critical
+        severity: warning
 {{- if .Values.defaultRules.additionalRuleLabels }}
 {{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
 {{- end }}
@@ -153,7 +153,7 @@ spec:
         != 1
       for: 20m
       labels:
-        severity: critical
+        severity: warning
 {{- if .Values.defaultRules.additionalRuleLabels }}
 {{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
 {{- end }}
@@ -180,7 +180,7 @@ spec:
         >= 0.5
       for: 5m
       labels:
-        severity: critical
+        severity: warning
 {{- if .Values.defaultRules.additionalRuleLabels }}
 {{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
 {{- end }}
@@ -207,7 +207,7 @@ spec:
         >= 0.5
       for: 5m
       labels:
-        severity: critical
+        severity: warning
 {{- if .Values.defaultRules.additionalRuleLabels }}
 {{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
 {{- end }}
