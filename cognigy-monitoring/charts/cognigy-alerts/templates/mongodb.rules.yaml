@@ -34,7 +34,7 @@ spec:
 
     {{- if (.Values.rules.mongodb.mongodbReplicationLag.enabled ) }}
     - alert: MongodbReplicationLag
-      expr: mongodb_rs_members_optimeDate{member_state="PRIMARY",  rs_state="1"} - on (rs_nm) group_right mongodb_rs_members_optimeDate{member_state="SECONDARY", rs_state="1"} > 10
+      expr: mongodb_rs_members_optimeDate{member_state="PRIMARY"} - on (set) group_right mongodb_rs_members_optimeDate{member_state="SECONDARY"} > 10
       for: 5m
       labels:
         severity: warning

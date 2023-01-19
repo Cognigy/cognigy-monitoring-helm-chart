@@ -17,25 +17,25 @@ spec:
         severity: warning
       annotations:
         summary: Rabbitmq memory high (instance {{`{{`}} $labels.instance }})
-        description: "A node use more than 90% of allocated RAM\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+        description: "Rabbitmq uses more than 90% of allocated RAM\n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
 
-    - alert: RabbitMQ High watermark limit crossed
+    - alert: RabbitmqHighWatermarkCrossed
       expr: rabbitmq_resident_memory_limit_bytes - rabbitmq_process_resident_memory_bytes < 0
       for: 5m
       labels:
         severity: critical
       annotations:
-        summary: High watermark limit has been crossed
-        description: High watermark limit has been crossed
+        summary: Rabbitmq high watermark limit has been crossed (instance {{`{{`}} $labels.instance }})
+        description: "RabbitMQ High watermark RAM limit has been crossed VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
 
-    - alert: RabbitMQ Ready message is getting high
-      expr: sum(rate(rabbitmq_queue_messages_ready[15m])) > 5
-      for: 5m
+    - alert: RabbitmqReadyMessageGettingHigh
+      expr: sum(delta(rabbitmq_queue_messages_ready[5m])) > 10
+      for: 15m
       labels:
-        severity: critical
+        severity: warning
       annotations:
-        summary: RabbitMQ Ready message is getting high
-        description: RabbitMQ Ready message is getting high
+        summary: RabbitMQ Ready message queue is getting high (instance {{`{{`}} $labels.instance }})
+        description: "RabbitMQ Ready message is getting high \n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
 
     - alert: RabbitmqReadyQueueHigh
       expr: rabbitmq_queue_messages_ready > 100
@@ -43,25 +43,43 @@ spec:
       labels:
         severity: warning
       annotations:
-        summary: RabbitMQ Ready message is high
-        description: RabbitMQ Ready queue has crossed warning high threshold
+        summary: RabbitMQ Ready message queue is high (instance {{`{{`}} $labels.instance }})
+        description: "RabbitMQ Ready queue has crossed warning threshold \n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
 
     - alert: RabbitmqReadyQueueHigh
-      expr: rabbitmq_queue_messages_ready > 1000
-      for: 10m
+      expr: rabbitmq_queue_messages_ready > 500
+      for: 15m
       labels:
         severity: critical
       annotations:
-        summary: RabbitMQ Ready message is high
-        description: RabbitMQ Ready queue has crossed critical high threshold
+        summary: RabbitMQ Ready message queue is high (instance {{`{{`}} $labels.instance }})
+        description: "RabbitMQ Ready queue has crossed critical threshold  \n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
 
-    - alert: RabbitMQ Unacked message is getting high
-      expr: sum(rate(rabbitmq_queue_messages_unacked[15m])) > 10
+    - alert: RabbitmqUnackedMessageGettingHigh
+      expr: sum(delta(rabbitmq_queue_messages_unacked[5m])) > 10
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: RabbitMQ Unacked message queue is getting high (instance {{`{{`}} $labels.instance }})
+        description: "RabbitMQ Unacked message is getting high \n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+
+    - alert: RabbitmqUnackedQueueHigh
+      expr: rabbitmq_queue_messages_unacked > 100
       for: 5m
       labels:
+        severity: warning
+      annotations:
+        summary: RabbitMQ Unacked message queue is high (instance {{`{{`}} $labels.instance }})
+        description: "RabbitMQ Unacked queue has crossed warning threshold \n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+
+    - alert: RabbitmqUnackedQueueHigh
+      expr: rabbitmq_queue_messages_unacked > 500
+      for: 15m
+      labels:
         severity: critical
       annotations:
-        summary: RabbitMQ Unacked message is getting high
-        description: RabbitMQ Unacked message is getting high
+        summary: RabbitMQ Unacked message queue is high (instance {{`{{`}} $labels.instance }})
+        description: "RabbitMQ Unacked queue has crossed critical threshold  \n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
 
 {{- end -}}

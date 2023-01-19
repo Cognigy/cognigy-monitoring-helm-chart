@@ -1,5 +1,11 @@
 # Release Notes
 
+### 1.6.1
+**Released** January 19th, 2023
+#### Bugfixes
+- disabled broken `MongodbReplicationLag` alert rule temporary
+- fixed RabbitMQ alert rules
+
 ### 1.6.0
 **Released** January 18th, 2023
 #### Changes
