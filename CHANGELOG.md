@@ -1,5 +1,10 @@
 # Release Notes
 
+### 1.7.0
+**Released** February 2, 2023
+#### Changes
+- introduced `GenerativeAI` dashboard
+
 ### 1.6.1
 **Released** January 19th, 2023
 #### Bugfixes
