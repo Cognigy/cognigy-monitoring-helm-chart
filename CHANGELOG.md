@@ -1,5 +1,13 @@
 # Release Notes
 
+### 1.9.0
+
+**Released** February 17th, 2023
+
+#### Changes
+
+- introduced `Service NLP Classifier` dashboard
+
 ### 1.8.0
 
 **Released** February 16th, 2023
