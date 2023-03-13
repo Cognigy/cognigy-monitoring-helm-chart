@@ -1,4 +1,14 @@
 # Release Notes
+### 1.10.0
+
+**Released** March 10th, 2023 
+
+#### Changes
+- introduced `Service NLP Orchestrator` and `Service NLP Embedding` dashboards for NLPv2
+- adjusted visuals in `Service NLP Classifier` dashboard
+- introduced `Analytics Reporter` dashboard for Analytics
+- introduced organization selector to `Agents Overview` dashboard
+- introduced  `RPC execution average time` dashboard for IDE Services
 
 ### 1.9.0
 

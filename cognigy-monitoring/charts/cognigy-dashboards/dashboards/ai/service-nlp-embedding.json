@@ -24,7 +24,7 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "id": 51,
+    "id": 52,
     "links": [],
     "liveNow": false,
     "panels": [
@@ -46,6 +46,7 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
+        "description": "Number of successful and unsuccessful inference requests received by Triton",
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -96,12 +97,273 @@
               ]
             }
           },
-          "overrides": []
+          "overrides": [
+            {
+              "__systemRef": "hideSeriesFrom",
+              "matcher": {
+                "id": "byNames",
+                "options": {
+                  "mode": "exclude",
+                  "names": [
+                    "service-nlp-embedding-en"
+                  ],
+                  "prefix": "All except:",
+                  "readOnly": true
+                }
+              },
+              "properties": [
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": true
+                  }
+                }
+              ]
+            }
+          ]
         },
         "gridPos": {
           "h": 9,
-          "w": 12,
+          "w": 8,
           "x": 0,
+          "y": 1
+        },
+        "id": 69,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
+            "expr": "sum(increase(nv_inference_request_success{container=~\"service-nlp-embedding-$language\"}[1m])) by (container) + sum(increase(nv_inference_request_failure{container=~\"service-nlp-embedding-$language\"}[1m])) by (container)",
+            "legendFormat": "{{container}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Embedding Request Count / Minute",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "description": "Number of actual inference batch executions. One inference run through the model equals one event. One event can contain multiple inputs that are to be encoded.",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "smooth",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "always",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "__systemRef": "hideSeriesFrom",
+              "matcher": {
+                "id": "byNames",
+                "options": {
+                  "mode": "exclude",
+                  "names": [
+                    "service-nlp-embedding-en"
+                  ],
+                  "prefix": "All except:",
+                  "readOnly": true
+                }
+              },
+              "properties": [
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 8,
+          "x": 8,
+          "y": 1
+        },
+        "id": 68,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
+            "expr": "sum(increase(nv_inference_exec_count{container=~\"service-nlp-embedding-$language\"}[1m])) by (container)",
+            "legendFormat": "{{container}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Embedding Execution Count / Minute",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "description": "Number of inferences performed (a batch of \"n\" is counted as \"n\" inferences, does not include cached requests)",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "smooth",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "always",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "__systemRef": "hideSeriesFrom",
+              "matcher": {
+                "id": "byNames",
+                "options": {
+                  "mode": "exclude",
+                  "names": [
+                    "service-nlp-embedding-en"
+                  ],
+                  "prefix": "All except:",
+                  "readOnly": true
+                }
+              },
+              "properties": [
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 8,
+          "x": 16,
           "y": 1
         },
         "id": 36,
@@ -124,13 +386,13 @@
               "uid": "prometheus"
             },
             "editorMode": "code",
-            "expr": "sum(increase(cognigy_nlp_classifier_score_rpc_counter_total{container=~\"service-nlp-classifier-score-$language\"}[1m])) by (container)",
+            "expr": "sum(increase(nv_inference_count{container=~\"service-nlp-embedding-$language\"}[1m])) by (container)",
             "legendFormat": "{{container}}",
             "range": true,
             "refId": "A"
           }
         ],
-        "title": "Classifier Score Events/min Rate",
+        "title": "Embedding Inference Count / Minute",
         "type": "timeseries"
       },
       {
@@ -138,6 +400,7 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
+        "description": "Number of successful inference requests received by Triton (each request is counted as 1, even if the request contains a batch)",
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -193,8 +456,8 @@
         "gridPos": {
           "h": 9,
           "w": 12,
-          "x": 12,
-          "y": 1
+          "x": 0,
+          "y": 10
         },
         "id": 37,
         "options": {
@@ -216,13 +479,13 @@
               "uid": "prometheus"
             },
             "editorMode": "code",
-            "expr": "sum(increase(cognigy_nlp_classifier_train_rpc_counter_total{container=~\"service-nlp-classifier-train-$language\"}[1m])) by (container)",
+            "expr": "sum(increase(nv_inference_request_success{container=~\"service-nlp-embedding-$language\"}[1m])) by (container)",
             "legendFormat": "{{container}}",
             "range": true,
             "refId": "A"
           }
         ],
-        "title": "Classifier Train Events/min Rate",
+        "title": "Embedding Successful Inferences / Minute",
         "type": "timeseries"
       },
       {
@@ -230,254 +493,7 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 10,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "smooth",
-              "lineWidth": 1,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "always",
-              "spanNulls": true,
-              "stacking": {
-                "group": "A",
-                "mode": "none"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "dtdurationms"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 9,
-          "w": 12,
-          "x": 0,
-          "y": 10
-        },
-        "id": 2,
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "editorMode": "code",
-            "exemplar": true,
-            "expr": "histogram_quantile(0.90, sum(rate(cognigy_nlp_classifier_score_rpc_latency_histogram_milliseconds_bucket{container=~\"service-nlp-classifier-score-$language\"}[1m])) by (le, container))",
-            "hide": false,
-            "interval": "",
-            "legendFormat": "90th | {{container}}",
-            "range": true,
-            "refId": "B"
-          },
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "editorMode": "code",
-            "exemplar": true,
-            "expr": "histogram_quantile(0.95, sum(rate(cognigy_nlp_classifier_score_rpc_latency_histogram_milliseconds_bucket{container=~\"service-nlp-classifier-score-$language\"}[1m])) by (le, container))",
-            "hide": false,
-            "interval": "",
-            "legendFormat": "95th | {{container}}",
-            "range": true,
-            "refId": "C"
-          },
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "editorMode": "code",
-            "exemplar": true,
-            "expr": "histogram_quantile(0.99, sum(rate(cognigy_nlp_classifier_score_rpc_latency_histogram_milliseconds_bucket{container=~\"service-nlp-classifier-score-$language\"}[1m])) by (le, container))",
-            "hide": false,
-            "interval": "",
-            "legendFormat": "99th | {{container}}",
-            "range": true,
-            "refId": "D"
-          }
-        ],
-        "title": "Classifier Score RPC latency",
-        "type": "timeseries"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 10,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "smooth",
-              "lineWidth": 1,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "always",
-              "spanNulls": true,
-              "stacking": {
-                "group": "A",
-                "mode": "none"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "dtdurations"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 9,
-          "w": 12,
-          "x": 12,
-          "y": 10
-        },
-        "id": 7,
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "editorMode": "code",
-            "exemplar": true,
-            "expr": "histogram_quantile(0.90, sum(rate(cognigy_nlp_classifier_train_rpc_latency_histogram_seconds_bucket{container=~\"service-nlp-classifier-train-$language\"}[1m])) by (le, container))",
-            "hide": false,
-            "interval": "",
-            "legendFormat": "90th | {{container}}",
-            "range": true,
-            "refId": "B"
-          },
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "editorMode": "code",
-            "exemplar": true,
-            "expr": "histogram_quantile(0.95, sum(rate(cognigy_nlp_classifier_train_rpc_latency_histogram_seconds_bucket{container=~\"service-nlp-classifier-train-$language\"}[1m])) by (le, container))",
-            "hide": false,
-            "interval": "",
-            "legendFormat": "95th | {{container}}",
-            "range": true,
-            "refId": "C"
-          },
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "editorMode": "code",
-            "exemplar": true,
-            "expr": "histogram_quantile(0.99, sum(rate(cognigy_nlp_classifier_train_rpc_latency_histogram_seconds_bucket{container=~\"service-nlp-classifier-train-$language\"}[1m])) by (le, container))",
-            "hide": false,
-            "interval": "",
-            "legendFormat": "99th | {{container}}",
-            "range": true,
-            "refId": "D"
-          }
-        ],
-        "title": "Classifier Train RPC latency",
-        "type": "timeseries"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
+        "description": "Number of failed inference requests received by Triton (each request is counted as 1, even if the request contains a batch)",
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -518,12 +534,8 @@
               "mode": "absolute",
               "steps": [
                 {
-                  "color": "green",
-                  "value": null
-                },
-                {
                   "color": "red",
-                  "value": 80
+                  "value": null
                 }
               ]
             }
@@ -533,10 +545,10 @@
         "gridPos": {
           "h": 9,
           "w": 12,
-          "x": 0,
-          "y": 19
+          "x": 12,
+          "y": 10
         },
-        "id": 44,
+        "id": 67,
         "options": {
           "legend": {
             "calcs": [],
@@ -556,13 +568,13 @@
               "uid": "prometheus"
             },
             "editorMode": "code",
-            "expr": "sum(increase(cognigy_nlp_classifier_score_rpc_error_counter_total{container=~\"service-nlp-classifier-score-$language\"}[1m])) by (container)",
+            "expr": "sum(increase(nv_inference_request_failure{container=~\"service-nlp-embedding-$language\"}[1m])) by (container)",
             "legendFormat": "{{container}}",
             "range": true,
             "refId": "A"
           }
         ],
-        "title": "Classifier Score Errors",
+        "title": "Embedding Failed Inferences / Minute",
         "type": "timeseries"
       },
       {
@@ -570,6 +582,7 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
+        "description": "Cumulative end-to-end inference request handling time (includes cached requests)",
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -582,7 +595,7 @@
               "axisPlacement": "auto",
               "barAlignment": 0,
               "drawStyle": "line",
-              "fillOpacity": 10,
+              "fillOpacity": 0,
               "gradientMode": "none",
               "hideFrom": {
                 "legend": false,
@@ -592,102 +605,6 @@
               "lineInterpolation": "smooth",
               "lineWidth": 1,
               "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "always",
-              "spanNulls": true,
-              "stacking": {
-                "group": "A",
-                "mode": "none"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "dtdurationms"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 9,
-          "w": 12,
-          "x": 12,
-          "y": 19
-        },
-        "id": 45,
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "editorMode": "code",
-            "exemplar": true,
-            "expr": "sum(increase(cognigy_nlp_classifier_train_rpc_error_counter_total{container=~\"service-nlp-classifier-train-$language\"}[1m])) by (container)",
-            "hide": false,
-            "interval": "",
-            "legendFormat": "90th | {{container}}",
-            "range": true,
-            "refId": "B"
-          }
-        ],
-        "title": "Classifier Train Errors",
-        "type": "timeseries"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 100,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "linear",
-              "lineWidth": 0,
-              "pointSize": 4,
               "scaleDistribution": {
                 "type": "linear"
               },
@@ -706,47 +623,22 @@
               "mode": "absolute",
               "steps": [
                 {
-                  "color": "green",
-                  "value": null
-                },
-                {
                   "color": "red",
-                  "value": 80
+                  "value": null
                 }
               ]
             },
-            "unit": "decmbytes"
+            "unit": "µs"
           },
-          "overrides": [
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "Max Cache Size"
-              },
-              "properties": [
-                {
-                  "id": "custom.drawStyle",
-                  "value": "line"
-                },
-                {
-                  "id": "custom.fillOpacity",
-                  "value": 0
-                },
-                {
-                  "id": "custom.lineWidth",
-                  "value": 2
-                }
-              ]
-            }
-          ]
+          "overrides": []
         },
         "gridPos": {
-          "h": 10,
-          "w": 12,
+          "h": 9,
+          "w": 8,
           "x": 0,
-          "y": 28
+          "y": 19
         },
-        "id": 57,
+        "id": 70,
         "options": {
           "legend": {
             "calcs": [],
@@ -759,7 +651,6 @@
             "sort": "none"
           }
         },
-        "pluginVersion": "9.2.3",
         "targets": [
           {
             "datasource": {
@@ -767,25 +658,193 @@
               "uid": "prometheus"
             },
             "editorMode": "code",
-            "expr": "cognigy_nlp_classifier_score_current_cache_size{container=~\"service-nlp-classifier-score-$language\"}",
-            "legendFormat": "{{pod}}",
+            "expr": "rate(nv_inference_request_duration_us{container=~\"service-nlp-embedding-$language\"}[1m])",
+            "legendFormat": "{{container}}",
             "range": true,
             "refId": "A"
+          }
+        ],
+        "title": "Embedding Request Time",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "description": "Cumulative time requests spend waiting in the scheduling queue (includes cached requests)",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "smooth",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "always",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "µs"
           },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 8,
+          "x": 8,
+          "y": 19
+        },
+        "id": 71,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
           {
             "datasource": {
               "type": "prometheus",
               "uid": "prometheus"
             },
             "editorMode": "code",
-            "expr": "min(cognigy_nlp_classifier_score_max_cache_size{container=~\"service-nlp-classifier-score-$language\"})",
-            "hide": false,
-            "legendFormat": "Max Cache Size",
+            "expr": "rate(nv_inference_queue_duration_us{container=~\"service-nlp-embedding-$language\"}[1m])",
+            "legendFormat": "{{container}}",
             "range": true,
-            "refId": "B"
+            "refId": "A"
           }
         ],
-        "title": "Classifier Score Cache Size",
+        "title": "Embedding Queue Time",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "description": "Cumulative time requests spend processing inference inputs, executing the inference model, and processing inference outputs (in the framework backend, does not include cached requests)",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "smooth",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "always",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "µs"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 8,
+          "x": 16,
+          "y": 19
+        },
+        "id": 72,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "editorMode": "code",
+            "expr": "rate(nv_inference_compute_infer_duration_us{container=~\"service-nlp-embedding-$language\"}[1m]) + rate(nv_inference_compute_input_duration_us{container=~\"service-nlp-embedding-$language\"}[1m]) + rate(nv_inference_compute_output_duration_us{container=~\"service-nlp-embedding-$language\"}[1m])",
+            "legendFormat": "{{container}}",
+            "range": true,
+            "refId": "Compute Infer Duration"
+          }
+        ],
+        "title": "Embedding Compute Time (Input+Infer+Output)",
         "type": "timeseries"
       },
       {
@@ -826,7 +885,7 @@
         "gridPos": {
           "h": 10,
           "w": 12,
-          "x": 12,
+          "x": 0,
           "y": 28
         },
         "id": 21,
@@ -854,7 +913,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "kube_deployment_spec_replicas{deployment=~\"service-nlp-classifier-.*.-$language\"}",
+            "expr": "kube_deployment_spec_replicas{deployment=~\"service-nlp-embedding-$language\"}",
             "format": "time_series",
             "instant": false,
             "interval": "",
@@ -863,101 +922,8 @@
             "refId": "A"
           }
         ],
-        "title": "Classifier replica count",
+        "title": "Embedding Replica Count",
         "type": "state-timeline"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 0,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "linear",
-              "lineWidth": 1,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "always",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "none"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "ms"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 10,
-          "w": 12,
-          "x": 0,
-          "y": 38
-        },
-        "id": 65,
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "editorMode": "code",
-            "expr": "sum(increase(python_gc_collections_total{container=~\"service-nlp-classifier-score-$language\"}[1m])) by (pod)",
-            "legendFormat": "{{pod}}",
-            "range": true,
-            "refId": "A"
-          }
-        ],
-        "title": "Classifier Score Garbage Collection",
-        "type": "timeseries"
       },
       {
         "datasource": {
@@ -1022,7 +988,7 @@
           "h": 10,
           "w": 12,
           "x": 12,
-          "y": 38
+          "y": 28
         },
         "id": 60,
         "links": [],
@@ -1045,7 +1011,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum (kube_pod_container_status_last_terminated_reason{container=~\"service-nlp-classifier-.*.-$language\"}) by (container, reason)",
+            "expr": "sum (kube_pod_container_status_last_terminated_reason{container=~\"service-nlp-embedding-$language\"}) by (container, reason)",
             "format": "time_series",
             "hide": false,
             "intervalFactor": 2,
@@ -1054,8 +1020,473 @@
             "refId": "A"
           }
         ],
-        "title": "Container restarts",
+        "title": "Container Restarts",
         "type": "timeseries"
+      },
+      {
+        "collapsed": true,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 38
+        },
+        "id": 76,
+        "panels": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "description": "Number of response cache hits per model",
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "smooth",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "always",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green"
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 9,
+              "w": 12,
+              "x": 0,
+              "y": 39
+            },
+            "id": 77,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "sum(increase(nv_cache_num_hits_per_model{container=~\"service-nlp-embedding-$language\"}[1m])) by (container)",
+                "legendFormat": "{{container}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "Embedding Cache Hit Count",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "description": "Number of response cache misses per model",
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "smooth",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "always",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green"
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 9,
+              "w": 12,
+              "x": 12,
+              "y": 39
+            },
+            "id": 78,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "sum(increase(nv_cache_num_misses_per_model{container=~\"service-nlp-embedding-$language\"}[1m])) by (container)",
+                "legendFormat": "{{container}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "Embedding Cache Miss Count",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "description": "Cumulative time requests spend retrieving a cached response per model on cache hits (microseconds)",
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "smooth",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "always",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red"
+                    }
+                  ]
+                },
+                "unit": "µs"
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 9,
+              "w": 8,
+              "x": 0,
+              "y": 48
+            },
+            "id": 79,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "rate(nv_cache_hit_lookup_duration_per_model{container=~\"service-nlp-embedding-$language\"}[1m])",
+                "legendFormat": "{{container}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "Embedding Cache Hit Lookup Time",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "description": "Cumulative time requests spend looking up a request hash on a cache miss (microseconds)",
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "smooth",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "always",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red"
+                    }
+                  ]
+                },
+                "unit": "µs"
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 9,
+              "w": 8,
+              "x": 8,
+              "y": 48
+            },
+            "id": 80,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "rate(nv_cache_miss_lookup_duration_per_model{container=~\"service-nlp-embedding-$language\"}[1m])",
+                "legendFormat": "{{container}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "Embedding Cache Miss Lookup Time",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "description": "Cumulative time requests spend inserting responses into the cache on a cache miss (microseconds)",
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 0,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "smooth",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "always",
+                  "spanNulls": false,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red"
+                    }
+                  ]
+                },
+                "unit": "µs"
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 9,
+              "w": 8,
+              "x": 16,
+              "y": 48
+            },
+            "id": 81,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "rate(nv_cache_miss_insertion_duration_per_model{container=~\"service-nlp-embedding-$language\"}[1m])",
+                "legendFormat": "{{container}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "Embedding Cache Miss Insertion Time",
+            "type": "timeseries"
+          }
+        ],
+        "title": "Cache Usage",
+        "type": "row"
       },
       {
         "collapsed": false,
@@ -1063,7 +1494,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 48
+          "y": 39
         },
         "id": 39,
         "panels": [],
@@ -1133,7 +1564,7 @@
           "h": 11,
           "w": 12,
           "x": 0,
-          "y": 49
+          "y": 40
         },
         "id": 47,
         "interval": "1m",
@@ -1157,7 +1588,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-score-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-embedding-$language\"}\n) by (pod)\n",
             "format": "time_series",
             "intervalFactor": 2,
             "legendFormat": "{{pod}}",
@@ -1166,7 +1597,7 @@
             "step": 10
           }
         ],
-        "title": "Classifier Score CPU Usage",
+        "title": "Embedding CPU Usage",
         "type": "timeseries"
       },
       {
@@ -1186,7 +1617,7 @@
               "axisPlacement": "auto",
               "barAlignment": 0,
               "drawStyle": "line",
-              "fillOpacity": 0,
+              "fillOpacity": 100,
               "gradientMode": "none",
               "hideFrom": {
                 "legend": false,
@@ -1194,7 +1625,7 @@
                 "viz": false
               },
               "lineInterpolation": "linear",
-              "lineWidth": 2,
+              "lineWidth": 0,
               "pointSize": 5,
               "scaleDistribution": {
                 "type": "linear"
@@ -1203,218 +1634,21 @@
               "spanNulls": false,
               "stacking": {
                 "group": "A",
-                "mode": "none"
+                "mode": "normal"
               },
               "thresholdsStyle": {
-                "mode": "off"
+                "mode": "line+area"
               }
             },
             "mappings": [],
+            "max": 1,
             "min": 0,
             "thresholds": {
               "mode": "absolute",
               "steps": [
                 {
-                  "color": "green",
+                  "color": "transparent",
                   "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "short"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 11,
-          "w": 12,
-          "x": 12,
-          "y": 49
-        },
-        "id": 48,
-        "interval": "1m",
-        "links": [],
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "pluginVersion": "9.2.3",
-        "targets": [
-          {
-            "datasource": {
-              "uid": "$datasource"
-            },
-            "editorMode": "code",
-            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-train-$language\"}\n) by (pod)\n",
-            "format": "time_series",
-            "intervalFactor": 2,
-            "legendFormat": "{{pod}}",
-            "range": true,
-            "refId": "A",
-            "step": 10
-          }
-        ],
-        "title": "Classifier Train CPU Usage",
-        "type": "timeseries"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "$datasource"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 100,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "linear",
-              "lineWidth": 0,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "always",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "normal"
-              },
-              "thresholdsStyle": {
-                "mode": "line+area"
-              }
-            },
-            "mappings": [],
-            "max": 1,
-            "min": 0,
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "transparent"
-                },
-                {
-                  "color": "red",
-                  "value": 0.25
-                }
-              ]
-            },
-            "unit": "percentunit"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 9,
-          "w": 12,
-          "x": 0,
-          "y": 60
-        },
-        "id": 62,
-        "interval": "1m",
-        "links": [],
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "pluginVersion": "9.2.3",
-        "targets": [
-          {
-            "datasource": {
-              "uid": "$datasource"
-            },
-            "editorMode": "code",
-            "expr": "increase(container_cpu_cfs_throttled_periods_total{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", container=~\"service-nlp-classifier-score-$language\", }[$__rate_interval]) / increase(container_cpu_cfs_periods_total{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", container=~\"service-nlp-classifier-score-$language\"}[$__rate_interval])",
-            "format": "time_series",
-            "intervalFactor": 2,
-            "legendFormat": "{{container}}",
-            "range": true,
-            "refId": "A",
-            "step": 10
-          }
-        ],
-        "title": "Classifier Score CPU Throttling",
-        "type": "timeseries"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "$datasource"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 100,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "linear",
-              "lineWidth": 0,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "always",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "normal"
-              },
-              "thresholdsStyle": {
-                "mode": "line+area"
-              }
-            },
-            "mappings": [],
-            "max": 1,
-            "min": 0,
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "transparent"
                 },
                 {
                   "color": "red",
@@ -1452,10 +1686,10 @@
           ]
         },
         "gridPos": {
-          "h": 9,
+          "h": 11,
           "w": 12,
           "x": 12,
-          "y": 60
+          "y": 40
         },
         "id": 63,
         "interval": "1m",
@@ -1479,7 +1713,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "increase(container_cpu_cfs_throttled_periods_total{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", container=~\"service-nlp-classifier-train-$language\", }[$__rate_interval]) / increase(container_cpu_cfs_periods_total{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", container=~\"service-nlp-classifier-train-$language\"}[$__rate_interval])",
+            "expr": "increase(container_cpu_cfs_throttled_periods_total{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", container=~\"service-nlp-embedding-$language\", }[$__rate_interval]) / increase(container_cpu_cfs_periods_total{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", container=~\"service-nlp-embedding-$language\"}[$__rate_interval])",
             "format": "time_series",
             "intervalFactor": 2,
             "legendFormat": "{{container}}",
@@ -1488,7 +1722,7 @@
             "step": 10
           }
         ],
-        "title": "Classifier Train CPU Throttling",
+        "title": "Embedding CPU Throttling",
         "type": "timeseries"
       },
       {
@@ -1693,7 +1927,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 69
+          "y": 51
         },
         "id": 50,
         "interval": "1m",
@@ -1715,7 +1949,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-embedding-$language\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -1728,7 +1962,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    kube_pod_container_resource_requests{job=\"kube-state-metrics\",resource=\"cpu\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    kube_pod_container_resource_requests{job=\"kube-state-metrics\",resource=\"cpu\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-embedding-$language\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -1741,7 +1975,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n/sum(\n    kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"cpu\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-embedding-$language\"}\n) by (pod)\n/sum(\n    kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"cpu\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-embedding-$language\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -1754,7 +1988,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-embedding-$language\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -1767,7 +2001,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\",}\n) by (pod)\n/sum(\n    kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-embedding-$language\",}\n) by (pod)\n/sum(\n    kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-embedding-$language\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -1793,9 +2027,9 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 76
+          "y": 58
         },
-        "id": 41,
+        "id": 74,
         "panels": [],
         "title": "Memory Consumption",
         "type": "row"
@@ -1862,7 +2096,7 @@
           "h": 13,
           "w": 12,
           "x": 0,
-          "y": 77
+          "y": 59
         },
         "id": 66,
         "interval": "1m",
@@ -1886,7 +2120,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-score-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-embedding-$language\"}\n) by (pod)\n",
             "format": "time_series",
             "intervalFactor": 2,
             "legendFormat": "{{pod}}",
@@ -1895,105 +2129,7 @@
             "step": 10
           }
         ],
-        "title": "Classifier Score Memory Usage",
-        "type": "timeseries"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "$datasource"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 0,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "linear",
-              "lineWidth": 2,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "always",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "none"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "min": 0,
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green"
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "bytes"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 13,
-          "w": 12,
-          "x": 12,
-          "y": 77
-        },
-        "id": 53,
-        "interval": "1m",
-        "links": [],
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "pluginVersion": "9.2.3",
-        "targets": [
-          {
-            "datasource": {
-              "uid": "$datasource"
-            },
-            "editorMode": "code",
-            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-train-$language\"}\n) by (pod)\n",
-            "format": "time_series",
-            "intervalFactor": 2,
-            "legendFormat": "{{pod}}",
-            "range": true,
-            "refId": "A",
-            "step": 10
-          }
-        ],
-        "title": "Classifier Train Memory Usage",
+        "title": "Embedding Memory Usage (Not Stacked)",
         "type": "timeseries"
       },
       {
@@ -2198,7 +2334,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 90
+          "y": 72
         },
         "id": 55,
         "interval": "1m",
@@ -2220,7 +2356,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-embedding-$language\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -2233,7 +2369,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"memory\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"memory\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-embedding-$language\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -2246,7 +2382,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n/sum(\n    kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"memory\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-embedding-$language\"}\n) by (pod)\n/sum(\n    kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"memory\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-embedding-$language\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -2259,7 +2395,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    kube_pod_container_resource_limits{job=\"kube-state-metrics\", cluster=\"$cluster\", namespace=\"$namespace\", resource=\"memory\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\", namespace=\"$namespace\", workload=~\"service-nlp-classifier-.*.-$language\", workload_type=\"$type\"}\n) by (pod)\n",
+            "expr": "sum(\n    kube_pod_container_resource_limits{job=\"kube-state-metrics\", cluster=\"$cluster\", namespace=\"$namespace\", resource=\"memory\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\", namespace=\"$namespace\", workload=~\"service-nlp-embedding-$language\", workload_type=\"$type\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -2272,7 +2408,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n/sum(\n    kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"memory\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-embedding-$language\"}\n) by (pod)\n/sum(\n    kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"memory\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-embedding-$language\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -2344,11 +2480,6 @@
             },
             {
               "selected": false,
-              "text": "de",
-              "value": "de"
-            },
-            {
-              "selected": false,
               "text": "xx",
               "value": "xx"
             },
@@ -2356,19 +2487,9 @@
               "selected": false,
               "text": "ge",
               "value": "ge"
-            },
-            {
-              "selected": false,
-              "text": "ja",
-              "value": "ja"
-            },
-            {
-              "selected": false,
-              "text": "ko",
-              "value": "ko"
             }
           ],
-          "query": "en,de,xx,ge,ja,ko",
+          "query": "en,xx,ge",
           "queryValue": "",
           "skipUrlSync": false,
           "type": "custom"
@@ -2381,8 +2502,8 @@
     },
     "timepicker": {},
     "timezone": "",
-    "title": "Service NLP Classifier",
-    "uid": "xezPk014z",
+    "title": "Service NLP Embedding",
+    "uid": "xezPk014b",
     "version": 2,
     "weekStart": ""
   }

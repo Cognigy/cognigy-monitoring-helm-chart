@@ -24,7 +24,7 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "id": 51,
+    "id": 53,
     "links": [],
     "liveNow": false,
     "panels": [
@@ -124,13 +124,13 @@
               "uid": "prometheus"
             },
             "editorMode": "code",
-            "expr": "sum(increase(cognigy_nlp_classifier_score_rpc_counter_total{container=~\"service-nlp-classifier-score-$language\"}[1m])) by (container)",
+            "expr": "sum(increase(cognigy_nlp_orchestrator_score_rpc_counter_total{container=~\"service-nlp-orchestrator\"}[1m])) by (container)",
             "legendFormat": "{{container}}",
             "range": true,
             "refId": "A"
           }
         ],
-        "title": "Classifier Score Events/min Rate",
+        "title": "Orchestrator Score Events/min Rate",
         "type": "timeseries"
       },
       {
@@ -216,13 +216,13 @@
               "uid": "prometheus"
             },
             "editorMode": "code",
-            "expr": "sum(increase(cognigy_nlp_classifier_train_rpc_counter_total{container=~\"service-nlp-classifier-train-$language\"}[1m])) by (container)",
+            "expr": "sum(increase(cognigy_nlp_orchestrator_train_rpc_counter_total{container=~\"service-nlp-orchestrator\"}[1m])) by (container)",
             "legendFormat": "{{container}}",
             "range": true,
             "refId": "A"
           }
         ],
-        "title": "Classifier Train Events/min Rate",
+        "title": "Orchestrator Train Events/min Rate",
         "type": "timeseries"
       },
       {
@@ -310,7 +310,7 @@
             },
             "editorMode": "code",
             "exemplar": true,
-            "expr": "histogram_quantile(0.90, sum(rate(cognigy_nlp_classifier_score_rpc_latency_histogram_milliseconds_bucket{container=~\"service-nlp-classifier-score-$language\"}[1m])) by (le, container))",
+            "expr": "histogram_quantile(0.90, sum(rate(cognigy_nlp_orchestrator_score_rpc_latency_histogram_milliseconds_bucket{container=~\"service-nlp-orchestrator\"}[1m])) by (le, container))",
             "hide": false,
             "interval": "",
             "legendFormat": "90th | {{container}}",
@@ -324,7 +324,7 @@
             },
             "editorMode": "code",
             "exemplar": true,
-            "expr": "histogram_quantile(0.95, sum(rate(cognigy_nlp_classifier_score_rpc_latency_histogram_milliseconds_bucket{container=~\"service-nlp-classifier-score-$language\"}[1m])) by (le, container))",
+            "expr": "histogram_quantile(0.95, sum(rate(cognigy_nlp_orchestrator_score_rpc_latency_histogram_milliseconds_bucket{container=~\"service-nlp-orchestrator\"}[1m])) by (le, container))",
             "hide": false,
             "interval": "",
             "legendFormat": "95th | {{container}}",
@@ -338,7 +338,7 @@
             },
             "editorMode": "code",
             "exemplar": true,
-            "expr": "histogram_quantile(0.99, sum(rate(cognigy_nlp_classifier_score_rpc_latency_histogram_milliseconds_bucket{container=~\"service-nlp-classifier-score-$language\"}[1m])) by (le, container))",
+            "expr": "histogram_quantile(0.99, sum(rate(cognigy_nlp_orchestrator_score_rpc_latency_histogram_milliseconds_bucket{container=~\"service-nlp-orchestrator\"}[1m])) by (le, container))",
             "hide": false,
             "interval": "",
             "legendFormat": "99th | {{container}}",
@@ -346,7 +346,7 @@
             "refId": "D"
           }
         ],
-        "title": "Classifier Score RPC latency",
+        "title": "Orchestrator Score RPC latency",
         "type": "timeseries"
       },
       {
@@ -434,7 +434,7 @@
             },
             "editorMode": "code",
             "exemplar": true,
-            "expr": "histogram_quantile(0.90, sum(rate(cognigy_nlp_classifier_train_rpc_latency_histogram_seconds_bucket{container=~\"service-nlp-classifier-train-$language\"}[1m])) by (le, container))",
+            "expr": "histogram_quantile(0.90, sum(rate(cognigy_nlp_orchestrator_train_rpc_latency_histogram_seconds_bucket{container=~\"service-nlp-orchestrator\"}[1m])) by (le, container))",
             "hide": false,
             "interval": "",
             "legendFormat": "90th | {{container}}",
@@ -448,7 +448,7 @@
             },
             "editorMode": "code",
             "exemplar": true,
-            "expr": "histogram_quantile(0.95, sum(rate(cognigy_nlp_classifier_train_rpc_latency_histogram_seconds_bucket{container=~\"service-nlp-classifier-train-$language\"}[1m])) by (le, container))",
+            "expr": "histogram_quantile(0.95, sum(rate(cognigy_nlp_orchestrator_train_rpc_latency_histogram_seconds_bucket{container=~\"service-nlp-orchestrator\"}[1m])) by (le, container))",
             "hide": false,
             "interval": "",
             "legendFormat": "95th | {{container}}",
@@ -462,7 +462,7 @@
             },
             "editorMode": "code",
             "exemplar": true,
-            "expr": "histogram_quantile(0.99, sum(rate(cognigy_nlp_classifier_train_rpc_latency_histogram_seconds_bucket{container=~\"service-nlp-classifier-train-$language\"}[1m])) by (le, container))",
+            "expr": "histogram_quantile(0.99, sum(rate(cognigy_nlp_orchestrator_train_rpc_latency_histogram_seconds_bucket{container=~\"service-nlp-orchestrator\"}[1m])) by (le, container))",
             "hide": false,
             "interval": "",
             "legendFormat": "99th | {{container}}",
@@ -470,7 +470,7 @@
             "refId": "D"
           }
         ],
-        "title": "Classifier Train RPC latency",
+        "title": "Orchestrator Train RPC latency",
         "type": "timeseries"
       },
       {
@@ -497,7 +497,7 @@
                 "tooltip": false,
                 "viz": false
               },
-              "lineInterpolation": "smooth",
+              "lineInterpolation": "linear",
               "lineWidth": 1,
               "pointSize": 5,
               "scaleDistribution": {
@@ -526,7 +526,8 @@
                   "value": 80
                 }
               ]
-            }
+            },
+            "unit": "ms"
           },
           "overrides": []
         },
@@ -536,7 +537,7 @@
           "x": 0,
           "y": 19
         },
-        "id": 44,
+        "id": 65,
         "options": {
           "legend": {
             "calcs": [],
@@ -556,13 +557,13 @@
               "uid": "prometheus"
             },
             "editorMode": "code",
-            "expr": "sum(increase(cognigy_nlp_classifier_score_rpc_error_counter_total{container=~\"service-nlp-classifier-score-$language\"}[1m])) by (container)",
-            "legendFormat": "{{container}}",
+            "expr": "sum(increase(python_gc_collections_total{container=~\"service-nlp-orchestrator\"}[1m])) by (pod)",
+            "legendFormat": "{{pod}}",
             "range": true,
             "refId": "A"
           }
         ],
-        "title": "Classifier Score Errors",
+        "title": "Orchestrator Score Garbage Collection",
         "type": "timeseries"
       },
       {
@@ -650,7 +651,7 @@
             },
             "editorMode": "code",
             "exemplar": true,
-            "expr": "sum(increase(cognigy_nlp_classifier_train_rpc_error_counter_total{container=~\"service-nlp-classifier-train-$language\"}[1m])) by (container)",
+            "expr": "sum(increase(cognigy_nlp_orchestrator_train_rpc_error_counter_total{container=~\"service-nlp-orchestrator\"}[1m])) by (container)",
             "hide": false,
             "interval": "",
             "legendFormat": "90th | {{container}}",
@@ -658,134 +659,7 @@
             "refId": "B"
           }
         ],
-        "title": "Classifier Train Errors",
-        "type": "timeseries"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 100,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "linear",
-              "lineWidth": 0,
-              "pointSize": 4,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "always",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "none"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "decmbytes"
-          },
-          "overrides": [
-            {
-              "matcher": {
-                "id": "byName",
-                "options": "Max Cache Size"
-              },
-              "properties": [
-                {
-                  "id": "custom.drawStyle",
-                  "value": "line"
-                },
-                {
-                  "id": "custom.fillOpacity",
-                  "value": 0
-                },
-                {
-                  "id": "custom.lineWidth",
-                  "value": 2
-                }
-              ]
-            }
-          ]
-        },
-        "gridPos": {
-          "h": 10,
-          "w": 12,
-          "x": 0,
-          "y": 28
-        },
-        "id": 57,
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "pluginVersion": "9.2.3",
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "editorMode": "code",
-            "expr": "cognigy_nlp_classifier_score_current_cache_size{container=~\"service-nlp-classifier-score-$language\"}",
-            "legendFormat": "{{pod}}",
-            "range": true,
-            "refId": "A"
-          },
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "editorMode": "code",
-            "expr": "min(cognigy_nlp_classifier_score_max_cache_size{container=~\"service-nlp-classifier-score-$language\"})",
-            "hide": false,
-            "legendFormat": "Max Cache Size",
-            "range": true,
-            "refId": "B"
-          }
-        ],
-        "title": "Classifier Score Cache Size",
+        "title": "Orchestrator Train Errors",
         "type": "timeseries"
       },
       {
@@ -824,9 +698,9 @@
           "overrides": []
         },
         "gridPos": {
-          "h": 10,
+          "h": 4,
           "w": 12,
-          "x": 12,
+          "x": 0,
           "y": 28
         },
         "id": 21,
@@ -854,7 +728,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "kube_deployment_spec_replicas{deployment=~\"service-nlp-classifier-.*.-$language\"}",
+            "expr": "kube_deployment_spec_replicas{deployment=~\"service-nlp-orchestrator\"}",
             "format": "time_series",
             "instant": false,
             "interval": "",
@@ -863,101 +737,8 @@
             "refId": "A"
           }
         ],
-        "title": "Classifier replica count",
+        "title": "Orchestrator replica count",
         "type": "state-timeline"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 0,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "linear",
-              "lineWidth": 1,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "always",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "none"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "ms"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 10,
-          "w": 12,
-          "x": 0,
-          "y": 38
-        },
-        "id": 65,
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "editorMode": "code",
-            "expr": "sum(increase(python_gc_collections_total{container=~\"service-nlp-classifier-score-$language\"}[1m])) by (pod)",
-            "legendFormat": "{{pod}}",
-            "range": true,
-            "refId": "A"
-          }
-        ],
-        "title": "Classifier Score Garbage Collection",
-        "type": "timeseries"
       },
       {
         "datasource": {
@@ -1022,7 +803,7 @@
           "h": 10,
           "w": 12,
           "x": 12,
-          "y": 38
+          "y": 28
         },
         "id": 60,
         "links": [],
@@ -1045,7 +826,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum (kube_pod_container_status_last_terminated_reason{container=~\"service-nlp-classifier-.*.-$language\"}) by (container, reason)",
+            "expr": "sum (kube_pod_container_status_last_terminated_reason{container=~\"service-nlp-orchestrator\"}) by (container, reason)",
             "format": "time_series",
             "hide": false,
             "intervalFactor": 2,
@@ -1054,7 +835,7 @@
             "refId": "A"
           }
         ],
-        "title": "Container restarts",
+        "title": "Orchestrator Container restarts",
         "type": "timeseries"
       },
       {
@@ -1063,7 +844,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 48
+          "y": 38
         },
         "id": 39,
         "panels": [],
@@ -1116,8 +897,7 @@
               "mode": "absolute",
               "steps": [
                 {
-                  "color": "green",
-                  "value": null
+                  "color": "green"
                 },
                 {
                   "color": "red",
@@ -1133,7 +913,7 @@
           "h": 11,
           "w": 12,
           "x": 0,
-          "y": 49
+          "y": 39
         },
         "id": 47,
         "interval": "1m",
@@ -1157,7 +937,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-score-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-orchestrator\"}\n) by (pod)\n",
             "format": "time_series",
             "intervalFactor": 2,
             "legendFormat": "{{pod}}",
@@ -1166,106 +946,7 @@
             "step": 10
           }
         ],
-        "title": "Classifier Score CPU Usage",
-        "type": "timeseries"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "$datasource"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 0,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "linear",
-              "lineWidth": 2,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "always",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "none"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "min": 0,
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "short"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 11,
-          "w": 12,
-          "x": 12,
-          "y": 49
-        },
-        "id": 48,
-        "interval": "1m",
-        "links": [],
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "pluginVersion": "9.2.3",
-        "targets": [
-          {
-            "datasource": {
-              "uid": "$datasource"
-            },
-            "editorMode": "code",
-            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-train-$language\"}\n) by (pod)\n",
-            "format": "time_series",
-            "intervalFactor": 2,
-            "legendFormat": "{{pod}}",
-            "range": true,
-            "refId": "A",
-            "step": 10
-          }
-        ],
-        "title": "Classifier Train CPU Usage",
+        "title": "Orchestrator CPU Usage",
         "type": "timeseries"
       },
       {
@@ -1328,10 +1009,10 @@
           "overrides": []
         },
         "gridPos": {
-          "h": 9,
+          "h": 11,
           "w": 12,
-          "x": 0,
-          "y": 60
+          "x": 12,
+          "y": 39
         },
         "id": 62,
         "interval": "1m",
@@ -1355,7 +1036,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "increase(container_cpu_cfs_throttled_periods_total{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", container=~\"service-nlp-classifier-score-$language\", }[$__rate_interval]) / increase(container_cpu_cfs_periods_total{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", container=~\"service-nlp-classifier-score-$language\"}[$__rate_interval])",
+            "expr": "increase(container_cpu_cfs_throttled_periods_total{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", container=~\"service-nlp-orchestrator\", }[$__rate_interval]) / increase(container_cpu_cfs_periods_total{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", container=~\"service-nlp-orchestrator\"}[$__rate_interval])",
             "format": "time_series",
             "intervalFactor": 2,
             "legendFormat": "{{container}}",
@@ -1364,131 +1045,7 @@
             "step": 10
           }
         ],
-        "title": "Classifier Score CPU Throttling",
-        "type": "timeseries"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "$datasource"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 100,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "linear",
-              "lineWidth": 0,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "always",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "normal"
-              },
-              "thresholdsStyle": {
-                "mode": "line+area"
-              }
-            },
-            "mappings": [],
-            "max": 1,
-            "min": 0,
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "transparent"
-                },
-                {
-                  "color": "red",
-                  "value": 0.25
-                }
-              ]
-            },
-            "unit": "percentunit"
-          },
-          "overrides": [
-            {
-              "__systemRef": "hideSeriesFrom",
-              "matcher": {
-                "id": "byNames",
-                "options": {
-                  "mode": "exclude",
-                  "names": [
-                    "service-nlp-classifier-train-en"
-                  ],
-                  "prefix": "All except:",
-                  "readOnly": true
-                }
-              },
-              "properties": [
-                {
-                  "id": "custom.hideFrom",
-                  "value": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": true
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        "gridPos": {
-          "h": 9,
-          "w": 12,
-          "x": 12,
-          "y": 60
-        },
-        "id": 63,
-        "interval": "1m",
-        "links": [],
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "pluginVersion": "9.2.3",
-        "targets": [
-          {
-            "datasource": {
-              "uid": "$datasource"
-            },
-            "editorMode": "code",
-            "expr": "increase(container_cpu_cfs_throttled_periods_total{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", container=~\"service-nlp-classifier-train-$language\", }[$__rate_interval]) / increase(container_cpu_cfs_periods_total{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", container=~\"service-nlp-classifier-train-$language\"}[$__rate_interval])",
-            "format": "time_series",
-            "intervalFactor": 2,
-            "legendFormat": "{{container}}",
-            "range": true,
-            "refId": "A",
-            "step": 10
-          }
-        ],
-        "title": "Classifier Train CPU Throttling",
+        "title": "Orchestrator CPU Throttling",
         "type": "timeseries"
       },
       {
@@ -1693,7 +1250,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 69
+          "y": 50
         },
         "id": 50,
         "interval": "1m",
@@ -1715,7 +1272,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-orchestrator\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -1728,7 +1285,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    kube_pod_container_resource_requests{job=\"kube-state-metrics\",resource=\"cpu\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    kube_pod_container_resource_requests{job=\"kube-state-metrics\",resource=\"cpu\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-orchestrator\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -1741,7 +1298,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n/sum(\n    kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"cpu\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-orchestrator\"}\n) by (pod)\n/sum(\n    kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"cpu\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-orchestrator\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -1754,7 +1311,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-orchestrator\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -1767,7 +1324,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\",}\n) by (pod)\n/sum(\n    kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-orchestrator\",}\n) by (pod)\n/sum(\n    kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-orchestrator\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -1793,7 +1350,7 @@
           "h": 1,
           "w": 24,
           "x": 0,
-          "y": 76
+          "y": 57
         },
         "id": 41,
         "panels": [],
@@ -1862,105 +1419,7 @@
           "h": 13,
           "w": 12,
           "x": 0,
-          "y": 77
-        },
-        "id": 66,
-        "interval": "1m",
-        "links": [],
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "pluginVersion": "9.2.3",
-        "targets": [
-          {
-            "datasource": {
-              "uid": "$datasource"
-            },
-            "editorMode": "code",
-            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-score-$language\"}\n) by (pod)\n",
-            "format": "time_series",
-            "intervalFactor": 2,
-            "legendFormat": "{{pod}}",
-            "range": true,
-            "refId": "A",
-            "step": 10
-          }
-        ],
-        "title": "Classifier Score Memory Usage",
-        "type": "timeseries"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "$datasource"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "line",
-              "fillOpacity": 0,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "lineInterpolation": "linear",
-              "lineWidth": 2,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "always",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "none"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "min": 0,
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green"
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "bytes"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 13,
-          "w": 12,
-          "x": 12,
-          "y": 77
+          "y": 58
         },
         "id": 53,
         "interval": "1m",
@@ -1984,7 +1443,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-train-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-orchestrator\"}\n) by (pod)\n",
             "format": "time_series",
             "intervalFactor": 2,
             "legendFormat": "{{pod}}",
@@ -1993,7 +1452,7 @@
             "step": 10
           }
         ],
-        "title": "Classifier Train Memory Usage",
+        "title": "Orchestrator Memory Usage",
         "type": "timeseries"
       },
       {
@@ -2198,7 +1657,7 @@
           "h": 7,
           "w": 24,
           "x": 0,
-          "y": 90
+          "y": 71
         },
         "id": 55,
         "interval": "1m",
@@ -2220,7 +1679,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-orchestrator\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -2233,7 +1692,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"memory\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"memory\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-orchestrator\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -2246,7 +1705,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n/sum(\n    kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"memory\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-orchestrator\"}\n) by (pod)\n/sum(\n    kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"memory\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-orchestrator\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -2259,7 +1718,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    kube_pod_container_resource_limits{job=\"kube-state-metrics\", cluster=\"$cluster\", namespace=\"$namespace\", resource=\"memory\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\", namespace=\"$namespace\", workload=~\"service-nlp-classifier-.*.-$language\", workload_type=\"$type\"}\n) by (pod)\n",
+            "expr": "sum(\n    kube_pod_container_resource_limits{job=\"kube-state-metrics\", cluster=\"$cluster\", namespace=\"$namespace\", resource=\"memory\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\", namespace=\"$namespace\", workload=~\"service-nlp-orchestrator\", workload_type=\"$type\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -2272,7 +1731,7 @@
               "uid": "$datasource"
             },
             "editorMode": "code",
-            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n/sum(\n    kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"memory\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-classifier-.*.-$language\"}\n) by (pod)\n",
+            "expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-orchestrator\"}\n) by (pod)\n/sum(\n    kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"memory\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=~\"service-nlp-orchestrator\"}\n) by (pod)\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 2,
@@ -2315,63 +1774,6 @@
           "regex": "",
           "skipUrlSync": false,
           "type": "datasource"
-        },
-        {
-          "current": {
-            "selected": true,
-            "text": [
-              "All"
-            ],
-            "value": [
-              "$__all"
-            ]
-          },
-          "hide": 0,
-          "includeAll": true,
-          "label": "Language",
-          "multi": true,
-          "name": "language",
-          "options": [
-            {
-              "selected": true,
-              "text": "All",
-              "value": "$__all"
-            },
-            {
-              "selected": false,
-              "text": "en",
-              "value": "en"
-            },
-            {
-              "selected": false,
-              "text": "de",
-              "value": "de"
-            },
-            {
-              "selected": false,
-              "text": "xx",
-              "value": "xx"
-            },
-            {
-              "selected": false,
-              "text": "ge",
-              "value": "ge"
-            },
-            {
-              "selected": false,
-              "text": "ja",
-              "value": "ja"
-            },
-            {
-              "selected": false,
-              "text": "ko",
-              "value": "ko"
-            }
-          ],
-          "query": "en,de,xx,ge,ja,ko",
-          "queryValue": "",
-          "skipUrlSync": false,
-          "type": "custom"
         }
       ]
     },
@@ -2381,8 +1783,8 @@
     },
     "timepicker": {},
     "timezone": "",
-    "title": "Service NLP Classifier",
-    "uid": "xezPk014z",
-    "version": 2,
+    "title": "Service NLP Orchestrator",
+    "uid": "xezPk014a",
+    "version": 1,
     "weekStart": ""
   }
