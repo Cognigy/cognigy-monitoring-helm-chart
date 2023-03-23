@@ -1,0 +1,19 @@
+---
+{{- if .Values.monitors.kubecost.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-kubecost-servicemonitor
+  labels:
+    {{- include "cognigy-monitoring.labels" . | nindent 4 }}
+    app: cost-analyzer
+spec:
+  endpoints:
+    - path: /metrics
+      port: tcp-model # name of the port in the service.
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      app: cost-analyzer # target kube-cost analyzer
+{{- end -}}

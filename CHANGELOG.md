@@ -1,7 +1,23 @@
 # Release Notes
+
+### 1.11.0
+
+**Released** March 23rd, 2023
+
+#### Changes
+- introduced `Agents Overview - V2` dashboard which includes filtering for organisation and project by names
+- introduced `Analytics Odata` dashboards for Analytics
+- introduced `VG` dashboards
+- introduced `InfluxDB` data source for Voice Gateway
+- introduced `MySQL Overview` dashboard
+
+#### Bugfixes
+- fixed `Postgresql Overview` dashboard
+- fixed default MS Teams receivers configuration. Runtime MS Teams channel is disabled by default to prevent misconfigurations
+
 ### 1.10.0
 
-**Released** March 10th, 2023 
+**Released** March 10th, 2023
 
 #### Changes
 - introduced `Service NLP Orchestrator` and `Service NLP Embedding` dashboards for NLPv2

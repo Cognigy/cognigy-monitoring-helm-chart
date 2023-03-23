@@ -73,11 +73,26 @@ kubepromstack:
           - receiver: 'null'
             matchers:
               - alertname =~ "InfoInhibitor|Watchdog"
-          - receiver: 'msteams-runtime'
-            matchers:
-              - group = runtime-custom-alert-rules
+          ## Uncomment to enable additional MS Teams channels
+          #- receiver: 'msteams-runtime'
+          #  matchers:
+          #    - group = runtime-custom-alert-rules
+          #- receiver: 'msteams-vg'
+          #  matchers:
+          #    - group = vg-custom-alert-rules
       receivers:
+        - name: 'pagerduty'
         - name: 'null'
+        ## Uncomment to enable additional MS Teams channels
+        #- name: 'msteams-runtime'
+        #  webhook_configs:
+        #    - send_resolved: true
+        #      url: 'http://prometheus-msteams:2000/runtime'
+        #- name: 'msteams-vg'
+        #  webhook_configs:
+        #    - send_resolved: true
+        #      url: 'http://prometheus-msteams:2000/vg'
+
 
   ### Prometheus configuration
   prometheus:
@@ -176,6 +191,36 @@ kubepromstack:
       #   hosts:
       #   - grafana.example.com
 
+    ## For VoiceGateway uncomment `deleteDatasources` and `additionalDataSources` sections to enable InfluxDB and
+    # InfluxDB-Telegraf data sources
+    deleteDatasources: []
+    #  - name: InfluxDB
+    #    orgId: 1
+    #  - name: InfluxDB-Telegraf
+    #    orgId: 1
+    
+    additionalDataSources: []
+    #  - name: InfluxDB
+    #    type: influxdb
+    #    access: proxy
+    #    database: homer
+    #    user: grafana
+    #    url: http://influxdb:8086
+    #    jsonData:
+    #      timeInterval: "15s"
+    #    # <bool> allow users to edit datasources from the UI.
+    #    editable: true
+    #  - name: InfluxDB-Telegraf
+    #    type: influxdb
+    #    access: proxy
+    #    database: telegraf
+    #    user: grafana
+    #    url: http://influxdb:8086
+    #    jsonData:
+    #      timeInterval: "15s"
+    #    # <bool> allow users to edit datasources from the UI.
+    #    editable: true
+
 ## Cognigy Product Dashboards, enable/disable dashboards according to your installation
 cognigy-dashboards:
   enabled: true
@@ -219,6 +264,8 @@ cognigy-alerts:
     # Cognigy.AI runtime alerts, enable only if absolutely necessary
     runtime:
       enabled: false
+    vg:
+      enabled: false
 
 
 ## Prometheus Monitors for backend services
@@ -248,4 +295,5 @@ prometheus-msteams:
       cpu: 25m
       memory: 32Mi
   connectors:
-    - runtime: MSTEAMS_RUNTIME_WEBHOOK_URL # specify MS Teams Webhook URL
+    - runtime: MSTEAMS_RUNTIME_WEBHOOK_URL # specify MS Teams Webhook URL for Runtime alerts
+    - vg: MSTEAMS_VG_WEBHOOK_URL # specify MS Teams Webhook URL for VG alerts

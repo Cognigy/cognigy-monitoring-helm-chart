@@ -1,0 +1,58 @@
+{{- $targetNamespace := .Values.appNamespacesTarget }}
+{{- if .Values.rules.vg.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-cognigy-vg-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+    # General rules
+    - name: cognigy.vg.alert.general
+      rules:
+      - alert: PodRestarts
+        expr: (kube_pod_container_status_restarts_total{container=~"api-server|billing-app|drachtio|feature-server|freeswitch|influxdb|mysql|postgres|redis|sbc-inbound|sbc-outbound|sbc-call-router|sbc-rtp|rtp-engine-sidecar|sbc-sip|sbc-sip-sidecar|test-call-manager|webapp"} -  kube_pod_container_status_restarts_total{container=~"api-server|billing-app|drachtio|feature-server|freeswitch|influxdb|mysql|postgres|redis|sbc-inbound|sbc-outbound|sbc-call-router|sbc-rtp|rtp-engine-sidecar|sbc-sip|sbc-sip-sidecar|test-call-manager|webapp"} offset 5m) > 0
+        for: 0m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} has restarted
+          description: "Pod {{`{{`}} $labels.container }} restarted on {{`{{`}} $labels.instance }}). \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+	
+	# feature-server
+    {{- if (.Values.rules.vg.featureServer.enabled ) }}
+    - name: cognigy.vg.alert.feature-server
+      rules:
+      - alert: UncaughtErrorsFeatureServer
+        expr: sum(increase(vg_feature_server_uncaught_error_total[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: feature-server had uncaught errors on (instance {{`{{`}} $labels.instance }})
+          description: "feature-server had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      
+	  - alert: HandoverErrorsFeatureServer
+        expr: sum(increase(vg_feature_server_handover_error_total[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: feature-server had handover errors (instance {{`{{`}} $labels.instance }})
+          description: "feature-server had handover errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      
+	  - alert: AnalyticsDataErrorsFeatureServer
+        expr: sum(increase(vg_feature_server_analytics_submit_error_total[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: feature-server had errors sending analytics data to insights (instance {{`{{`}} $labels.instance }})
+          description: "feature-server had errors sending analytics data to insights: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"      
+    {{- end }}
+{{- end -}}
