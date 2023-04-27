@@ -20,8 +20,8 @@ spec:
         annotations:
           summary: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} has restarted
           description: "Pod {{`{{`}} $labels.container }} restarted on {{`{{`}} $labels.instance }}). \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
-	
-	# feature-server
+
+    # feature-server rules
     {{- if (.Values.rules.vg.featureServer.enabled ) }}
     - name: cognigy.vg.alert.feature-server
       rules:
@@ -35,7 +35,7 @@ spec:
           summary: feature-server had uncaught errors on (instance {{`{{`}} $labels.instance }})
           description: "feature-server had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
       
-	  - alert: HandoverErrorsFeatureServer
+      - alert: HandoverErrorsFeatureServer
         expr: sum(increase(vg_feature_server_handover_error_total[5m])) > 5
         for: 5m
         labels:
@@ -45,7 +45,7 @@ spec:
           summary: feature-server had handover errors (instance {{`{{`}} $labels.instance }})
           description: "feature-server had handover errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
       
-	  - alert: AnalyticsDataErrorsFeatureServer
+      - alert: AnalyticsDataErrorsFeatureServer
         expr: sum(increase(vg_feature_server_analytics_submit_error_total[5m])) > 5
         for: 5m
         labels:

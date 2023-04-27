@@ -1,5 +1,21 @@
 # Release Notes
 
+### 1.12.0
+
+**Released** April 27th, 2023
+
+#### Changes
+- updated `VG` dashboards
+- introduced `HostOutOfMemory` and `HostMemoryUnderMemoryPressure` alerts
+- introduced `Request Handover` dashboard
+- made `mongodbReplicationLag` alert configurable
+- made `traefikHighHttp5xxErrorRateService` alert configurable
+
+#### Bugfixes
+- fixed `Kubecost Overview` dashboard
+- fixed `mongodbReplicationLag` alert
+- fixed `Live Agent` dashboard
+
 ### 1.11.0
 
 **Released** March 23rd, 2023

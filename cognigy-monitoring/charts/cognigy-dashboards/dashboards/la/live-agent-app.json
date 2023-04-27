@@ -1,406 +1,1123 @@
 {
-  "annotations": {
-    "list": [
-      {
-        "builtIn": 1,
-        "datasource": "-- Grafana --",
-        "enable": true,
-        "hide": true,
-        "iconColor": "rgba(0, 211, 255, 1)",
-        "name": "Annotations & Alerts",
-        "target": {
-          "limit": 100,
-          "matchAny": false,
-          "tags": [],
-          "type": "dashboard"
-        },
-        "type": "dashboard"
-      }
-    ]
-  },
-  "editable": true,
-  "fiscalYearStartMonth": 0,
-  "gnetId": null,
-  "graphTooltip": 0,
-  "id": 35,
-  "links": [],
-  "liveNow": false,
-  "panels": [
-    {
-      "datasource": null,
-      "description": "Accounts that are created into Live Agent. For example, when the organisation setup for Live Agent is triggered.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 5,
-        "x": 0,
-        "y": 0
-      },
-      "id": 5,
-      "interval": null,
-      "options": {
-        "displayLabels": [
-          "value"
-        ],
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "values": [
-            "value",
-            "percent"
-          ]
-        },
-        "pieType": "pie",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "tooltip": {
-          "mode": "single"
-        }
-      },
-      "pluginVersion": "8.2.3",
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "ruby_http_requests_total{ controller=\"api/v1/accounts\", action=\"create\", status=\"200\" }",
-          "format": "time_series",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "{{action}} {{ controller }} {{ status }}",
-          "refId": "A"
-        },
-        {
-          "exemplar": true,
-          "expr": "ruby_http_requests_total{ controller=\"api/v1/accounts\", action=\"create\", status!=\"200\" }",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "{{action}} {{ controller }} {{ status }}",
-          "refId": "B"
-        }
-      ],
-      "title": "Accounts Creation",
-      "transformations": [],
-      "type": "piechart"
-    },
-    {
-      "datasource": null,
-      "description": "Conversations that are created into Live Agent. This happens when the handover process is performed",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 5,
-        "x": 5,
-        "y": 0
-      },
-      "id": 2,
-      "interval": null,
-      "options": {
-        "displayLabels": [
-          "value"
-        ],
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "values": [
-            "value",
-            "percent"
-          ]
-        },
-        "pieType": "pie",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "tooltip": {
-          "mode": "single"
-        }
-      },
-      "pluginVersion": "8.2.3",
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "ruby_http_requests_total{ controller=\"api/v1/accounts/conversationte\", status=\"200\" }",
-          "format": "time_series",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "{{action}} {{ controller }} {{ status }}",
-          "refId": "A"
-        },
-        {
-          "exemplar": true,
-          "expr": "ruby_http_requests_total{ controller=\"api/v1/accounts/conversations\", action=\"create\", status!=\"200\" }",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "{{action}} {{ controller }} {{ status }}",
-          "refId": "B"
-        }
-      ],
-      "title": "Conversation Creation",
-      "transformations": [],
-      "type": "piechart"
-    },
-    {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 5,
-        "x": 10,
-        "y": 0
-      },
-      "id": 4,
-      "options": {
-        "displayLabels": [
-          "value"
-        ],
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "values": [
-            "value",
-            "percent"
-          ]
-        },
-        "pieType": "pie",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "tooltip": {
-          "mode": "single"
-        }
-      },
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "ruby_http_requests_total{ controller=\"api/v1/accounts/conversations/messages\", action=\"create\" }",
-          "interval": "",
-          "legendFormat": "{{action}} {{controller}} {{status}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Messages Creation",
-      "type": "piechart"
-    },
-    {
-      "datasource": null,
-      "description": "Conversations that are retrieved into Live Agent. This happens when conversations are listed",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 5,
-        "x": 0,
-        "y": 11
-      },
-      "id": 6,
-      "interval": null,
-      "options": {
-        "displayLabels": [
-          "value"
-        ],
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "values": [
-            "value",
-            "percent"
-          ]
-        },
-        "pieType": "pie",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "tooltip": {
-          "mode": "single"
-        }
-      },
-      "pluginVersion": "8.2.3",
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "ruby_http_requests_total{ controller=\"api/v1/accounts/conversations\", action=\"index\", status=\"200\" }",
-          "format": "time_series",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "{{action}} {{ controller }} {{ status }}",
-          "refId": "A"
-        },
-        {
-          "exemplar": true,
-          "expr": "ruby_http_requests_total{ controller=\"api/v1/accounts/conversations\", action=\"index\", status!=\"200\" }",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "{{action}} {{ controller }} {{ status }}",
-          "refId": "B"
-        }
-      ],
-      "title": "Conversation Retrieved",
-      "transformations": [],
-      "type": "piechart"
-    },
-    {
-      "datasource": null,
-      "description": "Contacts that are created into Live Agent. This happens when the handover process happens",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 5,
-        "x": 5,
-        "y": 11
-      },
-      "id": 7,
-      "interval": null,
-      "options": {
-        "displayLabels": [
-          "value"
-        ],
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "values": [
-            "value",
-            "percent"
-          ]
-        },
-        "pieType": "pie",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "tooltip": {
-          "mode": "single"
-        }
-      },
-      "pluginVersion": "8.2.3",
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "ruby_http_requests_total{ controller=\"api/v1/accounts/contacts\", action=\"create\", status=\"200\" }",
-          "format": "time_series",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "{{action}} {{ controller }} {{ status }}",
-          "refId": "A"
-        },
-        {
-          "exemplar": true,
-          "expr": "ruby_http_requests_total{ controller=\"api/v1/accounts/contacts\", action=\"create\", status!=\"200\" }",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "{{action}} {{ controller }} {{ status }}",
-          "refId": "B"
-        }
-      ],
-      "title": "Contacts Creation",
-      "transformations": [],
-      "type": "piechart"
-    }
-  ],
-  "schemaVersion": 31,
-  "style": "dark",
-  "tags": [],
-  "templating": {
-    "list": []
-  },
-  "time": {
-    "from": "now-6h",
-    "to": "now"
-  },
-  "timepicker": {},
-  "timezone": "",
-  "title": "Live Agent Overview",
-  "uid": "IJUsUl3nz",
-  "version": 4
+	"annotations": {
+		"list": [
+			{
+				"builtIn": 1,
+				"datasource": {
+					"type": "datasource",
+					"uid": "grafana"
+				},
+				"enable": true,
+				"hide": true,
+				"iconColor": "rgba(0, 211, 255, 1)",
+				"name": "Annotations & Alerts",
+				"target": {
+					"limit": 100,
+					"matchAny": false,
+					"tags": [],
+					"type": "dashboard"
+				},
+				"type": "dashboard"
+			}
+		]
+	},
+	"editable": true,
+	"fiscalYearStartMonth": 0,
+	"graphTooltip": 0,
+	"links": [],
+	"liveNow": false,
+	"panels": [
+		{
+			"datasource": {
+				"type": "prometheus",
+				"uid": "prometheus"
+			},
+			"description": "Accounts endpoints and its status codes. More information at the Live Agent OpenAPI definitions",
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"viz": false
+						}
+					},
+					"mappings": []
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 13,
+				"w": 4,
+				"x": 0,
+				"y": 0
+			},
+			"id": 18,
+			"options": {
+				"displayLabels": ["value"],
+				"legend": {
+					"displayMode": "table",
+					"placement": "bottom",
+					"showLegend": true,
+					"values": ["value", "percent"]
+				},
+				"pieType": "pie",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"pluginVersion": "8.2.3",
+			"targets": [
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"exemplar": true,
+					"expr": "sum by(action, controller, status) (ruby_http_requests_total{ controller=\"api/v1/accounts\" })",
+					"format": "time_series",
+					"instant": false,
+					"interval": "",
+					"legendFormat": "{{action}} {{ controller }} {{ status }}",
+					"refId": "A"
+				}
+			],
+			"title": "Accounts Endpoints Status Codes",
+			"transformations": [],
+			"type": "piechart"
+		},
+		{
+			"datasource": {
+				"type": "prometheus",
+				"uid": "prometheus"
+			},
+			"description": "Inboxes endpoints and its status codes. More information at the Live Agent OpenAPI definitions",
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"viz": false
+						}
+					},
+					"mappings": []
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 13,
+				"w": 4,
+				"x": 4,
+				"y": 0
+			},
+			"id": 19,
+			"options": {
+				"displayLabels": ["value"],
+				"legend": {
+					"displayMode": "table",
+					"placement": "bottom",
+					"showLegend": true,
+					"values": ["value", "percent"]
+				},
+				"pieType": "pie",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"pluginVersion": "8.2.3",
+			"targets": [
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"exemplar": true,
+					"expr": "sum by(action, controller, status) (ruby_http_requests_total{ controller=\"api/v1/accounts/inboxes\" })",
+					"format": "time_series",
+					"instant": false,
+					"interval": "",
+					"legendFormat": "{{action}} {{ controller }} {{ status }}",
+					"refId": "A"
+				}
+			],
+			"title": "Inbox Endpoints Status Codes",
+			"transformations": [],
+			"type": "piechart"
+		},
+		{
+			"datasource": {
+				"type": "prometheus",
+				"uid": "prometheus"
+			},
+			"description": "Conversations endpoints and its status codes. More information at the Live Agent OpenAPI definitions",
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"viz": false
+						}
+					},
+					"mappings": []
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 13,
+				"w": 4,
+				"x": 8,
+				"y": 0
+			},
+			"id": 2,
+			"options": {
+				"displayLabels": ["value"],
+				"legend": {
+					"displayMode": "table",
+					"placement": "bottom",
+					"showLegend": true,
+					"values": ["value", "percent"]
+				},
+				"pieType": "pie",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"pluginVersion": "8.2.3",
+			"targets": [
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"exemplar": true,
+					"expr": "sum by(action, controller, status) (ruby_http_requests_total{ controller=\"api/v1/accounts/conversations\" })",
+					"format": "time_series",
+					"instant": false,
+					"interval": "",
+					"legendFormat": "{{action}} {{ controller }} {{ status }}",
+					"refId": "A"
+				}
+			],
+			"title": "Conversation Endpoints Status Codes",
+			"transformations": [],
+			"type": "piechart"
+		},
+		{
+			"datasource": {
+				"type": "prometheus",
+				"uid": "prometheus"
+			},
+			"description": "Contacts endpoints and its status codes. More information at the Live Agent OpenAPI definitions",
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"viz": false
+						}
+					},
+					"mappings": []
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 13,
+				"w": 4,
+				"x": 12,
+				"y": 0
+			},
+			"id": 7,
+			"options": {
+				"displayLabels": ["value"],
+				"legend": {
+					"displayMode": "table",
+					"placement": "bottom",
+					"showLegend": true,
+					"values": ["value", "percent"]
+				},
+				"pieType": "pie",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"pluginVersion": "8.2.3",
+			"targets": [
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"exemplar": true,
+					"expr": "sum by(action, controller, status) (ruby_http_requests_total{ controller=\"api/v1/accounts/contacts\" })",
+					"format": "time_series",
+					"instant": false,
+					"interval": "",
+					"legendFormat": "{{action}} {{ controller }} {{ status }}",
+					"refId": "A"
+				}
+			],
+			"title": "Contacts Endpoint Status Codes",
+			"transformations": [],
+			"type": "piechart"
+		},
+		{
+			"datasource": {
+				"type": "prometheus",
+				"uid": "prometheus"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"viz": false
+						}
+					},
+					"mappings": []
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 13,
+				"w": 4,
+				"x": 16,
+				"y": 0
+			},
+			"id": 4,
+			"options": {
+				"displayLabels": ["value"],
+				"legend": {
+					"displayMode": "table",
+					"placement": "bottom",
+					"showLegend": true,
+					"values": ["value", "percent"]
+				},
+				"pieType": "pie",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"targets": [
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"exemplar": true,
+					"expr": "sum by(action, controller, status) (ruby_http_requests_total{ controller=\"api/v1/accounts/conversations/messages\" })",
+					"interval": "",
+					"legendFormat": "{{action}} {{controller}} {{status}}",
+					"range": true,
+					"refId": "A"
+				}
+			],
+			"title": "Messages  Endpoints Status Codes",
+			"transformations": [],
+			"type": "piechart"
+		},
+		{
+			"datasource": {
+				"type": "prometheus",
+				"uid": "prometheus"
+			},
+			"description": "Agent Bot that is created into Live Agent. This happens when the handover process happens",
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"viz": false
+						}
+					},
+					"mappings": []
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 6,
+				"w": 3,
+				"x": 20,
+				"y": 0
+			},
+			"id": 14,
+			"options": {
+				"displayLabels": ["value"],
+				"legend": {
+					"displayMode": "table",
+					"placement": "bottom",
+					"showLegend": true,
+					"values": ["value", "percent"]
+				},
+				"pieType": "pie",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"pluginVersion": "8.2.3",
+			"targets": [
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"exemplar": true,
+					"expr": "sum by(action, controller, status) (ruby_http_requests_total{ controller=\"platform/api/v1/agent_bots\" })",
+					"format": "time_series",
+					"instant": false,
+					"interval": "",
+					"legendFormat": "{{action}} {{ controller }} {{ status }}",
+					"refId": "A"
+				}
+			],
+			"title": "Agent Bot  Platform Endpoints Status Codes",
+			"transformations": [],
+			"type": "piechart"
+		},
+		{
+			"datasource": {
+				"type": "prometheus",
+				"uid": "prometheus"
+			},
+			"description": "Agent Bot that is created into Live Agent. This happens when the handover process happens",
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"viz": false
+						}
+					},
+					"mappings": []
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 7,
+				"w": 3,
+				"x": 20,
+				"y": 6
+			},
+			"id": 16,
+			"options": {
+				"displayLabels": ["value"],
+				"legend": {
+					"displayMode": "table",
+					"placement": "bottom",
+					"showLegend": true,
+					"values": ["value", "percent"]
+				},
+				"pieType": "pie",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"pluginVersion": "8.2.3",
+			"targets": [
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"exemplar": true,
+					"expr": "sum by(action, controller, status) (ruby_http_requests_total{ controller=\"api/v1/accounts/agent_bots\" })",
+					"format": "time_series",
+					"instant": false,
+					"interval": "",
+					"legendFormat": "{{action}} {{ controller }} {{ status }}",
+					"refId": "A"
+				}
+			],
+			"title": "Old Agent Bot Endpoints Status Codes",
+			"transformations": [],
+			"type": "piechart"
+		},
+		{
+			"datasource": {
+				"type": "prometheus",
+				"uid": "prometheus"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"axisCenteredZero": false,
+						"axisColorMode": "text",
+						"axisLabel": "Error Rate (%)",
+						"axisPlacement": "auto",
+						"barAlignment": 0,
+						"drawStyle": "line",
+						"fillOpacity": 10,
+						"gradientMode": "none",
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"viz": false
+						},
+						"lineInterpolation": "linear",
+						"lineWidth": 1,
+						"pointSize": 5,
+						"scaleDistribution": {
+							"type": "linear"
+						},
+						"showPoints": "never",
+						"spanNulls": false,
+						"stacking": {
+							"group": "A",
+							"mode": "none"
+						},
+						"thresholdsStyle": {
+							"mode": "off"
+						}
+					},
+					"mappings": [],
+					"max": 100,
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 15,
+				"w": 11,
+				"x": 0,
+				"y": 13
+			},
+			"id": 5,
+			"options": {
+				"legend": {
+					"calcs": ["sum"],
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"tooltip": {
+					"mode": "multi",
+					"sort": "none"
+				}
+			},
+			"pluginVersion": "9.2.3",
+			"targets": [
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"expr": "sum(rate(ruby_http_requests_total{controller=~\"api/v1/accounts/.*\", status!~\"200|304|404\"}[1m])) by (action, controller) / sum(rate(ruby_http_requests_total{controller=~\"api/v1/accounts/.*\"}[1m])) by (action, controller) * 100\n",
+					"legendFormat": "{{controller}}/{{action}}",
+					"range": true,
+					"refId": "A"
+				}
+			],
+			"title": "Error Rate By Endpoint",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+				"type": "prometheus",
+				"uid": "prometheus"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"axisCenteredZero": false,
+						"axisColorMode": "text",
+						"axisLabel": "Requests",
+						"axisPlacement": "auto",
+						"barAlignment": 0,
+						"drawStyle": "line",
+						"fillOpacity": 10,
+						"gradientMode": "none",
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"viz": false
+						},
+						"lineInterpolation": "linear",
+						"lineWidth": 1,
+						"pointSize": 5,
+						"scaleDistribution": {
+							"type": "linear"
+						},
+						"showPoints": "never",
+						"spanNulls": false,
+						"stacking": {
+							"group": "A",
+							"mode": "none"
+						},
+						"thresholdsStyle": {
+							"mode": "off"
+						}
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 18,
+				"w": 12,
+				"x": 11,
+				"y": 13
+			},
+			"id": 1,
+			"options": {
+				"legend": {
+					"calcs": ["sum"],
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"tooltip": {
+					"mode": "multi",
+					"sort": "none"
+				}
+			},
+			"pluginVersion": "9.2.3",
+			"targets": [
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"expr": "sum by (status, method, action, controller) (ruby_http_requests_total{controller=~\"api/v1/accounts/.*\"})",
+					"legendFormat": "{{method}} {{status}} {{controller}}/{{action}}",
+					"range": true,
+					"refId": "A"
+				}
+			],
+			"title": "HTTP Requests Count By Response Code",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+				"type": "prometheus",
+				"uid": "prometheus"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							}
+						]
+					}
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 10,
+				"w": 11,
+				"x": 0,
+				"y": 28
+			},
+			"id": 9,
+			"options": {
+				"colorMode": "value",
+				"graphMode": "area",
+				"justifyMode": "auto",
+				"orientation": "auto",
+				"reduceOptions": {
+					"calcs": ["lastNotNull"],
+					"fields": "",
+					"values": false
+				},
+				"textMode": "auto"
+			},
+			"pluginVersion": "9.2.3",
+			"targets": [
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"expr": "sum by (status) (ruby_http_requests_total)",
+					"legendFormat": "__auto",
+					"range": true,
+					"refId": "A"
+				}
+			],
+			"title": "Total Status Code",
+			"type": "stat"
+		},
+		{
+			"datasource": {
+				"type": "prometheus",
+				"uid": "prometheus"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"axisCenteredZero": false,
+						"axisColorMode": "text",
+						"axisLabel": "",
+						"axisPlacement": "auto",
+						"barAlignment": 0,
+						"drawStyle": "line",
+						"fillOpacity": 25,
+						"gradientMode": "none",
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"viz": false
+						},
+						"lineInterpolation": "linear",
+						"lineWidth": 1,
+						"pointSize": 5,
+						"scaleDistribution": {
+							"type": "linear"
+						},
+						"showPoints": "auto",
+						"spanNulls": false,
+						"stacking": {
+							"group": "A",
+							"mode": "normal"
+						},
+						"thresholdsStyle": {
+							"mode": "off"
+						}
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							}
+						]
+					}
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 23,
+				"w": 12,
+				"x": 11,
+				"y": 31
+			},
+			"id": 6,
+			"options": {
+				"legend": {
+					"calcs": ["sum"],
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"pluginVersion": "9.2.3",
+			"targets": [
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"expr": "ruby_http_request_duration_seconds{controller=~'api/v1/accounts.*', quantile='0.99'}",
+					"format": "time_series",
+					"legendFormat": "{{controller}}/{{action}} (99th percentile)",
+					"range": true,
+					"refId": "A"
+				},
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"expr": "ruby_http_request_duration_seconds{controller=~'api/v1/accounts.*', quantile='0.95'}",
+					"legendFormat": "{{controller}}/{{action}} (95th percentile)",
+					"range": true,
+					"refId": "B"
+				},
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"expr": "ruby_http_request_duration_seconds{controller=~'api/v1/accounts.*', quantile='0.5'}",
+					"legendFormat": "{{controller}}/{{action}} (50th percentile)",
+					"range": true,
+					"refId": "C"
+				}
+			],
+			"title": "Endpoint performance over time",
+			"type": "timeseries"
+		},
+		{
+			"columns": [
+				{
+					"sort": true,
+					"sortDesc": true,
+					"text": "Endpoint",
+					"type": "string"
+				},
+				{
+					"sort": true,
+					"sortDesc": true,
+					"text": "Requests",
+					"type": "number"
+				}
+			],
+			"datasource": "prometheus",
+			"fieldConfig": {
+				"defaults": {
+					"custom": {
+						"align": "auto",
+						"displayMode": "auto",
+						"inspect": false
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green"
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 12,
+				"w": 11,
+				"x": 0,
+				"y": 38
+			},
+			"id": 3,
+			"options": {
+				"footer": {
+					"fields": "",
+					"reducer": ["sum"],
+					"show": false
+				},
+				"showHeader": true
+			},
+			"pageSize": 10,
+			"pluginVersion": "9.2.3",
+			"targets": [
+				{
+					"expr": "sum by (action, controller) (rate(ruby_http_requests_total[1m]))",
+					"format": "table",
+					"refId": "A"
+				}
+			],
+			"title": "Top Endpoints By Request Count",
+			"type": "table"
+		},
+		{
+			"datasource": {
+				"type": "prometheus",
+				"uid": "prometheus"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"custom": {
+						"align": "auto",
+						"displayMode": "auto",
+						"inspect": false
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green"
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": [
+					{
+						"matcher": {
+							"id": "byName",
+							"options": "Value"
+						},
+						"properties": [
+							{
+								"id": "custom.width",
+								"value": 158
+							}
+						]
+					}
+				]
+			},
+			"gridPos": {
+				"h": 23,
+				"w": 11,
+				"x": 0,
+				"y": 50
+			},
+			"id": 10,
+			"options": {
+				"footer": {
+					"fields": "",
+					"reducer": ["sum"],
+					"show": false
+				},
+				"showHeader": true,
+				"sortBy": [
+					{
+						"desc": true,
+						"displayName": "Value"
+					}
+				]
+			},
+			"pluginVersion": "9.2.3",
+			"targets": [
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"expr": "topk(10, sum by (action, controller) (rate(ruby_http_request_duration_seconds_sum{controller=~\"api/v1/accounts/.*\"}[1m])) / sum by (action, controller) (rate(ruby_http_request_duration_seconds_count{controller=~\"api/v1/accounts/.*\"}[1m]))) \n",
+					"format": "table",
+					"legendFormat": "{{action}} {{controller}}",
+					"range": true,
+					"refId": "A"
+				}
+			],
+			"title": "Top Endpoints By Response Time",
+			"type": "table"
+		},
+		{
+			"datasource": {
+				"type": "prometheus",
+				"uid": "prometheus"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"axisCenteredZero": false,
+						"axisColorMode": "text",
+						"axisLabel": "",
+						"axisPlacement": "auto",
+						"barAlignment": 0,
+						"drawStyle": "line",
+						"fillOpacity": 0,
+						"gradientMode": "none",
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"viz": false
+						},
+						"lineInterpolation": "linear",
+						"lineWidth": 1,
+						"pointSize": 5,
+						"scaleDistribution": {
+							"type": "linear"
+						},
+						"showPoints": "auto",
+						"spanNulls": false,
+						"stacking": {
+							"group": "A",
+							"mode": "none"
+						},
+						"thresholdsStyle": {
+							"mode": "off"
+						}
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green"
+							}
+						]
+					}
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 19,
+				"w": 12,
+				"x": 11,
+				"y": 54
+			},
+			"id": 11,
+			"options": {
+				"legend": {
+					"calcs": [],
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"pluginVersion": "9.2.3",
+			"targets": [
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"exemplar": false,
+					"expr": "sum by (status) (rate(ruby_http_requests_total{status=~\"4..|5..\"}[1h]))",
+					"legendFormat": "{{status}}",
+					"range": true,
+					"refId": "A"
+				}
+			],
+			"title": "Error Requests Time Serie",
+			"type": "timeseries"
+		}
+	],
+	"schemaVersion": 37,
+	"style": "dark",
+	"tags": [],
+	"templating": {
+		"list": []
+	},
+	"time": {
+		"from": "now-6h",
+		"to": "now"
+	},
+	"timepicker": {},
+	"timezone": "",
+	"title": "Live Agent Overview",
+	"uid": "laov2",
+	"version": 3,
+	"weekStart": ""
 }

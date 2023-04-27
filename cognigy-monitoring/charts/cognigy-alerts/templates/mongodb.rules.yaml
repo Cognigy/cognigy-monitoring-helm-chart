@@ -34,13 +34,13 @@ spec:
 
     {{- if (.Values.rules.mongodb.mongodbReplicationLag.enabled ) }}
     - alert: MongodbReplicationLag
-      expr: mongodb_rs_members_optimeDate{member_state="PRIMARY"} - on (set) group_right mongodb_rs_members_optimeDate{member_state="SECONDARY"} > 10
+      expr: (mongodb_rs_members_optimeDate{member_state="PRIMARY", rs_state="1"} - on (pod) group_right mongodb_rs_members_optimeDate{member_state="SECONDARY", rs_state="1"})/1000 >  {{ $.Values.rules.mongodb.mongodbReplicationLag.threshold }}
       for: 5m
       labels:
         severity: warning
       annotations:
         summary: MongoDB replication lag (instance {{`{{`}} $labels.instance }})
-        description: "Mongodb replication lag is more than 10s\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+        description: "Mongodb replication lag is more than  {{ $.Values.rules.mongodb.mongodbReplicationLag.threshold }} sec\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
     {{- end }}
 
     {{- if (.Values.rules.mongodb.mongodbNumberCursorsOpen.enabled ) }}
