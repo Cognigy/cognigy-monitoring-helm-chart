@@ -1,5 +1,19 @@
 # Release Notes
 
+### 1.13.0
+
+**Released** May 26th, 2023
+
+#### Changes
+- made parameters for `cognigy.alert.k8s` configurable, see [values.yaml](cognigy-monitoring/charts/cognigy-alerts/values.yaml)
+for details
+- changed default severity of `kubeDeploymentReplicasMismatch`, `kubePodNotReady` and `kubeStatefulSetReplicasMismatch`
+to `warning`, use `severity` configuration parameter to override default setting
+- made `ServiceHandoverErrorsHigh` configurable, see [values.yaml](cognigy-monitoring/charts/cognigy-alerts/values.yaml) for details
+- introduced `xApps Metrics` dashboard
+- introduced `Weaviate` dashboards
+- introduced `Agent Assist Backend` and  `Agent Assist Frontend` dashboards
+
 ### 1.12.0
 
 **Released** April 27th, 2023

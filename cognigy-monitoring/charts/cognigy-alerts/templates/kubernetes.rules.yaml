@@ -67,6 +67,7 @@ spec:
 
   - name: cognigy.alert.k8s
     rules:
+    {{- if (.Values.rules.kubernetes.kubeDeploymentReplicasMismatch.enabled ) }}
     - alert: KubeDeploymentReplicasMismatch
       annotations:
         description: Deployment {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.deployment {{`}}`}} has not matched the expected number of replicas for longer than 15 minutes.
@@ -82,10 +83,12 @@ spec:
             ==
           0
         )
-      for: 15m
+      for: {{ .Values.rules.kubernetes.kubeDeploymentReplicasMismatch.timeout }}
       labels:
-        severity: critical
+        severity: {{ .Values.rules.kubernetes.kubeDeploymentReplicasMismatch.severity }}
+    {{- end }}
 
+    {{- if (.Values.rules.kubernetes.kubeStatefulSetReplicasMismatch.enabled ) }}
     - alert: KubeStatefulSetReplicasMismatch
       annotations:
         description: StatefulSet {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.statefulset {{`}}`}} has not matched the expected number of replicas for longer than 15 minutes.
@@ -101,9 +104,10 @@ spec:
             ==
           0
         )
-      for: 15m
+      for: {{ .Values.rules.kubernetes.kubeStatefulSetReplicasMismatch.timeout }}
       labels:
-        severity: critical
+        severity: {{ .Values.rules.kubernetes.kubeStatefulSetReplicasMismatch.severity }}
+    {{- end }}
 
     {{- if (.Values.rules.kubernetes.kubePodCrashLooping.enabled ) }}
     - alert: KubePodCrashLooping
@@ -134,9 +138,9 @@ spec:
             1, max by(namespace, pod, owner_kind) (kube_pod_owner{owner_kind!="Job"})
           )
         ) > 0
-      for: 15m
+      for: {{ .Values.rules.kubernetes.kubePodNotReady.timeout }}
       labels:
-        severity: critical
+        severity: {{ .Values.rules.kubernetes.kubePodNotReady.severity }}
     {{- end }}
 
     {{- if (.Values.rules.kubernetes.podManyRestarts.enabled ) }}
@@ -146,9 +150,9 @@ spec:
         summary: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} restarts too often.
         description: "Pod {{`{{`}} $labels.pod }} restarts in the last 60 minutes \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
         runbook_url: {{ .Values.runbookUrl }}alert-name-kubepodcrashlooping
-      for: 5m
+      for: {{ .Values.rules.kubernetes.podManyRestarts.timeout }}
       labels:
-        severity: warning
+        severity: {{ .Values.rules.kubernetes.podManyRestarts.severity }}
     {{- end }}
 
     {{- if (.Values.rules.kubernetes.containerOOMKilled.enabled ) }}
@@ -159,9 +163,9 @@ spec:
       annotations:
         summary: Container {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.container {{`}}`}} OOM Killed
         description: "Container {{`{{`}} $labels.container }} OOMKilled in namespace {{`{{`}} $labels.namespace {{`}}`}}\n LABELS = {{`{{`}} $labels }}"
-      for: 5m
+      for: {{ .Values.rules.kubernetes.containerOOMKilled.timeout }}
       labels:
-        severity: warning
+        severity: {{ .Values.rules.kubernetes.containerOOMKilled.severity }}
     {{- end }}
 
     {{- if (.Values.rules.kubernetes.cpuThrottlingBackendServiceHigh.enabled ) }}
@@ -175,9 +179,9 @@ spec:
           /
         sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace)
           > ( 25 / 100 )
-      for: 15m
+      for: {{ .Values.rules.kubernetes.cpuThrottlingBackendServiceHigh.timeout }}
       labels:
-        severity: warning
+        severity: {{ .Values.rules.kubernetes.cpuThrottlingBackendServiceHigh.severity }}
     {{- end }}
 
     {{- if (.Values.rules.kubernetes.hpaMaxReplicasReached.enabled ) }}
@@ -187,9 +191,9 @@ spec:
         summary: HPA {{`{{`}} $labels.horizontalpodautoscaler }} reached max replicas.
       expr: |-
         kube_horizontalpodautoscaler_spec_max_replicas{} - kube_horizontalpodautoscaler_status_current_replicas{} == 0
-      for: 15m
+      for: {{ .Values.rules.kubernetes.hpaMaxReplicasReached.timeout }}
       labels:
-        severity: warning
+        severity: {{ .Values.rules.kubernetes.hpaMaxReplicasReached.severity }}
     {{- end }}
 
 {{- end -}}

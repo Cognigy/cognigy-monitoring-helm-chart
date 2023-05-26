@@ -79,7 +79,7 @@ spec:
   - name: cognigy.alert.service-handover
     rules:
       - alert: ServiceHandoverErrorsHigh
-        expr: sum (increase(cognigy_ai_handover_error_amount[5m])) by (projectId) > 2
+        expr: sum (increase(cognigy_ai_handover_error_amount[5m])) by (projectId) >  {{ $.Values.rules.ai.serviceHandover.errorsThreshold }}
         for: 5m
         labels:
           severity: warning
