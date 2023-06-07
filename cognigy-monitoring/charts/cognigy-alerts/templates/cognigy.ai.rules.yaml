@@ -12,7 +12,7 @@ spec:
   - name: cognigy.alert.nlp-matcher
     rules:
       - alert: MatcherFindKeyphraseError
-        expr: cognigy_matcher_findkeyphrases_error > 0
+        expr: increase(cognigy_matcher_findkeyphrases_error[5m]) > 0
         for: 5m
         labels:
           severity: warning
@@ -52,10 +52,12 @@ spec:
     rules:
       - alert: EndpointMessageProcessingTimeIncreasing
         expr: >
-          100*((sum(rate(cognigy_endpoint_raw_messages_response_time_sum[15m]))/sum(rate(cognigy_endpoint_raw_messages_response_time_count[15m])))
+          (sum(rate(cognigy_endpoint_raw_messages_response_time_sum[180m]))/sum(rate(cognigy_endpoint_raw_messages_response_time_count[180m]))/1000 >
+          {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeBaseline }}) and
+          (100*((sum(rate(cognigy_endpoint_raw_messages_response_time_sum[15m]))/sum(rate(cognigy_endpoint_raw_messages_response_time_count[15m])))
           - (sum(rate(cognigy_endpoint_raw_messages_response_time_sum[180m]))/sum(rate(cognigy_endpoint_raw_messages_response_time_count[180m]))))/
           (sum(rate(cognigy_endpoint_raw_messages_response_time_sum[180m]))/sum(rate(cognigy_endpoint_raw_messages_response_time_count[180m]))) >
-          {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeIncreasingThreshold }}
+          {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeIncreasingThreshold }})
         for: 15m
         labels:
           severity: warning

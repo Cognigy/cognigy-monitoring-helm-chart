@@ -1,5 +1,14 @@
 # Release Notes
 
+### 1.13.1
+
+**Released** June 7th, 2023
+
+#### Bugfixes
+- fixed default timeout of `ContainerOOMKilled` alert
+- fixed `MatcherFindKeyphraseError` alert
+- fixed `EndpointMessageProcessingTimeIncreasing` alert logic with `messageProcessingTimeBaseline` parameter
+
 ### 1.13.0
 
 **Released** May 26th, 2023
