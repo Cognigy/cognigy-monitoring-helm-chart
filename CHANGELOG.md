@@ -1,5 +1,20 @@
 # Release Notes
 
+### 1.14.0
+
+**Released** July 17th, 2023
+
+#### Changes
+- introduced `Kubernetes Cluster Autoscaler (AWS)` dashboard
+- made parameters for `RedisBlockedClients` alert configurable
+- added SMTP metrics to `Service-AI` dashboard
+- introduced Prometheus `podMonitor` for Flux CD
+
+#### Bugfixes
+- fixed various dashboards for NLP V2
+- fixed `VG Overview` dashboard
+- fixed `Agent Assist Backend` dashboard
+
 ### 1.13.1
 
 **Released** June 7th, 2023

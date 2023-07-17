@@ -55,4 +55,39 @@ spec:
           summary: feature-server had errors sending analytics data to insights (instance {{`{{`}} $labels.instance }})
           description: "feature-server had errors sending analytics data to insights: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"      
     {{- end }}
+    
+    # billing-app rules
+    {{- if (.Values.rules.vg.billingApp.enabled ) }}
+    - name: cognigy.vg.alert.billing-app
+      rules:
+      - alert: UncaughtErrorsBillingApp
+        expr: sum(increase(vg_billing_app_uncaught_error_total[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: billing-app had uncaught errors on (instance {{`{{`}} $labels.instance }})
+          description: "billing-app had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+
+      - alert: UpdateCallHistoryErrors
+        expr: vg_billing_app_update_call_history_error_total > 0
+        for: 0m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: billing-app had errors when update call history on (instance {{`{{`}} $labels.instance }})
+          description: "billing-app had errors when update call history: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      
+      - alert: RouteUpdateCallHistoryErrors
+        expr: vg_billing_app_route_update_call_history_error_total > 0
+        for: 0m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: billing-app had errors in route of update call history on (instance {{`{{`}} $labels.instance }})
+          description: "billing-app had errors in route of update call history: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
 {{- end -}}

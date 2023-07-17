@@ -1,0 +1,32 @@
+{{- if .Values.monitors.fluxcd.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ .Release.Name }}-flux-system
+  labels:
+    app.kubernetes.io/part-of: flux
+    app.kubernetes.io/component: monitoring
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  namespaceSelector:
+    matchNames:
+      - "{{ .Values.monitors.fluxcd.namespace }}"
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - helm-controller
+          - source-controller
+          - kustomize-controller
+          - notification-controller
+          - image-automation-controller
+          - image-reflector-controller
+  podMetricsEndpoints:
+    - port: http-prom
+      relabelings:
+        # https://github.com/prometheus-operator/prometheus-operator/issues/4816
+        - sourceLabels: [__meta_kubernetes_pod_phase]
+          action: keep
+          regex: Running
+{{- end -}}

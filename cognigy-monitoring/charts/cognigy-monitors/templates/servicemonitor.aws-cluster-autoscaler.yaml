@@ -1,0 +1,18 @@
+{{- if .Values.monitors.awsClusterAutoscaler.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-aws-cluster-autoscaler-servicemonitor
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aws-cluster-autoscaler
+  namespaceSelector:
+    matchNames:
+      - "{{ .Values.monitors.awsClusterAutoscaler.namespace }}"
+  endpoints:
+    - path: /metrics
+      port: http
+{{- end -}}

@@ -30,8 +30,9 @@ spec:
         description: |
           Redis instance {{ "{{ $labels.instance }}" }} is using {{ "{{ $value }}" }}% of its available memory
 
+    {{- if (.Values.rules.redis.redisBlockedClients.enabled ) }}
     - alert: RedisBlockedClients
-      expr: increase(redis_blocked_clients[5m]) > 0
+      expr: increase(redis_blocked_clients[5m]) > {{ $.Values.rules.redis.redisBlockedClients.threshold }}
       for: 5m
       labels:
         severity: warning
@@ -39,6 +40,7 @@ spec:
         summary: Redis instance {{ "{{ $labels.instance }}" }} has blocked clients
         description: |
           Redis instance {{ "{{ $labels.instance }}" }} has blocked {{ "{{ $value }}" }} clients
+    {{- end }}
 
     - alert: RedisContainerRestarted
       expr: increase(kube_pod_container_status_restarts_total{container="redis"}[5m]) > 0
