@@ -158,11 +158,12 @@ spec:
     {{- if (.Values.rules.kubernetes.containerOOMKilled.enabled ) }}
     - alert: ContainerOOMKilled
       expr: |-
-        (sum (kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}) by (container)) -
-        (sum (kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} offset 5m) by (container)) > 0
+        (sum by (pod) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled"})) > 0
+        UNLESS ((sum by (pod) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled"})) -
+        (sum by (pod) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} offset 10m)) == 0)
       annotations:
-        summary: Container {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.container {{`}}`}} OOM Killed
-        description: "Container {{`{{`}} $labels.container }} OOMKilled in namespace {{`{{`}} $labels.namespace {{`}}`}}\n LABELS = {{`{{`}} $labels }}"
+        summary: Container {{`{{`}} $labels.pod {{`}}`}}/{{`{{`}} $labels.container {{`}}`}} OOM Killed
+        description: "Container {{`{{`}} $labels.container }} OOMKilled in pod {{`{{`}} $labels.pod {{`}}`}}\n LABELS = {{`{{`}} $labels }}"
       for: {{ .Values.rules.kubernetes.containerOOMKilled.timeout }}
       labels:
         severity: {{ .Values.rules.kubernetes.containerOOMKilled.severity }}

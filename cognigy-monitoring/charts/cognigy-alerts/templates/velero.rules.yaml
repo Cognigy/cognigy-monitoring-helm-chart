@@ -1,0 +1,32 @@
+{{- $targetNamespace := .Values.appNamespacesTarget }}
+{{- if .Values.rules.velero.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-cognigy-velero-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+  - name: cognigy.alert.velero
+    rules:
+    - alert: VeleroBackupFailed
+      expr:  velero_backup_failure_total > 0
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: Velero backup has failed (instance {{`{{`}} $labels.instance }})
+        description: "Velero backup has failed\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+
+    - alert: Velero backup absent
+      expr: absent(velero_backup_success_total)
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: Velero backup absent (instance {{`{{`}} $labels.instance }})
+        description: "Velero service backup absent  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+
+{{- end -}}
+

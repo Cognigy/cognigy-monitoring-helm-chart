@@ -1,0 +1,24 @@
+{{- $targetNamespace := .Values.appNamespacesTarget }}
+{{- if .Values.rules.insights.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-cognigy-insights-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+    {{- if (.Values.rules.insights.analyticsCollector.enabled ) }}
+    - name: cognigy.insights.alert.analytics-collector
+      rules:
+      - alert: ProcessedVsStoredMismatch
+        expr: sum(increase(cognigy_analytics_collector_processed_analytics_records_total[5m])) - sum(increase(cognigy_analytics_collector_stored_analytics_records_total[5m])) > {{ $.Values.rules.insights.analyticsCollector.processedVsStored.threshold }}
+        for: 10m
+        labels:
+          severity: warning
+          group: insights-custom-alert-rules
+        annotations:
+          summary: analytics collector was unable to store all processed records (instance {{`{{`}} $labels.instance }})
+          description: "Mismatch in processed vs stored: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+{{- end -}}

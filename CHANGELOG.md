@@ -1,5 +1,25 @@
 # Release Notes
 
+### 1.15.0
+
+**Released** September 7th, 2023
+
+#### Changes
+- enabled filtering on namespaces and pod names on `Redis Instances Overview` dashboard
+- added dynamic organisation and project tables on `Agents Overview v2` dashboard
+- added `Live Agent OData Overview` dashboard
+- added `Knowledge AI search` metrics to `Agents Overview v2` dashboard
+- added `Agent Assist Genesys Notifications Forwarder` dashboard
+- added alerts for Insights services
+- added several VG dashboards
+- added optional `Kubecost Global` dashboard
+- added optional dashboard and alerts for Velero
+
+#### Bugfixes
+- Fixed `containerOOMKilled` logic to catch the first occurrence 
+- Fixed Timezone `defaultDashboardsTimezone` on dashboards
+- Fixed VG dashboards names
+
 ### 1.14.0
 
 **Released** July 17th, 2023
