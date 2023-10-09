@@ -1,0 +1,21 @@
+---
+{{- if .Values.monitors.postgresHa.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ .Release.Name }}-services-postgres-ha
+  labels:
+    {{- include "cognigy-monitoring.labels" . | nindent 4 }}
+spec:
+  namespaceSelector:
+    matchNames:
+      - "{{ .Values.monitors.postgresHa.namespace }}"
+  podMetricsEndpoints:
+   - port: exporter
+     interval: 15s
+     scrapeTimeout: 10s
+  selector:
+    matchLabels:
+      application: spilo
+{{- end }}
+

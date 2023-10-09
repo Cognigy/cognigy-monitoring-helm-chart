@@ -1,0 +1,22 @@
+
+---
+{{- if .Values.monitors.postgresHaPatroni.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ .Release.Name }}-services-postgres-ha-patroni
+  labels:
+    {{- include "cognigy-monitoring.labels" . | nindent 4 }}
+spec:
+  namespaceSelector:
+    matchNames:
+      - "{{ .Values.monitors.postgresHaPatroni.namespace }}"
+  podMetricsEndpoints:
+   - targetPort: 8008
+     interval: 15s
+     scrapeTimeout: 10s
+     path: /metrics
+  selector:
+    matchLabels:
+      application: spilo
+{{- end }}

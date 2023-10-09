@@ -1,5 +1,18 @@
 # Release Notes
 
+### 1.16.0
+
+**Released** October 6th, 2023
+
+#### Changes
+- added `IDE NFS Status` dashboard
+- added `Cluster Upgrades` dashboard
+- added pod monitor for postgres-ha setup
+- added new metrics to `Agent Assist Genesys Notifications Forwarder` dashboard
+
+#### Bugfixes
+- fixed `Kubecost Global` dashboard
+
 ### 1.15.0
 
 **Released** September 7th, 2023
@@ -16,9 +29,9 @@
 - added optional dashboard and alerts for Velero
 
 #### Bugfixes
-- Fixed `containerOOMKilled` logic to catch the first occurrence 
-- Fixed Timezone `defaultDashboardsTimezone` on dashboards
-- Fixed VG dashboards names
+- fixed `containerOOMKilled` logic to catch the first occurrence 
+- fixed Timezone `defaultDashboardsTimezone` on dashboards
+- fixed VG dashboards names
 
 ### 1.14.0
 
