@@ -1,5 +1,18 @@
 # Release Notes
 
+### 1.17.0
+
+**Released** October 16th, 2023
+
+#### Changes
+- added Postgres alert rules
+
+#### Bugfixes
+- fixed `RedisBlockedClients` alert to avoid false positives
+- fixed `CPUThrottlingBackendServiceHigh` to avoid false positives from `metrics` container
+- fixed `PostgreSQL Patroni` dashboard
+- fixed `kube-state-metrics` compatibility with Kubernetes v1.26
+
 ### 1.16.0
 
 **Released** October 6th, 2023

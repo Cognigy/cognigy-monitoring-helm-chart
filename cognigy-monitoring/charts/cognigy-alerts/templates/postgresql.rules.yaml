@@ -1,0 +1,89 @@
+{{- $targetNamespace := .Values.appNamespacesTarget }}
+{{- if .Values.rules.postgresql.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-cognigy-postgresql-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+  - name: cognigy.alert.postgresql
+    rules:
+      - alert: PostgresqlDown
+        expr: pg_up == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: Postgresql down (instance {{`{{`}} $labels.instance }})
+          description: "Postgresql instance is down\n  VALUE = {{`{{`}} $value }}\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+
+      {{- if (.Values.rules.postgresql.tooManyConnections.enabled ) }}
+      - alert: PostgresqlTooManyConnections
+        expr: sum by (instance, pod, namespace) (pg_stat_activity_count) > min by (instance, pod, namespace) (pg_settings_max_connections * {{ $.Values.rules.postgresql.tooManyConnections.threshold }}/100 )
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Postgresql too many connections (instance {{`{{`}} $labels.instance }})
+          description: "PostgreSQL instance has too many connections ({{ $.Values.rules.postgresql.tooManyConnections.threshold }} > %).\n  VALUE = {{`{{`}} $value }}\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{- if (.Values.rules.postgresql.highRollbackRate.enabled ) }}
+      - alert: PostgresqlHighRollbackRate
+        expr: sum by (namespace, datname) ((rate(pg_stat_database_xact_rollback{datname!~"template.*|postgres",datid!="0"}[3m])) / ((rate(pg_stat_database_xact_rollback{datname!~"template.*|postgres",datid!="0"}[3m])) +
+                (rate(pg_stat_database_xact_commit{datname!~"template.*|postgres",datid!="0"}[3m])))) >
+                 {{ $.Values.rules.postgresql.highRollbackRate.threshold }}/100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Postgresql high rollback rate (instance {{`{{`}} $labels.instance }})
+          description: "Ratio of transactions being aborted compared to committed is > {{ $.Values.rules.postgresql.highRollbackRate.threshold }} %\n  VALUE = {{`{{`}} $value }}\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{- if (.Values.rules.postgresql.deadLocks.enabled ) }}
+      - alert: PostgresqlDeadLocks
+        expr: increase(pg_stat_database_deadlocks{datname!~"template.*|postgres"}[1m]) > {{ $.Values.rules.postgresql.deadLocks.threshold }}
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Postgresql dead locks (instance {{`{{`}} $labels.instance }})
+          description: "PostgreSQL has dead-locks\n  VALUE = {{`{{`}} $value }}\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{- if (.Values.rules.postgresql.unusedReplicationSlot.enabled ) }}
+      - alert: PostgresqlUnusedReplicationSlot
+        expr: pg_replication_slots_active == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Postgresql unused replication slot (instance {{`{{`}} $labels.instance }})
+          description: "Unused Replication Slots\n  VALUE = {{`{{`}} $value }}\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+    {{- if (.Values.rules.postgresql.patroni.enabled ) }}
+      {{- if (.Values.rules.postgresql.patroni.replicationLag.enabled ) }}
+      - alert: PostgresPatroniReplicationLag
+        expr: (patroni_xlog_replayed_location{} - patroni_xlog_received_location{}) > {{ $.Values.rules.postgresql.patroni.replicationLag.threshold }}
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Postgres Patroni replication lag (instance {{`{{`}} $labels.instance }})
+          description: "Postgres Patroni replication lag is more than  {{ $.Values.rules.postgresql.patroni.replicationLag.threshold }} sec\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+
+      - alert: PatroniHasNoLeader
+        expr: (max by (scope) (patroni_master) < 1) and (max by (scope) (patroni_standby_leader) < 1)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Patroni has no Leader (instance {{`{{`}} $labels.instance }})
+          description: "A leader node (neither primary nor standby) cannot be found inside the cluster\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+    {{- end }}
+{{- end -}}
