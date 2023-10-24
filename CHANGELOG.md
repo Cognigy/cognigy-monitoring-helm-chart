@@ -1,5 +1,15 @@
 # Release Notes
 
+### 1.17.1
+
+**Released** October 24th, 2023
+
+#### Bugfixes
+- fixed `Live Agent Overview` dashboard
+- fixed `PostgreSQL Overview` dashboard
+- fixed `LiveAgentHighHttpErrorRate` alert rule
+- fixed `CPUThrottlingBackendServiceHigh` to catch LA PostgreSQL alerts
+
 ### 1.17.0
 
 **Released** October 16th, 2023

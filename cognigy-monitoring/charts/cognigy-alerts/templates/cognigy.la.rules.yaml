@@ -1,0 +1,26 @@
+{{- $targetNamespace := .Values.appNamespacesTarget }}
+{{- if .Values.rules.la.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-cognigy-la-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+    {{- if (.Values.rules.la.HighHttpErrorRate.enabled ) }}
+    - name: cognigy.la.alert.HighHttpErrorRate
+      rules:
+      - alert: LiveAgentHighHttpErrorRate
+        expr: 100 * (sum(rate(ruby_http_requests_total{controller=~"api/v1/accounts/.*", status!~"2..|3..|404"}[1m])) by (action, controller, status)) /
+              (sum(rate(ruby_http_requests_total{controller=~"api/v1/accounts/.*"}[1m])) by (action, controller, status))
+              > {{ $.Values.rules.la.HighHttpErrorRate.threshold }}
+        for: 5m
+        labels:
+          severity: warning
+          group: la-custom-alert-rules
+        annotations:
+          summary: LiveAgent HTTP error rate is high (instance {{`{{`}} $labels.instance }})
+          description: "LiveAgent HTTP error rate is above {{ $.Values.rules.la.HighHttpErrorRate.threshold }}%\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+{{- end -}}
