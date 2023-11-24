@@ -25,7 +25,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 98,
+  "id": 103,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -82,6 +82,7 @@
         "y": 0
       },
       "id": 29,
+      "interval": "1h",
       "options": {
         "footer": {
           "enablePagination": false,
@@ -132,6 +133,7 @@
           "format": "table",
           "hide": false,
           "instant": false,
+          "interval": "1h",
           "legendFormat": "RAM",
           "range": true,
           "refId": "B"
@@ -145,6 +147,7 @@
           "expr": "sum by (cluster) ( (avg(pv_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) by (persistentvolume,cluster,cloud) * 730 * avg(kube_persistentvolume_capacity_bytes{cloud=~\"$cloud\", cluster=~\"$cluster\"}) by (persistentvolume,cluster,cloud) / 1024 / 1024 / 1024 ))\n+\nsum by (cluster) (node_filesystem_size_bytes{cloud=~\"$cloud\", cluster=~\"$cluster\", job=\"node-exporter\", fstype!=\"\", fstype!=\"tmpfs\", fstype!=\"nfs4\"}) /1024 /1024 /1024 * $localStorageGBCost",
           "format": "table",
           "hide": false,
+          "interval": "1h",
           "legendFormat": "Storage",
           "range": true,
           "refId": "C"
@@ -158,6 +161,7 @@
           "expr": "kubernetes_build_info{cloud=~\"$cloud\", cluster=~\"$cluster\"}",
           "format": "table",
           "hide": false,
+          "interval": "1h",
           "legendFormat": "Version",
           "range": true,
           "refId": "D"
@@ -310,7 +314,7 @@
       },
       "hiddenSeries": false,
       "id": 22,
-      "interval": "1m",
+      "interval": "30m",
       "legend": {
         "avg": false,
         "current": false,
@@ -345,6 +349,7 @@
           "editorMode": "code",
           "expr": "sum by (cluster) ((avg by (node,cluster,cloud) (kube_node_status_capacity{resource=\"cpu\", unit=\"core\", cloud=~\"$cloud\", cluster=~\"$cluster\"}) * avg by (node,cluster,cloud) ((node_cpu_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) * 730)) + (avg by (node,cluster,cloud) (node_gpu_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) * 730))\n+\nsum by (cluster) ((avg by (node,cluster,cloud) (kube_node_status_capacity{resource=\"memory\", unit=\"byte\",cloud=~\"$cloud\" , cluster=~\"$cluster\"})/1024/1024/1024* avg by (node,cluster,cloud) ((node_ram_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) * 730)))\n+\nsum by (cluster) ( (avg(pv_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) by (persistentvolume,cluster,cloud) * 730 * avg(kube_persistentvolume_capacity_bytes{cloud=~\"$cloud\", cluster=~\"$cluster\"}) by (persistentvolume,cluster,cloud) / 1024 / 1024 / 1024 ))\n+\nsum by (cluster) (node_filesystem_size_bytes{cloud=~\"$cloud\", cluster=~\"$cluster\", job=\"node-exporter\", fstype!=\"\", fstype!=\"tmpfs\", fstype!=\"nfs4\"}) /1024 /1024 /1024 * $localStorageGBCost",
           "format": "time_series",
+          "interval": "",
           "intervalFactor": 1,
           "legendFormat": "{{ cluster }}",
           "range": true,
@@ -391,6 +396,99 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
+      "description": "Total Costs per Cloud Provider",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 18,
+        "w": 24,
+        "x": 0,
+        "y": 31
+      },
+      "hiddenSeries": false,
+      "id": 31,
+      "interval": "24h",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "9.2.3",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum by (cloud) ((avg by (node,cluster,cloud) (kube_node_status_capacity{resource=\"cpu\", unit=\"core\", cloud=~\"$cloud\", cluster=~\"$cluster\"}) * avg by (node,cluster,cloud) ((node_cpu_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) * 730)) + (avg by (node,cluster,cloud) (node_gpu_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) * 730))\n+\nsum by (cloud) ((avg by (node,cluster,cloud) (kube_node_status_capacity{resource=\"memory\", unit=\"byte\",cloud=~\"$cloud\" , cluster=~\"$cluster\"})/1024/1024/1024* avg by (node,cluster,cloud) ((node_ram_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) * 730)))\n+\nsum by (cloud) ((avg(pv_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) by (persistentvolume,cluster,cloud) * 730 * avg(kube_persistentvolume_capacity_bytes{cloud=~\"$cloud\", cluster=~\"$cluster\"}) by (persistentvolume,cluster,cloud) / 1024 / 1024 / 1024 ))\n+\nsum by (cloud) (node_filesystem_size_bytes{cloud=~\"$cloud\", cluster=~\"$cluster\", job=\"node-exporter\", fstype!=\"\", fstype!=\"tmpfs\", fstype!=\"nfs4\"}) /1024 /1024 /1024 * $localStorageGBCost",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "{{ cluster }}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "Total Daily Cloud Costs",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "currencyUSD",
+          "logBase": 1,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
       "description": "Monthly run rate of CPU + GPU costs",
       "fill": 1,
       "fillGradient": 0,
@@ -398,11 +496,11 @@
         "h": 17,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 49
       },
       "hiddenSeries": false,
       "id": 6,
-      "interval": "1m",
+      "interval": "30m",
       "legend": {
         "avg": false,
         "current": false,
@@ -492,11 +590,11 @@
         "h": 18,
         "w": 12,
         "x": 0,
-        "y": 48
+        "y": 66
       },
       "hiddenSeries": false,
       "id": 9,
-      "interval": "1m",
+      "interval": "30m",
       "legend": {
         "avg": false,
         "current": false,
@@ -586,11 +684,11 @@
         "h": 18,
         "w": 12,
         "x": 12,
-        "y": 48
+        "y": 66
       },
       "hiddenSeries": false,
       "id": 30,
-      "interval": "1m",
+      "interval": "30m",
       "legend": {
         "avg": false,
         "current": false,

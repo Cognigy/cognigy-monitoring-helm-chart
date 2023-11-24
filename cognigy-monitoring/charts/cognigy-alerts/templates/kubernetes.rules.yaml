@@ -145,10 +145,11 @@ spec:
 
     {{- if (.Values.rules.kubernetes.podManyRestarts.enabled ) }}
     - alert: PodManyRestarts
-      expr: increase(kube_pod_container_status_restarts_total[60m]) > 3
+      expr: (increase(kube_pod_container_status_restarts_total[60m]) > {{.Values.rules.kubernetes.podManyRestarts.restartsPerHour}})
+            or (kube_pod_container_status_restarts_total > {{.Values.rules.kubernetes.podManyRestarts.restartsTotal}})
       annotations:
         summary: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} restarts too often.
-        description: "Pod {{`{{`}} $labels.pod }} restarts in the last 60 minutes \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+        description: "Pod {{`{{`}} $labels.pod }} restarts \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
         runbook_url: {{ .Values.runbookUrl }}alert-name-kubepodcrashlooping
       for: {{ .Values.rules.kubernetes.podManyRestarts.timeout }}
       labels:

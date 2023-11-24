@@ -6,7 +6,7 @@ This chart installs Cognigy Monitoring Stack which is based on [kube-prometheus-
 ## Prerequisites
 - Kubernetes cluster running one or more of [Cognigy Products](https://github.com/orgs/Cognigy/repositories) 
 - A Linux machine which has the access to the K8S cluster via kubectl
-- [Helm](https://helm.sh/) v.3.8.0+
+- [Helm](https://helm.sh/) v.3.10-v.3.12
 
 
 ## Installation

@@ -1,5 +1,18 @@
 # Release Notes
 
+### 1.18.0
+
+**Released** November 24th, 2023
+
+#### Changes
+- added `Cluster Resources - Nodegroups` dashboard
+
+#### Bugfixes
+- fixed `PodManyRestarts` alert logic
+- fixed `Redis Instances Overview` dashboard
+- improved performance of queries in `Kubecost Global` dashboard
+- fixed `Agent Assist Backend` dashboard
+
 ### 1.17.1
 
 **Released** October 24th, 2023
