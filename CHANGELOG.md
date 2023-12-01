@@ -1,5 +1,12 @@
 # Release Notes
 
+### 1.18.1
+
+**Released** December 1st, 2023
+
+#### Bugfixes
+- fixed Kubernetes versions compatibility
+
 ### 1.18.0
 
 **Released** November 24th, 2023
