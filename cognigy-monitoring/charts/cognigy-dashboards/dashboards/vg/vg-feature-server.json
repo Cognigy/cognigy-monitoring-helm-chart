@@ -24,7 +24,7 @@
 	"editable": true,
 	"fiscalYearStartMonth": 0,
 	"graphTooltip": 0,
-	"id": 35,
+	"id": 54,
 	"links": [],
 	"liveNow": false,
 	"panels": [
@@ -128,6 +128,18 @@
 			"legendFormat": "Analytics Process Command Errors",
 			"range": true,
 			"refId": "Analytics Process Command Errors"
+		  },
+		  {
+			"datasource": {
+			  "type": "prometheus",
+			  "uid": "prometheus"
+			},
+			"editorMode": "code",
+			"expr": "round(sum(increase(vg_feature_server_unhandled_rejection_total[24h])))",
+			"hide": false,
+			"legendFormat": "Unhandled Rejections",
+			"range": true,
+			"refId": "A"
 		  }
 		],
 		"title": "Feature Server Errors 24h",
@@ -247,6 +259,103 @@
 		  "type": "prometheus",
 		  "uid": "prometheus"
 		},
+		"fieldConfig": {
+		  "defaults": {
+			"color": {
+			  "fixedColor": "red",
+			  "mode": "fixed"
+			},
+			"custom": {
+			  "axisCenteredZero": false,
+			  "axisColorMode": "text",
+			  "axisLabel": "",
+			  "axisPlacement": "auto",
+			  "barAlignment": 0,
+			  "drawStyle": "line",
+			  "fillOpacity": 0,
+			  "gradientMode": "none",
+			  "hideFrom": {
+				"legend": false,
+				"tooltip": false,
+				"viz": false
+			  },
+			  "lineInterpolation": "linear",
+			  "lineStyle": {
+				"fill": "solid"
+			  },
+			  "lineWidth": 1,
+			  "pointSize": 5,
+			  "scaleDistribution": {
+				"type": "linear"
+			  },
+			  "showPoints": "never",
+			  "spanNulls": true,
+			  "stacking": {
+				"group": "A",
+				"mode": "none"
+			  },
+			  "thresholdsStyle": {
+				"mode": "off"
+			  }
+			},
+			"mappings": [],
+			"thresholds": {
+			  "mode": "absolute",
+			  "steps": [
+				{
+				  "color": "green",
+				  "value": null
+				},
+				{
+				  "color": "red",
+				  "value": 80
+				}
+			  ]
+			}
+		  },
+		  "overrides": []
+		},
+		"gridPos": {
+		  "h": 6,
+		  "w": 8,
+		  "x": 8,
+		  "y": 7
+		},
+		"id": 36,
+		"options": {
+		  "legend": {
+			"calcs": [],
+			"displayMode": "list",
+			"placement": "bottom",
+			"showLegend": true
+		  },
+		  "tooltip": {
+			"mode": "single",
+			"sort": "none"
+		  }
+		},
+		"targets": [
+		  {
+			"datasource": {
+			  "type": "prometheus",
+			  "uid": "prometheus"
+			},
+			"editorMode": "code",
+			"expr": "sum(rate(vg_feature_server_unhandled_rejection_total[1m]))",
+			"interval": "",
+			"legendFormat": "Unhandled Rejections",
+			"range": true,
+			"refId": "A"
+		  }
+		],
+		"title": "Unhandled Rejections",
+		"type": "timeseries"
+	  },
+	  {
+		"datasource": {
+		  "type": "prometheus",
+		  "uid": "prometheus"
+		},
 		"description": "Errors while transferring a call via sip:refer or dial\nEach status code received > 400 is counted as error",
 		"fieldConfig": {
 		  "defaults": {
@@ -304,7 +413,7 @@
 		"gridPos": {
 		  "h": 6,
 		  "w": 8,
-		  "x": 8,
+		  "x": 16,
 		  "y": 7
 		},
 		"id": 22,
@@ -415,143 +524,10 @@
 		"type": "stat"
 	  },
 	  {
-		"collapsed": false,
-		"gridPos": {
-		  "h": 1,
-		  "w": 24,
-		  "x": 0,
-		  "y": 19
-		},
-		"id": 26,
-		"panels": [],
-		"title": "Analytics Data",
-		"type": "row"
-	  },
-	  {
 		"datasource": {
 		  "type": "prometheus",
 		  "uid": "prometheus"
 		},
-		"description": "Error while schema validation of analytics data",
-		"fieldConfig": {
-		  "defaults": {
-			"color": {
-			  "fixedColor": "red",
-			  "mode": "fixed"
-			},
-			"custom": {
-			  "axisCenteredZero": false,
-			  "axisColorMode": "text",
-			  "axisLabel": "",
-			  "axisPlacement": "auto",
-			  "barAlignment": 0,
-			  "drawStyle": "line",
-			  "fillOpacity": 0,
-			  "gradientMode": "none",
-			  "hideFrom": {
-				"legend": false,
-				"tooltip": false,
-				"viz": false
-			  },
-			  "lineInterpolation": "linear",
-			  "lineWidth": 1,
-			  "pointSize": 5,
-			  "scaleDistribution": {
-				"type": "linear"
-			  },
-			  "showPoints": "never",
-			  "spanNulls": false,
-			  "stacking": {
-				"group": "A",
-				"mode": "none"
-			  },
-			  "thresholdsStyle": {
-				"mode": "off"
-			  }
-			},
-			"mappings": [],
-			"thresholds": {
-			  "mode": "absolute",
-			  "steps": [
-				{
-				  "color": "green",
-				  "value": null
-				},
-				{
-				  "color": "red",
-				  "value": 80
-				}
-			  ]
-			}
-		  },
-		  "overrides": [
-			{
-			  "__systemRef": "hideSeriesFrom",
-			  "matcher": {
-				"id": "byNames",
-				"options": {
-				  "mode": "exclude",
-				  "names": [
-					"sum(rate(vg_feature_server_analytics_schema_error_total{container=\"feature-server\"}[5m]))"
-				  ],
-				  "prefix": "All except:",
-				  "readOnly": true
-				}
-			  },
-			  "properties": [
-				{
-				  "id": "custom.hideFrom",
-				  "value": {
-					"legend": false,
-					"tooltip": false,
-					"viz": true
-				  }
-				}
-			  ]
-			}
-		  ]
-		},
-		"gridPos": {
-		  "h": 6,
-		  "w": 8,
-		  "x": 0,
-		  "y": 20
-		},
-		"id": 24,
-		"options": {
-		  "legend": {
-			"calcs": [],
-			"displayMode": "list",
-			"placement": "bottom",
-			"showLegend": true
-		  },
-		  "tooltip": {
-			"mode": "single",
-			"sort": "none"
-		  }
-		},
-		"targets": [
-		  {
-			"datasource": {
-			  "type": "prometheus",
-			  "uid": "prometheus"
-			},
-			"editorMode": "code",
-			"expr": "sum(rate(vg_feature_server_analytics_schema_error_total{container=\"feature-server\"}[5m]))",
-			"legendFormat": "__auto",
-			"range": true,
-			"refId": "A"
-		  }
-		],
-		"title": "Analytics Schema Validation Errors",
-		"type": "timeseries"
-	  },
-	  {
-		"datasource": {
-		  "type": "prometheus",
-		  "uid": "prometheus"
-		},
-		"description": "Counts the total number of errors occured when submitting the data to Insights",
 		"fieldConfig": {
 		  "defaults": {
 			"color": {
@@ -560,18 +536,22 @@
 			"custom": {
 			  "axisCenteredZero": false,
 			  "axisColorMode": "text",
-			  "axisLabel": "",
+			  "axisGridShow": false,
+			  "axisLabel": "Calls",
 			  "axisPlacement": "auto",
 			  "barAlignment": 0,
 			  "drawStyle": "line",
-			  "fillOpacity": 0,
+			  "fillOpacity": 10,
 			  "gradientMode": "none",
 			  "hideFrom": {
 				"legend": false,
 				"tooltip": false,
 				"viz": false
 			  },
-			  "lineInterpolation": "linear",
+			  "lineInterpolation": "smooth",
+			  "lineStyle": {
+				"fill": "solid"
+			  },
 			  "lineWidth": 1,
 			  "pointSize": 5,
 			  "scaleDistribution": {
@@ -600,17 +580,18 @@
 				  "value": 80
 				}
 			  ]
-			}
+			},
+			"unit": "none"
 		  },
 		  "overrides": []
 		},
 		"gridPos": {
-		  "h": 6,
+		  "h": 5,
 		  "w": 8,
 		  "x": 8,
-		  "y": 20
+		  "y": 14
 		},
-		"id": 4,
+		"id": 38,
 		"options": {
 		  "legend": {
 			"calcs": [],
@@ -622,270 +603,6 @@
 			"mode": "single",
 			"sort": "none"
 		  }
-		},
-		"targets": [
-		  {
-			"datasource": {
-			  "type": "prometheus",
-			  "uid": "prometheus"
-			},
-			"editorMode": "code",
-			"expr": "sum(increase(vg_feature_server_analytics_submit_error_total[5m])) > 5",
-			"legendFormat": "__auto",
-			"range": true,
-			"refId": "A"
-		  }
-		],
-		"title": "Analytics Submit Errors",
-		"type": "timeseries"
-	  },
-	  {
-		"datasource": {
-		  "type": "prometheus",
-		  "uid": "prometheus"
-		},
-		"description": "Counts the total number of errors occured when calling the AI Endpoint",
-		"fieldConfig": {
-		  "defaults": {
-			"color": {
-			  "mode": "palette-classic"
-			},
-			"custom": {
-			  "axisCenteredZero": false,
-			  "axisColorMode": "text",
-			  "axisLabel": "",
-			  "axisPlacement": "auto",
-			  "barAlignment": 0,
-			  "drawStyle": "line",
-			  "fillOpacity": 0,
-			  "gradientMode": "none",
-			  "hideFrom": {
-				"legend": false,
-				"tooltip": false,
-				"viz": false
-			  },
-			  "lineInterpolation": "linear",
-			  "lineWidth": 1,
-			  "pointSize": 5,
-			  "scaleDistribution": {
-				"type": "linear"
-			  },
-			  "showPoints": "never",
-			  "spanNulls": false,
-			  "stacking": {
-				"group": "A",
-				"mode": "none"
-			  },
-			  "thresholdsStyle": {
-				"mode": "off"
-			  }
-			},
-			"mappings": [],
-			"thresholds": {
-			  "mode": "absolute",
-			  "steps": [
-				{
-				  "color": "green",
-				  "value": null
-				},
-				{
-				  "color": "red",
-				  "value": 80
-				}
-			  ]
-			}
-		  },
-		  "overrides": []
-		},
-		"gridPos": {
-		  "h": 6,
-		  "w": 8,
-		  "x": 16,
-		  "y": 20
-		},
-		"id": 6,
-		"options": {
-		  "legend": {
-			"calcs": [],
-			"displayMode": "list",
-			"placement": "bottom",
-			"showLegend": true
-		  },
-		  "tooltip": {
-			"mode": "single",
-			"sort": "none"
-		  }
-		},
-		"targets": [
-		  {
-			"datasource": {
-			  "type": "prometheus",
-			  "uid": "prometheus"
-			},
-			"editorMode": "code",
-			"expr": "sum(rate(vg_feature_server_ai_account_mapping_error_total{container=\"feature-server\"}[5m]))",
-			"legendFormat": "__auto",
-			"range": true,
-			"refId": "A"
-		  }
-		],
-		"title": "Analytics Handshake Errors",
-		"type": "timeseries"
-	  },
-	  {
-		"datasource": {
-		  "type": "prometheus",
-		  "uid": "prometheus"
-		},
-		"description": "Total amount of errors: analytics: processCommand",
-		"fieldConfig": {
-		  "defaults": {
-			"color": {
-			  "fixedColor": "red",
-			  "mode": "fixed"
-			},
-			"custom": {
-			  "axisCenteredZero": false,
-			  "axisColorMode": "text",
-			  "axisLabel": "",
-			  "axisPlacement": "auto",
-			  "barAlignment": 0,
-			  "drawStyle": "line",
-			  "fillOpacity": 0,
-			  "gradientMode": "none",
-			  "hideFrom": {
-				"legend": false,
-				"tooltip": false,
-				"viz": false
-			  },
-			  "lineInterpolation": "linear",
-			  "lineWidth": 1,
-			  "pointSize": 5,
-			  "scaleDistribution": {
-				"type": "linear"
-			  },
-			  "showPoints": "never",
-			  "spanNulls": false,
-			  "stacking": {
-				"group": "A",
-				"mode": "none"
-			  },
-			  "thresholdsStyle": {
-				"mode": "off"
-			  }
-			},
-			"mappings": [],
-			"thresholds": {
-			  "mode": "absolute",
-			  "steps": [
-				{
-				  "color": "green",
-				  "value": null
-				},
-				{
-				  "color": "red",
-				  "value": 80
-				}
-			  ]
-			}
-		  },
-		  "overrides": []
-		},
-		"gridPos": {
-		  "h": 6,
-		  "w": 8,
-		  "x": 0,
-		  "y": 26
-		},
-		"id": 30,
-		"options": {
-		  "legend": {
-			"calcs": [],
-			"displayMode": "list",
-			"placement": "bottom",
-			"showLegend": true
-		  },
-		  "tooltip": {
-			"mode": "single",
-			"sort": "none"
-		  }
-		},
-		"targets": [
-		  {
-			"datasource": {
-			  "type": "prometheus",
-			  "uid": "prometheus"
-			},
-			"editorMode": "code",
-			"expr": "sum(rate(vg_feature_server_analytics_process_command_error_total{container=\"feature-server\"}[5m]))",
-			"legendFormat": "__auto",
-			"range": true,
-			"refId": "A"
-		  }
-		],
-		"title": "Process Command Errors",
-		"type": "timeseries"
-	  },
-	  {
-		"collapsed": false,
-		"gridPos": {
-		  "h": 1,
-		  "w": 24,
-		  "x": 0,
-		  "y": 32
-		},
-		"id": 16,
-		"panels": [],
-		"title": "Memory related information",
-		"type": "row"
-	  },
-	  {
-		"datasource": {
-		  "type": "prometheus",
-		  "uid": "prometheus"
-		},
-		"description": "Number of Analytics Collector instances in memory",
-		"fieldConfig": {
-		  "defaults": {
-			"color": {
-			  "mode": "thresholds"
-			},
-			"mappings": [],
-			"thresholds": {
-			  "mode": "absolute",
-			  "steps": [
-				{
-				  "color": "blue",
-				  "value": null
-				}
-			  ]
-			}
-		  },
-		  "overrides": []
-		},
-		"gridPos": {
-		  "h": 6,
-		  "w": 6,
-		  "x": 0,
-		  "y": 33
-		},
-		"id": 14,
-		"options": {
-		  "colorMode": "value",
-		  "graphMode": "area",
-		  "justifyMode": "auto",
-		  "orientation": "auto",
-		  "reduceOptions": {
-			"calcs": [
-			  "lastNotNull"
-			],
-			"fields": "",
-			"values": false
-		  },
-		  "text": {
-			"titleSize": 10
-		  },
-		  "textMode": "auto"
 		},
 		"pluginVersion": "9.2.3",
 		"targets": [
@@ -895,14 +612,29 @@
 			  "uid": "prometheus"
 			},
 			"editorMode": "code",
-			"expr": "sum(vg_feature_server_analytics_collector_in_memory_count)",
-			"legendFormat": "__auto",
+			"exemplar": false,
+			"expr": "sum by (pod) (vg_feature_server_call_session_count{container=\"feature-server\"})",
+			"instant": false,
+			"legendFormat": "{{pod}}",
 			"range": true,
 			"refId": "A"
 		  }
 		],
-		"title": "Total in-memory Analytic Collector Count",
-		"type": "stat"
+		"title": "Processed Calls",
+		"type": "timeseries"
+	  },
+	  {
+		"collapsed": false,
+		"gridPos": {
+		  "h": 1,
+		  "w": 24,
+		  "x": 0,
+		  "y": 19
+		},
+		"id": 16,
+		"panels": [],
+		"title": "Memory related information",
+		"type": "row"
 	  },
 	  {
 		"datasource": {
@@ -952,7 +684,7 @@
 		  "h": 8,
 		  "w": 24,
 		  "x": 0,
-		  "y": 39
+		  "y": 20
 		},
 		"id": 8,
 		"options": {
@@ -983,7 +715,7 @@
 			  "uid": "prometheus"
 			},
 			"editorMode": "code",
-			"expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=\"feature-server\", workload_type=\"deployment\"}\n)",
+			"expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{workload=\"feature-server\",workload_type=\"statefulset\"}\n)",
 			"legendFormat": "__auto",
 			"range": true,
 			"refId": "A"
@@ -1041,7 +773,7 @@
 		  "h": 7,
 		  "w": 24,
 		  "x": 0,
-		  "y": 47
+		  "y": 28
 		},
 		"id": 10,
 		"options": {
@@ -1072,7 +804,7 @@
 			  "uid": "prometheus"
 			},
 			"editorMode": "code",
-			"expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{ workload=\"feature-server\", workload_type=\"deployment\"}\n)",
+			"expr": "sum(\n    container_memory_working_set_bytes{container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{ workload=\"feature-server\", workload_type=\"statefulset\"}\n)",
 			"legendFormat": "__auto",
 			"range": true,
 			"refId": "A"
@@ -1126,8 +858,7 @@
 			  "mode": "absolute",
 			  "steps": [
 				{
-				  "color": "green",
-				  "value": null
+				  "color": "green"
 				},
 				{
 				  "color": "red",
@@ -1143,7 +874,7 @@
 		  "h": 6,
 		  "w": 24,
 		  "x": 0,
-		  "y": 54
+		  "y": 35
 		},
 		"id": 12,
 		"options": {
@@ -1190,6 +921,6 @@
 	"timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
 	"title": "VG Feature-Server",
 	"uid": "m6rFSIfVz",
-	"version": 14,
+	"version": 15,
 	"weekStart": ""
   }

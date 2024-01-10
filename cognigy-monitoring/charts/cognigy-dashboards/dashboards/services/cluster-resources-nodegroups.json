@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 104,
+  "id": 102,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -112,7 +112,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(kube_node_info{node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\", cluster=\"$cluster\"})",
+          "expr": "sum(kube_node_info{node!~\"$non_default_nodes\", cluster=\"$cluster\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 2,
@@ -180,7 +180,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\", node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\"})",
+          "expr": "sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\", node!~\"$non_default_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node!~\"$non_default_nodes\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 2,
@@ -248,7 +248,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"memory\",job=\"kube-state-metrics\", cluster=\"$cluster\", node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"memory\",cluster=\"$cluster\", node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\"})",
+          "expr": "sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"memory\",job=\"kube-state-metrics\", cluster=\"$cluster\", node!~\"$non_default_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"memory\",cluster=\"$cluster\", node!~\"$non_default_nodes\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 2,
@@ -316,7 +316,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\"}) - sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\", node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1))",
+          "expr": "sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node!~\"$non_default_nodes\"}) - sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\", node!~\"$non_default_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1))",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 2,
@@ -386,7 +386,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "(sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\"}) - sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\", node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)))/max(kube_node_status_capacity{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\"})",
+          "expr": "(sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node!~\"$non_default_nodes\"}) - sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\", node!~\"$non_default_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)))/max(kube_node_status_capacity{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node!~\"$non_default_nodes\"})",
           "format": "time_series",
           "instant": true,
           "interval": "1h",
@@ -401,7 +401,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "(sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"memory\",cluster=\"$cluster\", node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\"}) - sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"memory\",job=\"kube-state-metrics\", cluster=\"$cluster\", node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)))/max(kube_node_status_capacity{job=\"kube-state-metrics\",resource=\"memory\",cluster=\"$cluster\", node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\"})",
+          "expr": "(sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"memory\",cluster=\"$cluster\", node!~\"$non_default_nodes\"}) - sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"memory\",job=\"kube-state-metrics\", cluster=\"$cluster\", node!~\"$non_default_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)))/max(kube_node_status_capacity{job=\"kube-state-metrics\",resource=\"memory\",cluster=\"$cluster\", node!~\"$non_default_nodes\"})",
           "hide": false,
           "instant": false,
           "interval": "1h",
@@ -483,7 +483,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(max by (namespace, pod, container, cluster) (kube_pod_container_resource_limits{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\", node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\"}) * on(namespace, pod, cluster) group_left() max by (namespace, pod, cluster) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\"})",
+          "expr": "sum(max by (namespace, pod, container, cluster) (kube_pod_container_resource_limits{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\", node!~\"$non_default_nodes\"}) * on(namespace, pod, cluster) group_left() max by (namespace, pod, cluster) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node!~\"$non_default_nodes\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 2,
@@ -551,7 +551,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(max by (namespace, pod, container, cluster) (kube_pod_container_resource_limits{resource=\"memory\",job=\"kube-state-metrics\", cluster=\"$cluster\", node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\"}) * on(namespace, pod, cluster) group_left() max by (namespace, pod, cluster) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"memory\",cluster=\"$cluster\", node!~\"$autoscaler\", node!~\"$sip_nodes\", node!~\"$rtp_nodes\"})",
+          "expr": "sum(max by (namespace, pod, container, cluster) (kube_pod_container_resource_limits{resource=\"memory\",job=\"kube-state-metrics\", cluster=\"$cluster\", node!~\"$non_default_nodes\"}) * on(namespace, pod, cluster) group_left() max by (namespace, pod, cluster) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"memory\",cluster=\"$cluster\", node!~\"$non_default_nodes\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 2,
@@ -619,14 +619,14 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(kube_node_info{node=~\"$autoscaler\", cluster=\"$cluster\"})",
+          "expr": "sum(kube_node_info{node=~\"$non_default_nodes\", cluster=\"$cluster\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 2,
           "refId": "A"
         }
       ],
-      "title": "Autoscaler Nodes",
+      "title": "Non-Default Nodes",
       "type": "stat"
     },
     {
@@ -687,14 +687,14 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\", node=~\"$autoscaler\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node=~\"$autoscaler\"})",
+          "expr": "sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\", node=~\"$non_default_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\",  node=~\"$non_default_nodes\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 2,
           "refId": "A"
         }
       ],
-      "title": "CPU Requests Autoscaler",
+      "title": "CPU Requests Non-Default",
       "type": "stat"
     },
     {
@@ -755,14 +755,14 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"memory\",job=\"kube-state-metrics\", cluster=~\"$cluster\", node=~\"$autoscaler\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"memory\",cluster=\"$cluster\", node=~\"$autoscaler\"})",
+          "expr": "sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"memory\",job=\"kube-state-metrics\", cluster=~\"$cluster\",  node=~\"$non_default_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"memory\",cluster=\"$cluster\",  node=~\"$non_default_nodes\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 2,
           "refId": "A"
         }
       ],
-      "title": "Memory Requests Autoscaler",
+      "title": "Memory Requests Non-Default",
       "type": "stat"
     },
     {
@@ -823,14 +823,14 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node=~\"$autoscaler\"}) - sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\", node=~\"$autoscaler\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1))",
+          "expr": "sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\",  node=~\"$non_default_nodes\"}) - sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\",  node=~\"$non_default_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1))",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 2,
           "refId": "A"
         }
       ],
-      "title": "CPU Free Cores Autoscaler",
+      "title": "CPU Free Cores Non-Default",
       "type": "stat"
     },
     {
@@ -838,7 +838,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "Free Nodes in Autoscaler Pool for RAM, CPU and Spare Nodes (safely removable from the cluster) ",
+      "description": "Free Nodes in Non-Default Pool for RAM, CPU and Spare Nodes (safely removable from the cluster) ",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -893,7 +893,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "(sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node=~\"$autoscaler\"}) - sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\", node=~\"$autoscaler\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)))/max(kube_node_status_capacity{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node=~\"$autoscaler\"})",
+          "expr": "(sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\",  node=~\"$non_default_nodes\"}) - sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\",  node=~\"$non_default_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)))/max(kube_node_status_capacity{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\",  node=~\"$non_default_nodes\"})",
           "format": "time_series",
           "instant": true,
           "interval": "1h",
@@ -908,7 +908,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "(sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"memory\",cluster=\"$cluster\", node=~\"$autoscaler\"}) - sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"memory\",job=\"kube-state-metrics\", cluster=\"$cluster\", node=~\"$autoscaler\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)))/max(kube_node_status_capacity{job=\"kube-state-metrics\",resource=\"memory\",cluster=\"$cluster\", node=~\"$autoscaler\"})",
+          "expr": "(sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"memory\",cluster=\"$cluster\",  node=~\"$non_default_nodes\"}) - sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"memory\",job=\"kube-state-metrics\", cluster=\"$cluster\",  node=~\"$non_default_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)))/max(kube_node_status_capacity{job=\"kube-state-metrics\",resource=\"memory\",cluster=\"$cluster\",  node=~\"$non_default_nodes\"})",
           "hide": false,
           "instant": false,
           "interval": "1h",
@@ -928,7 +928,7 @@
           "type": "math"
         }
       ],
-      "title": "Free Nodes Autoscaler",
+      "title": "Free Nodes Non-Default",
       "transformations": [],
       "type": "stat"
     },
@@ -990,7 +990,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(max by (namespace, pod, container, cluster) (kube_pod_container_resource_limits{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\", node=~\"$autoscaler\"}) * on(namespace, pod, cluster) group_left() max by (namespace, pod, cluster) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node=~\"$autoscaler\"})",
+          "expr": "sum(max by (namespace, pod, container, cluster) (kube_pod_container_resource_limits{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\",  node=~\"$non_default_nodes\"}) * on(namespace, pod, cluster) group_left() max by (namespace, pod, cluster) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\",  node=~\"$non_default_nodes\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 2,
@@ -1058,14 +1058,14 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(max by (namespace, pod, container, cluster) (kube_pod_container_resource_limits{resource=\"memory\",job=\"kube-state-metrics\", cluster=\"$cluster\", node=~\"$autoscaler\"}) * on(namespace, pod, cluster) group_left() max by (namespace, pod, cluster) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"memory\",cluster=\"$cluster\", node=~\"$autoscaler\"})",
+          "expr": "sum(max by (namespace, pod, container, cluster) (kube_pod_container_resource_limits{resource=\"memory\",job=\"kube-state-metrics\", cluster=\"$cluster\",  node=~\"$non_default_nodes\"}) * on(namespace, pod, cluster) group_left() max by (namespace, pod, cluster) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)) / sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"memory\",cluster=\"$cluster\",  node=~\"$non_default_nodes\"})",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 2,
           "refId": "A"
         }
       ],
-      "title": "Memory Limits Autoscaler",
+      "title": "Memory Limits Non-Default",
       "type": "stat"
     },
     {
@@ -1936,7 +1936,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\", node!=\"$autoscaler\"}) by (namespace)",
+          "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\", node!=\"$non_default_nodes\"}) by (namespace)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{namespace}}",
@@ -2029,7 +2029,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\", node=~\"$autoscaler\"}) by (namespace)",
+          "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\",  node=~\"$non_default_nodes\"}) by (namespace)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{namespace}}",
@@ -2040,7 +2040,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "CPU Usage Autoscaler Nodes",
+      "title": "CPU Usage Non-Default Nodes",
       "tooltip": {
         "shared": false,
         "sort": 2,
@@ -2174,7 +2174,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(container_memory_rss{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\", container!=\"\", node!=\"$autoscaler\"}) by (namespace)",
+          "expr": "sum(container_memory_rss{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\", container!=\"\", node!=\"$non_default_nodes\"}) by (namespace)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{namespace}}",
@@ -2267,7 +2267,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(container_memory_rss{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\", container!=\"\", node=~\"$autoscaler\"}) by (namespace)",
+          "expr": "sum(container_memory_rss{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\", container!=\"\",  node=~\"$non_default_nodes\"}) by (namespace)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{namespace}}",
@@ -2278,7 +2278,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "Memory Usage (w/o cache) Autoscaler",
+      "title": "Memory Usage (w/o cache) Non-Default",
       "tooltip": {
         "shared": false,
         "sort": 2,
@@ -2403,92 +2403,28 @@
           "type": "prometheus",
           "uid": "${datasource}"
         },
-        "definition": "label_values(kube_node_spec_taint{ key=\"node-role.cognigy.ai\", effect=\"NoSchedule\", value=\"autoscaler\", cluster=\"$cluster\"}, node)",
-        "description": "autoscaler node group nodes",
+        "definition": "label_values(kube_node_spec_taint{cluster=\"$cluster\"}, node)",
+        "description": "Nodes with specific taints that do not belong to \"default\" pool",
         "hide": 0,
         "includeAll": true,
-        "label": "autoscaler",
+        "label": "non_default_nodes",
         "multi": true,
-        "name": "autoscaler",
+        "name": "non_default_nodes",
         "options": [],
         "query": {
-          "query": "label_values(kube_node_spec_taint{ key=\"node-role.cognigy.ai\", effect=\"NoSchedule\", value=\"autoscaler\", cluster=\"$cluster\"}, node)",
+          "query": "label_values(kube_node_spec_taint{cluster=\"$cluster\"}, node)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${datasource}"
-        },
-        "definition": "label_values(kube_node_spec_taint{ key=\"voip-edge\", effect=\"NoSchedule\", cluster=\"$cluster\"}, node)",
-        "description": "SIP nodes of VG cluster",
-        "hide": 0,
-        "includeAll": true,
-        "label": "sip_nodes",
-        "multi": true,
-        "name": "sip_nodes",
-        "options": [],
-        "query": {
-          "query": "label_values(kube_node_spec_taint{ key=\"voip-edge\", effect=\"NoSchedule\", cluster=\"$cluster\"}, node)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${datasource}"
-        },
-        "definition": "label_values(kube_node_spec_taint{ key=\"media-edge\", effect=\"NoSchedule\", cluster=\"$cluster\"}, node)",
-        "description": "RTP nodes of VG cluster",
-        "hide": 0,
-        "includeAll": true,
-        "label": "rtp_nodes",
-        "multi": true,
-        "name": "rtp_nodes",
-        "options": [],
-        "query": {
-          "query": "label_values(kube_node_spec_taint{ key=\"media-edge\", effect=\"NoSchedule\", cluster=\"$cluster\"}, node)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
+        "sort": 0,
         "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {

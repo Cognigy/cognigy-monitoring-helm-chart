@@ -402,7 +402,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 3
+            "y": 27
           },
           "id": 47,
           "options": {
@@ -487,7 +487,7 @@
             "h": 8,
             "w": 5,
             "x": 0,
-            "y": 4
+            "y": 28
           },
           "id": 8,
           "options": {
@@ -554,7 +554,7 @@
             "h": 8,
             "w": 19,
             "x": 5,
-            "y": 4
+            "y": 28
           },
           "id": 6,
           "options": {
@@ -653,7 +653,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 12
+            "y": 36
           },
           "id": 49,
           "options": {
@@ -770,7 +770,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 5
+            "y": 29
           },
           "id": 4,
           "options": {
@@ -899,7 +899,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 5
+            "y": 29
           },
           "id": 38,
           "options": {
@@ -1054,7 +1054,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 6
+            "y": 30
           },
           "id": 40,
           "options": {
@@ -1298,6 +1298,113 @@
         }
       ],
       "title": "SMTP Email Errors (per AI replica)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "id": 64,
+      "panels": [],
+      "title": "Dead-lettered Messages Information",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "The total amount of dead-lettered Messages",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "id": 62,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "builder",
+          "exemplar": true,
+          "expr": "sum(increase(cognigy_ai_expired_messages_count[1m])) by (pod)",
+          "legendFormat": "{{pod}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Dead-lettered Messages (per AI replica)",
       "type": "timeseries"
     }
   ],

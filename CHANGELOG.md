@@ -1,149 +1,166 @@
 # Release Notes
 
+### 1.19.0
+**Released** January 10th, 2024
+
+#### Changes
+- `Agents Overview v2` is renamed to `Agents Overview` dashboard. Previous version of `Agents Overview` dashboard is deprecated.
+- `Extensions Executions / Minute` panel is added to `Service-Execution` dashboard.
+- `Functions Scheduled / Minute` and  `Functions Executions / Minute` panels are added to `Service-Function-Execution` dashboard.
+- `Dead-lettered Messages` panel added to `Service-Endpoint` and `Service-AI` dashboards. 
+- `Agent Assist Backend` dashboard is extended.
+- `Insights Cube Reports` dashboard is introduced. 
+- `VG Feature-Server` dashboard is extended.
+
+#### Bugfixes
+- Several panels are fixed on `Agents Overview` dashboard.
+- `Cluster Resources - Nodegroups` dashboard is fixed.
+- `Service NLP Classifier` dashboard is fixed.
+
 ### 1.18.1
 
 **Released** December 1st, 2023
 
 #### Bugfixes
-- fixed Kubernetes versions compatibility
+- Fixed Kubernetes versions compatibility.
 
 ### 1.18.0
 
 **Released** November 24th, 2023
 
 #### Changes
-- added `Cluster Resources - Nodegroups` dashboard
+- Added `Cluster Resources - Nodegroups` dashboard.
 
 #### Bugfixes
-- fixed `PodManyRestarts` alert logic
-- fixed `Redis Instances Overview` dashboard
-- improved performance of queries in `Kubecost Global` dashboard
-- fixed `Agent Assist Backend` dashboard
+- Fixed `PodManyRestarts` alert logic.
+- Fixed `Redis Instances Overview` dashboard.
+- Improved performance of queries in `Kubecost Global` dashboard.
+- Fixed `Agent Assist Backend` dashboard.
 
 ### 1.17.1
 
 **Released** October 24th, 2023
 
 #### Bugfixes
-- fixed `Live Agent Overview` dashboard
-- fixed `PostgreSQL Overview` dashboard
-- fixed `LiveAgentHighHttpErrorRate` alert rule
-- fixed `CPUThrottlingBackendServiceHigh` to catch LA PostgreSQL alerts
+- Fixed `Live Agent Overview` dashboard.
+- Fixed `PostgreSQL Overview` dashboard.
+- Fixed `LiveAgentHighHttpErrorRate` alert rule.
+- Fixed `CPUThrottlingBackendServiceHigh` to catch LA PostgreSQL alerts.
 
 ### 1.17.0
 
 **Released** October 16th, 2023
 
 #### Changes
-- added Postgres alert rules
+- Added Postgres alert rules.
 
 #### Bugfixes
-- fixed `RedisBlockedClients` alert to avoid false positives
-- fixed `CPUThrottlingBackendServiceHigh` to avoid false positives from `metrics` container
-- fixed `PostgreSQL Patroni` dashboard
-- fixed `kube-state-metrics` compatibility with Kubernetes v1.26
+- Fixed `RedisBlockedClients` alert to avoid false positives.
+- Fixed `CPUThrottlingBackendServiceHigh` to avoid false positives from `metrics` container.
+- Fixed `PostgreSQL Patroni` dashboard.
+- Fixed `kube-state-metrics` compatibility with Kubernetes v1.26.
 
 ### 1.16.0
 
 **Released** October 6th, 2023
 
 #### Changes
-- added `IDE NFS Status` dashboard
-- added `Cluster Upgrades` dashboard
-- added pod monitor for postgres-ha setup
-- added new metrics to `Agent Assist Genesys Notifications Forwarder` dashboard
+- Added `IDE NFS Status` dashboard.
+- Added `Cluster Upgrades` dashboard.
+- Added pod monitor for postgres-ha setup.
+- Added new metrics to `Agent Assist Genesys Notifications Forwarder` dashboard.
 
 #### Bugfixes
-- fixed `Kubecost Global` dashboard
+- Fixed `Kubecost Global` dashboard.
 
 ### 1.15.0
 
 **Released** September 7th, 2023
 
 #### Changes
-- enabled filtering on namespaces and pod names on `Redis Instances Overview` dashboard
-- added dynamic organisation and project tables on `Agents Overview v2` dashboard
-- added `Live Agent OData Overview` dashboard
-- added `Knowledge AI search` metrics to `Agents Overview v2` dashboard
-- added `Agent Assist Genesys Notifications Forwarder` dashboard
-- added alerts for Insights services
-- added several VG dashboards
-- added optional `Kubecost Global` dashboard
-- added optional dashboard and alerts for Velero
+- Enabled filtering on namespaces and pod names on `Redis Instances Overview` dashboard.
+- Added dynamic organisation and project tables on `Agents Overview v2` dashboard.
+- Added `Live Agent OData Overview` dashboard.
+- Added `Knowledge AI search` metrics to `Agents Overview v2` dashboard.
+- Added `Agent Assist Genesys Notifications Forwarder` dashboard.
+- Added alerts for Insights services.
+- Added several VG dashboards.
+- Added optional `Kubecost Global` dashboard.
+- Added optional dashboard and alerts for Velero.
 
 #### Bugfixes
-- fixed `containerOOMKilled` logic to catch the first occurrence 
-- fixed Timezone `defaultDashboardsTimezone` on dashboards
-- fixed VG dashboards names
+- Fixed `containerOOMKilled` logic to catch the first occurrence.
+- Fixed Timezone `defaultDashboardsTimezone` on dashboards.
+- Fixed VG dashboards names.
 
 ### 1.14.0
 
 **Released** July 17th, 2023
 
 #### Changes
-- introduced `Kubernetes Cluster Autoscaler (AWS)` dashboard
-- made parameters for `RedisBlockedClients` alert configurable
-- added SMTP metrics to `Service-AI` dashboard
-- introduced Prometheus `podMonitor` for Flux CD
+- Introduced `Kubernetes Cluster Autoscaler (AWS)` dashboard.
+- Made parameters for `RedisBlockedClients` alert configurable.
+- Added SMTP metrics to `Service-AI` dashboard.
+- Introduced Prometheus `podMonitor` for Flux CD.
 
 #### Bugfixes
-- fixed various dashboards for NLP V2
-- fixed `VG Overview` dashboard
-- fixed `Agent Assist Backend` dashboard
+- Fixed various dashboards for NLP V2.
+- Fixed `VG Overview` dashboard.
+- Fixed `Agent Assist Backend` dashboard.
 
 ### 1.13.1
 
 **Released** June 7th, 2023
 
 #### Bugfixes
-- fixed default timeout of `ContainerOOMKilled` alert
-- fixed `MatcherFindKeyphraseError` alert
-- fixed `EndpointMessageProcessingTimeIncreasing` alert logic with `messageProcessingTimeBaseline` parameter
+- Fixed default timeout of `ContainerOOMKilled` alert.
+- Fixed `MatcherFindKeyphraseError` alert.
+- Fixed `EndpointMessageProcessingTimeIncreasing` alert logic with `messageProcessingTimeBaseline` parameter.
 
 ### 1.13.0
 
 **Released** May 26th, 2023
 
 #### Changes
-- made parameters for `cognigy.alert.k8s` configurable, see [values.yaml](cognigy-monitoring/charts/cognigy-alerts/values.yaml)
-for details
-- changed default severity of `kubeDeploymentReplicasMismatch`, `kubePodNotReady` and `kubeStatefulSetReplicasMismatch`
-to `warning`, use `severity` configuration parameter to override default setting
-- made `ServiceHandoverErrorsHigh` configurable, see [values.yaml](cognigy-monitoring/charts/cognigy-alerts/values.yaml) for details
-- introduced `xApps Metrics` dashboard
-- introduced `Weaviate` dashboards
-- introduced `Agent Assist Backend` and  `Agent Assist Frontend` dashboards
+- Made parameters for `cognigy.alert.k8s` configurable, see [values.yaml](cognigy-monitoring/charts/cognigy-alerts/values.yaml)
+for details.
+- Changed default severity of `kubeDeploymentReplicasMismatch`, `kubePodNotReady` and `kubeStatefulSetReplicasMismatch`
+to `warning`, use `severity` configuration parameter to override default setting.
+- Made `ServiceHandoverErrorsHigh` configurable, see [values.yaml](cognigy-monitoring/charts/cognigy-alerts/values.yaml) for details.
+- Introduced `xApps Metrics` dashboard.
+- Introduced `Weaviate` dashboards.
+- Introduced `Agent Assist Backend` and  `Agent Assist Frontend` dashboards.
 
 ### 1.12.0
 
 **Released** April 27th, 2023
 
 #### Changes
-- updated `VG` dashboards
-- introduced `HostOutOfMemory` and `HostMemoryUnderMemoryPressure` alerts
-- introduced `Request Handover` dashboard
-- made `mongodbReplicationLag` alert configurable
-- made `traefikHighHttp5xxErrorRateService` alert configurable
+- Updated `VG` dashboards.
+- Introduced `HostOutOfMemory` and `HostMemoryUnderMemoryPressure` alerts.
+- Introduced `Request Handover` dashboard.
+- Made `mongodbReplicationLag` alert configurable.
+- Made `traefikHighHttp5xxErrorRateService` alert configurable.
 
 #### Bugfixes
-- fixed `Kubecost Overview` dashboard
-- fixed `mongodbReplicationLag` alert
-- fixed `Live Agent` dashboard
+- Fixed `Kubecost Overview` dashboard.
+- Fixed `mongodbReplicationLag` alert.
+- Fixed `Live Agent` dashboard.
 
 ### 1.11.0
 
 **Released** March 23rd, 2023
 
 #### Changes
-- introduced `Agents Overview - V2` dashboard which includes filtering for organisation and project by names
-- introduced `Analytics Odata` dashboards for Analytics
-- introduced `VG` dashboards
-- introduced `InfluxDB` data source for Voice Gateway
-- introduced `MySQL Overview` dashboard
+- Introduced `Agents Overview - V2` dashboard which includes filtering for organisation and project by names.
+- Introduced `Analytics Odata` dashboards for Analytics.
+- Introduced `VG` dashboards.
+- Introduced `InfluxDB` data source for Voice Gateway.
+- Introduced `MySQL Overview` dashboard.
 
 #### Bugfixes
-- fixed `Postgresql Overview` dashboard
-- fixed default MS Teams receivers configuration. Runtime MS Teams channel is disabled by default to prevent misconfigurations
+- Fixed `Postgresql Overview` dashboard.
+- Fixed default MS Teams receivers configuration. Runtime MS Teams channel is disabled by default to prevent misconfigurations.
 
 ### 1.10.0
 

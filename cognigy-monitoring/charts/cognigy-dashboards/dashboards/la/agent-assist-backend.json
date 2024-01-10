@@ -643,6 +643,7 @@
 				"type": "prometheus",
 				"uid": "prometheus"
 			},
+			"description": "",
 			"fieldConfig": {
 				"defaults": {
 					"color": {
@@ -651,8 +652,8 @@
 					"custom": {
 						"axisCenteredZero": false,
 						"axisColorMode": "text",
-						"axisLabel": "",
 						"axisPlacement": "auto",
+						"axisWidth": -6,
 						"barAlignment": 0,
 						"drawStyle": "line",
 						"fillOpacity": 0,
@@ -697,11 +698,11 @@
 			},
 			"gridPos": {
 				"h": 8,
-				"w": 5,
-				"x": 6,
+				"w": 11,
+				"x": 0,
 				"y": 17
 			},
-			"id": 21,
+			"id": 23,
 			"options": {
 				"legend": {
 					"calcs": [],
@@ -714,6 +715,7 @@
 					"sort": "none"
 				}
 			},
+			"pluginVersion": "9.2.3",
 			"targets": [
 				{
 					"datasource": {
@@ -721,13 +723,25 @@
 						"uid": "prometheus"
 					},
 					"editorMode": "code",
-					"expr": "sum(rate(agent_assist_backend_config_retrieval_error_total[5m]))",
-					"legendFormat": "__auto",
+					"expr": "sum(agent_assist_backend_agent_assist_platform_connection_count{platform=\"liveAgent\"})",
+					"legendFormat": "Live Agent",
 					"range": true,
 					"refId": "A"
+				},
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"expr": "sum(agent_assist_backend_agent_assist_platform_connection_count{platform=\"unknown\"})",
+					"hide": false,
+					"legendFormat": "Unknown",
+					"range": true,
+					"refId": "B"
 				}
 			],
-			"title": "Error while retrieving AAW config",
+			"title": "Agent Assist platform connections count",
 			"type": "timeseries"
 		},
 		{
@@ -820,6 +834,98 @@
 				}
 			],
 			"title": "Error while retrieving AAW session params",
+			"type": "timeseries"
+		},
+		{
+			"datasource": {
+				"type": "prometheus",
+				"uid": "prometheus"
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"axisCenteredZero": false,
+						"axisColorMode": "text",
+						"axisLabel": "",
+						"axisPlacement": "auto",
+						"barAlignment": 0,
+						"drawStyle": "line",
+						"fillOpacity": 0,
+						"gradientMode": "none",
+						"hideFrom": {
+							"legend": false,
+							"tooltip": false,
+							"viz": false
+						},
+						"lineInterpolation": "linear",
+						"lineWidth": 1,
+						"pointSize": 5,
+						"scaleDistribution": {
+							"type": "linear"
+						},
+						"showPoints": "auto",
+						"spanNulls": false,
+						"stacking": {
+							"group": "A",
+							"mode": "none"
+						},
+						"thresholdsStyle": {
+							"mode": "off"
+						}
+					},
+					"mappings": [],
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 80
+							}
+						]
+					}
+				},
+				"overrides": []
+			},
+			"gridPos": {
+				"h": 8,
+				"w": 5,
+				"x": 16,
+				"y": 17
+			},
+			"id": 21,
+			"options": {
+				"legend": {
+					"calcs": [],
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"tooltip": {
+					"mode": "single",
+					"sort": "none"
+				}
+			},
+			"targets": [
+				{
+					"datasource": {
+						"type": "prometheus",
+						"uid": "prometheus"
+					},
+					"editorMode": "code",
+					"expr": "sum(rate(agent_assist_backend_config_retrieval_error_total[5m]))",
+					"legendFormat": "__auto",
+					"range": true,
+					"refId": "A"
+				}
+			],
+			"title": "Error while retrieving AAW config",
 			"type": "timeseries"
 		},
 		{
