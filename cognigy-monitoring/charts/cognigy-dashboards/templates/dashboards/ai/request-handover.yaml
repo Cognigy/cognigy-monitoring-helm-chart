@@ -1,0 +1,234 @@
+{{- /*
+Generated from json dashboard 'dashboards/ai/request-handover.json'.
+Do not change in-place! In order to change this file first modify the json dashboard 'dashboards/ai/request-handover.json'
+and then run the 'scripts/convert-dashboard/convert-dashboard.py' script.
+*/ -}}
+{{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
+{{- if and 
+    (index .Values "products" "ai" "enabled")
+    (index .Values "products" "ai" "dashboards" "request-handover" "enabled")
+    (index .Values "products" "ai" "dashboards" "request-handover" "yamlVersion")
+    (not .Values.forceDeployJsonDashboards)
+    (semverCompare ">=1.14.0-0" $kubeTargetVersion)
+    (semverCompare "<9.9.9-9" $kubeTargetVersion)
+     
+}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ template "cognigy-dashboards.namespace" . }}
+  name: {{ printf "%s-%s" (include "cognigy-dashboards.fullname" $) "request-handover" | trunc 63 | trimSuffix "-" }}
+  {{- with $.Values.grafana.sidecar.dashboards.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- if $.Values.grafana.sidecar.dashboards.label }}
+    {{ $.Values.grafana.sidecar.dashboards.label }}: {{ ternary $.Values.grafana.sidecar.dashboards.labelValue "1" (not (empty $.Values.grafana.sidecar.dashboards.labelValue)) | quote }}
+    {{- end }}
+    app: {{ template "cognigy-dashboards.name" $ }}-grafana
+    {{- include "cognigy-dashboards.labels" $ | nindent 4 }}
+data:
+  request-handover.json: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "datasource",
+              "uid": "grafana"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "target": {
+              "limit": 100,
+              "matchAny": false,
+              "tags": [],
+              "type": "dashboard"
+            },
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": 88,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 20,
+            "w": 23,
+            "x": 0,
+            "y": 0
+          },
+          "hiddenSeries": false,
+          "id": 2,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "9.2.3",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [
+            {
+              "alias": "99th Percentile",
+              "yaxis": 1
+            }
+          ],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "histogram_quantile(0.99, sum(rate(cognigy_services_histogram_rpc_execution_time_bucket{cluster=\"$cluster\", queue=\"handover-rpc-queue\",type=\"requestHandover\"}[5m])) by (le, job))",
+              "interval": "1m",
+              "legendFormat": "99th Percentile",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "histogram_quantile(0.50, sum(rate(cognigy_services_histogram_rpc_execution_time_bucket{cluster=\"$cluster\", queue=\"handover-rpc-queue\",type=\"requestHandover\"}[5m])) by (le, job))",
+              "interval": "1m",
+              "legendFormat": "50th Percentile",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "RPC Execution Time",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "type": "time",
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "ms",
+              "logBase": 1,
+              "show": true,
+              "type": "linear"
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": false,
+              "type": "linear"
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        }
+      ],
+      "refresh": "{{ index .Values "products" "ai" "dashboards" "request-handover" "refreshInterval" | default "5m" }}",
+      "schemaVersion": 37,
+      "style": "dark",
+      "tags": [],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "hide": 0,
+            "includeAll": false,
+            "label": "Data Source",
+            "multi": false,
+            "name": "datasource",
+            "options": [],
+            "query": "prometheus",
+            "queryValue": "",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "type": "datasource"
+          },
+          {
+            "allValue": null,
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+            "hide": {{ if .Values.grafana.sidecar.dashboards.multicluster.global.enabled }}0{{ else }}2{{ end }},
+            "includeAll": false,
+            "label": "Cluster",
+            "multi": false,
+            "name": "cluster",
+            "options": [],
+            "query": {
+              "query": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+              "refId": "Metrics-cluster-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "",
+            "sort": 1,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          }
+        ]
+      },
+      "time": {
+        "from": "{{ index .Values "products" "ai" "dashboards" "request-handover" "timeFrom" | default "now-3h" }}",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
+      "title": "Request Handover",
+      "uid": "Ra24krBVz",
+      "version": 8,
+      "weekStart": ""
+    }
+{{- end }}

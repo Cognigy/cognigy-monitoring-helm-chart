@@ -33,7 +33,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -98,9 +98,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
-          "expr": "max(max_over_time(redis_uptime_in_seconds{instance=~\"$instance\"}[$__interval]))",
+          "expr": "max(max_over_time(redis_uptime_in_seconds{instance=~\"$instance\", cluster=\"$cluster\"}[$__interval]))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -116,7 +116,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -182,9 +182,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
-          "expr": "redis_connected_clients{instance=~\"$instance\"}",
+          "expr": "redis_connected_clients{instance=~\"$instance\", cluster=\"$cluster\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -200,7 +200,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -269,9 +269,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
-          "expr": "100 * (redis_memory_used_bytes{instance=~\"$instance\"} / redis_memory_max_bytes{instance=~\"$instance\"})",
+          "expr": "100 * (redis_memory_used_bytes{instance=~\"$instance\", cluster=\"$cluster\"} / redis_memory_max_bytes{instance=~\"$instance\", cluster=\"$cluster\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -287,7 +287,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -368,10 +368,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "rate(redis_commands_processed_total{instance=~\"$instance\"}[1m])",
+          "expr": "rate(redis_commands_processed_total{instance=~\"$instance\", cluster=\"$cluster\"}[1m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -389,7 +389,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -471,9 +471,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
-          "expr": "irate(redis_keyspace_hits_total{instance=~\"$instance\"}[5m])",
+          "expr": "irate(redis_keyspace_hits_total{instance=~\"$instance\", cluster=\"$cluster\"}[5m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -487,9 +487,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
-          "expr": "irate(redis_keyspace_misses_total{instance=~\"$instance\"}[5m])",
+          "expr": "irate(redis_keyspace_misses_total{instance=~\"$instance\", cluster=\"$cluster\"}[5m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -507,7 +507,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -605,9 +605,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
-          "expr": "redis_memory_used_bytes{instance=~\"$instance\"} ",
+          "expr": "redis_memory_used_bytes{instance=~\"$instance\", cluster=\"$cluster\"} ",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "used, {{ instance }}",
@@ -619,9 +619,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
-          "expr": "redis_memory_max_bytes{instance=~\"$instance\"} ",
+          "expr": "redis_memory_max_bytes{instance=~\"$instance\", cluster=\"$cluster\"} ",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -636,7 +636,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -717,10 +717,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "rate(redis_net_input_bytes_total{instance=~\"$instance\"}[5m])",
+          "expr": "rate(redis_net_input_bytes_total{instance=~\"$instance\", cluster=\"$cluster\"}[5m])",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "input, {{ instance }}",
@@ -731,10 +731,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "rate(redis_net_output_bytes_total{instance=~\"$instance\"}[5m])",
+          "expr": "rate(redis_net_output_bytes_total{instance=~\"$instance\", cluster=\"$cluster\"}[5m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -750,7 +750,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -833,9 +833,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
-          "expr": "sum (redis_db_keys{instance=~\"$instance\"}) by (db)",
+          "expr": "sum (redis_db_keys{instance=~\"$instance\", cluster=\"$cluster\"}) by (db)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -851,7 +851,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -932,9 +932,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
-          "expr": "sum (redis_db_keys{instance=~\"$instance\"}) - sum (redis_db_keys_expiring{instance=~\"$instance\"}) ",
+          "expr": "sum (redis_db_keys{instance=~\"$instance\", cluster=\"$cluster\"}) - sum (redis_db_keys_expiring{instance=~\"$instance\", cluster=\"$cluster\"}) ",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -946,9 +946,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
-          "expr": "sum (redis_db_keys_expiring{instance=~\"$instance\"}) ",
+          "expr": "sum (redis_db_keys_expiring{instance=~\"$instance\", cluster=\"$cluster\"}) ",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -964,7 +964,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -1091,9 +1091,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
-          "expr": "sum(rate(redis_expired_keys_total{instance=~\"$instance\"}[5m])) by (instance)",
+          "expr": "sum(rate(redis_expired_keys_total{instance=~\"$instance\", cluster=\"$cluster\"}[5m])) by (instance)",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -1107,9 +1107,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
-          "expr": "sum(rate(redis_evicted_keys_total{instance=~\"$instance\"}[5m])) by (instance)",
+          "expr": "sum(rate(redis_evicted_keys_total{instance=~\"$instance\", cluster=\"$cluster\"}[5m])) by (instance)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1124,7 +1124,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -1205,9 +1205,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
-          "expr": "topk(5, irate(redis_commands_total{instance=~\"$instance\"} [1m]))",
+          "expr": "topk(5, irate(redis_commands_total{instance=~\"$instance\", cluster=\"$cluster\"} [1m]))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1223,7 +1223,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -1304,10 +1304,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(redis_connected_clients{instance=~\"$instance\"})",
+          "expr": "sum(redis_connected_clients{instance=~\"$instance\", cluster=\"$cluster\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "connected",
@@ -1317,10 +1317,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(redis_blocked_clients{instance=~\"$instance\"})",
+          "expr": "sum(redis_blocked_clients{instance=~\"$instance\", cluster=\"$cluster\"})",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1335,7 +1335,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -1416,10 +1416,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(rate(redis_commands_total{instance =~ \"$instance\"}[1m])) by (cmd)",
+          "expr": "sum(rate(redis_commands_total{instance =~ \"$instance\", cluster=\"$cluster\"}[1m])) by (cmd)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1436,7 +1436,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -1513,10 +1513,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(irate(redis_commands_duration_seconds_total{instance =~ \"$instance\"}[1m])) by (cmd) / sum(irate(redis_commands_total{instance =~ \"$instance\"}[1m])) by (cmd)",
+          "expr": "sum(irate(redis_commands_duration_seconds_total{instance =~ \"$instance\", cluster=\"$cluster\"}[1m])) by (cmd) / sum(irate(redis_commands_total{instance =~ \"$instance\", cluster=\"$cluster\"}[1m])) by (cmd)",
           "legendFormat": "{{cmd}}",
           "range": true,
           "refId": "A"
@@ -1528,7 +1528,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -1609,10 +1609,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(irate(redis_commands_duration_seconds_total{instance=~\"$instance\"}[1m])) by (cmd) != 0",
+          "expr": "sum(irate(redis_commands_duration_seconds_total{instance=~\"$instance\", cluster=\"$cluster\"}[1m])) by (cmd) != 0",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1639,15 +1639,14 @@
     "list": [
       {
         "current": {
-          "selected": false,
-          "text": "Prometheus",
-          "value": "Prometheus"
+          "text": "",
+          "value": ""
         },
         "hide": 0,
         "includeAll": false,
-        "label": "Prometheus",
+        "label": "Data Source",
         "multi": false,
-        "name": "DS_PROMETHEUS",
+        "name": "datasource",
         "options": [],
         "query": "prometheus",
         "queryValue": "",
@@ -1657,12 +1656,42 @@
         "type": "datasource"
       },
       {
+        "allValue": null,
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "$datasource"
+        },
+        "definition": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Cluster",
+        "multi": false,
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "query": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+          "refId": "Metrics-cluster-Variable-Query"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "$DS_PROMETHEUS"
+          "uid": "$datasource"
         },
-        "definition": "label_values(redis_up, namespace)",
+        "definition": "label_values(redis_up{cluster=\"$cluster\"}, namespace)",
         "hide": 0,
         "includeAll": false,
         "label": "Namespace",
@@ -1670,7 +1699,7 @@
         "name": "namespace",
         "options": [],
         "query": {
-          "query": "label_values(redis_up, namespace)",
+          "query": "label_values(redis_up{cluster=\"$cluster\"}, namespace)",
           "refId": "Prometheus-namespace-Variable-Query"
         },
         "refresh": 2,
@@ -1686,9 +1715,9 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "$DS_PROMETHEUS"
+          "uid": "$datasource"
         },
-        "definition": "label_values(redis_up{namespace=\"$namespace\"}, pod)",
+        "definition": "label_values(redis_up{cluster=\"$cluster\", namespace=\"$namespace\"}, pod)",
         "hide": 0,
         "includeAll": false,
         "label": "Pod Name",
@@ -1696,7 +1725,7 @@
         "name": "pod_name",
         "options": [],
         "query": {
-          "query": "label_values(redis_up{namespace=\"$namespace\"}, pod)",
+          "query": "label_values(redis_up{cluster=\"$cluster\", namespace=\"$namespace\"}, pod)",
           "refId": "Prometheus-pod_name-Variable-Query"
         },
         "refresh": 2,
@@ -1712,16 +1741,16 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "$DS_PROMETHEUS"
+          "uid": "$datasource"
         },
-        "definition": "label_values(redis_up{namespace=\"$namespace\", pod=\"$pod_name\"}, instance)",
+        "definition": "label_values(redis_up{cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod_name\"}, instance)",
         "hide": 0,
         "includeAll": true,
         "multi": true,
         "name": "instance",
         "options": [],
         "query": {
-          "query": "label_values(redis_up{namespace=\"$namespace\", pod=\"$pod_name\"}, instance)",
+          "query": "label_values(redis_up{cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod_name\"}, instance)",
           "refId": "Prometheus-instance-Variable-Query"
         },
         "refresh": 2,

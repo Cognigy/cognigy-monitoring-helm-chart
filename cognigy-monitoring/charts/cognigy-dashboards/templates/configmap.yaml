@@ -2,6 +2,7 @@
   {{- if $product_val.enabled }}
     {{ range $dash_key, $dash_val := $product_val.dashboards }}
       {{- if $dash_val.enabled }}
+        {{- if or (not $dash_val.yamlVersion ) ($.Values.forceDeployJsonDashboards) }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -19,7 +20,9 @@ metadata:
 data:
   {{ printf "%s-%s.json" $product_key $dash_key }}: |-
     {{- $.Files.Get (printf "dashboards/%s/%s.json" $product_key $dash_key ) | replace "{{ .Values.grafana.defaultDashboardsTimezone }}" $.Values.grafana.defaultDashboardsTimezone | nindent 4 }}
-        {{- end }}   
+
+        {{- end }}
       {{- end }}
+    {{- end }}
   {{- end }}
 {{- end }}

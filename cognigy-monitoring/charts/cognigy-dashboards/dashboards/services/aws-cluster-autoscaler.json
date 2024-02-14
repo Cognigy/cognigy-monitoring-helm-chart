@@ -33,7 +33,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -96,10 +96,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(cluster_autoscaler_nodes_count)\n",
+          "expr": "sum(cluster_autoscaler_nodes_count{cluster=\"$cluster\"})\n",
           "format": "time_series",
           "intervalFactor": 2,
           "range": true,
@@ -113,7 +113,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "description": "Shows the nodes which are ready as a percent of the total nodes",
       "fieldConfig": {
@@ -181,9 +181,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
-          "expr": "sum(cluster_autoscaler_nodes_count{state=\"ready\"})/sum(cluster_autoscaler_nodes_count)*100",
+          "expr": "sum(cluster_autoscaler_nodes_count{state=\"ready\", cluster=\"$cluster\"})/sum(cluster_autoscaler_nodes_count{cluster=\"$cluster\"})*100",
           "format": "time_series",
           "intervalFactor": 2,
           "refId": "A",
@@ -196,7 +196,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "description": "Tells you if there are unscheduled pods",
       "fieldConfig": {
@@ -253,9 +253,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
-          "expr": "sum(cluster_autoscaler_unschedulable_pods_count)",
+          "expr": "sum(cluster_autoscaler_unschedulable_pods_count{cluster=\"$cluster\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": " pods",
@@ -269,7 +269,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "description": "Is the cluster scaling up, down or ticking along okay?",
       "fieldConfig": {
@@ -354,9 +354,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
-          "expr": "sum(cluster_autoscaler_scaled_up_nodes_total)-sum(cluster_autoscaler_scaled_down_nodes_total)",
+          "expr": "sum(cluster_autoscaler_scaled_up_nodes_total{cluster=\"$cluster\"})-sum(cluster_autoscaler_scaled_down_nodes_total{cluster=\"$cluster\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -370,7 +370,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -439,9 +439,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
-          "expr": "sum(cluster_autoscaler_cluster_safe_to_autoscale)",
+          "expr": "sum(cluster_autoscaler_cluster_safe_to_autoscale{cluster=\"$cluster\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -455,7 +455,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -518,9 +518,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
-          "expr": "sum(time()-cluster_autoscaler_last_activity{activity=\"scaleDown\"})",
+          "expr": "sum(time()-cluster_autoscaler_last_activity{activity=\"scaleDown\", cluster=\"$cluster\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -534,7 +534,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -597,9 +597,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
-          "expr": "sum(time()-cluster_autoscaler_last_activity{activity=\"autoscaling\"})",
+          "expr": "sum(time()-cluster_autoscaler_last_activity{activity=\"autoscaling\", cluster=\"$cluster\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -613,7 +613,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -694,9 +694,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
-          "expr": "sum(cluster_autoscaler_unneeded_nodes_count)",
+          "expr": "sum(cluster_autoscaler_unneeded_nodes_count{cluster=\"$cluster\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "unneeded nodes",
@@ -706,9 +706,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
-          "expr": "sum(cluster_autoscaler_nodes_count)\n",
+          "expr": "sum(cluster_autoscaler_nodes_count{cluster=\"$cluster\"})\n",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "total nodes",
@@ -722,7 +722,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "description": "Shows the state of the nodes as scaling happens",
       "fieldConfig": {
@@ -802,11 +802,11 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "round(sum(increase(cluster_autoscaler_scaled_up_nodes_total[5m])), 1)",
+          "expr": "round(sum(increase(cluster_autoscaler_scaled_up_nodes_total{cluster=\"$cluster\"}[5m])), 1)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 10,
@@ -819,10 +819,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "round(sum(increase(cluster_autoscaler_scaled_down_nodes_total[5m])), 1)",
+          "expr": "round(sum(increase(cluster_autoscaler_scaled_down_nodes_total{cluster=\"$cluster\"}[5m])), 1)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 10,
@@ -839,7 +839,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "description": "Shows the state of the nodes as scaling happens",
       "fieldConfig": {
@@ -921,9 +921,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
-          "expr": "sum(cluster_autoscaler_nodes_count{state=\"ready\"})",
+          "expr": "sum(cluster_autoscaler_nodes_count{state=\"ready\", cluster=\"$cluster\"})",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 10,
@@ -935,9 +935,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
-          "expr": "sum(cluster_autoscaler_nodes_count{state=\"unready\"})",
+          "expr": "sum(cluster_autoscaler_nodes_count{state=\"unready\", cluster=\"$cluster\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "unready",
@@ -947,9 +947,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
-          "expr": "sum(cluster_autoscaler_nodes_count{state=\"notStarted\"})\n",
+          "expr": "sum(cluster_autoscaler_nodes_count{state=\"notStarted\", cluster=\"$cluster\"})\n",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "not started",
@@ -963,7 +963,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "description": "Shows the total number of CPU core and Memory in the cluster",
       "fieldConfig": {
@@ -1045,10 +1045,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(cluster_autoscaler_cluster_cpu_current_cores)",
+          "expr": "sum(cluster_autoscaler_cluster_cpu_current_cores{cluster=\"$cluster\"})",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 10,
@@ -1061,10 +1061,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(cluster_autoscaler_cluster_memory_current_bytes/1024/1024/1024)",
+          "expr": "sum(cluster_autoscaler_cluster_memory_current_bytes{cluster=\"$cluster\"}/1024/1024/1024)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 10,
@@ -1081,7 +1081,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "description": "Shows the evicted and unscheduled pods",
       "fieldConfig": {
@@ -1163,9 +1163,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
-          "expr": "sum(cluster_autoscaler_evicted_pods_total)",
+          "expr": "sum(increase(cluster_autoscaler_evicted_pods_total{cluster=\"$cluster\"}[5m]))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 10,
@@ -1177,9 +1177,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
-          "expr": "sum(cluster_autoscaler_unschedulable_pods_count)",
+          "expr": "sum(cluster_autoscaler_unschedulable_pods_count{cluster=\"$cluster\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "unscheduled pods",
@@ -1200,7 +1200,56 @@
     "Autoscaler"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Data Source",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "queryValue": "",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "$datasource"
+        },
+        "definition": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Cluster",
+        "multi": false,
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "query": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+          "refId": "Metrics-cluster-Variable-Query"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
   },
   "time": {
     "from": "now-1h",

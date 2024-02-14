@@ -5,7 +5,7 @@
         "builtIn": 1,
         "datasource": {
           "type": "datasource",
-          "uid": "${datasource}"
+          "uid": "$datasource"
         },
         "enable": true,
         "hide": true,
@@ -32,7 +32,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "Cognigy Products versions",
       "fieldConfig": {
@@ -111,7 +111,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "expr": "avg by (cluster, git_version, cloud, region, releaseVersion) (cognigy_ai_release_version{cloud=~\"$cloud\", cluster=~\"$cluster\"})",
@@ -220,7 +220,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "Timeline of Cognigy Product Upgrades",
       "fieldConfig": {
@@ -279,7 +279,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -298,7 +298,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "Kubernetes data plane versions",
       "fieldConfig": {
@@ -377,7 +377,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "expr": "avg by (cluster, git_version, cloud, region) (kubernetes_build_info{cloud=~\"$cloud\", cluster=~\"$cluster\", job=\"kubelet\"})",
@@ -478,7 +478,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "Timeline of data plane (kubelet) upgrades of Kubernetes clusters",
       "fieldConfig": {
@@ -537,7 +537,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -564,6 +564,89 @@
   ],
   "templating": {
     "list": [
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Data Source",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "queryValue": "",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "$datasource"
+        },
+        "definition": "label_values(kube_node_status_capacity{}, cloud)",
+        "hide": 0,
+        "includeAll": true,
+        "multi": true,
+        "name": "cloud",
+        "options": [],
+        "query": {
+          "query": "label_values(kube_node_status_capacity{}, cloud)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "$datasource"
+        },
+        "definition": "label_values(kube_node_status_capacity{cloud=~\"$cloud\"}, cluster)",
+        "hide": 2,
+        "includeAll": true,
+        "label": "Cluster",
+        "multi": true,
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "query": "label_values(kube_node_status_capacity{cloud=~\"$cloud\"}, cluster)",
+          "refId": "Metrics-cluster-Variable-Query"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
       {
         "auto": true,
         "auto_count": 1,
@@ -648,85 +731,6 @@
         "query": ".12",
         "skipUrlSync": false,
         "type": "constant"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "0-thanos-prod",
-          "value": "0-thanos-prod"
-        },
-        "hide": 0,
-        "includeAll": false,
-        "multi": false,
-        "name": "datasource",
-        "options": [],
-        "query": "prometheus",
-        "queryValue": "",
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "type": "datasource"
-      },
-      {
-        "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${datasource}"
-        },
-        "definition": "label_values(kube_node_status_capacity{}, cloud)",
-        "hide": 0,
-        "includeAll": true,
-        "multi": true,
-        "name": "cloud",
-        "options": [],
-        "query": {
-          "query": "label_values(kube_node_status_capacity{}, cloud)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${datasource}"
-        },
-        "definition": "label_values(kube_node_status_capacity{cloud=~\"$cloud\"}, cluster)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "cluster",
-        "multi": true,
-        "name": "cluster",
-        "options": [],
-        "query": {
-          "query": "label_values(kube_node_status_capacity{cloud=~\"$cloud\"}, cluster)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
       }
     ]
   },

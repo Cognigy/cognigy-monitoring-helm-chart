@@ -109,6 +109,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
@@ -177,6 +178,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
@@ -245,6 +247,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
@@ -313,6 +316,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
@@ -329,7 +333,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "Free Nodes in Default Pool for RAM, CPU and Spare Nodes (safely removable from the cluster) ",
       "fieldConfig": {
@@ -383,7 +387,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "expr": "(sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node!~\"$non_default_nodes\"}) - sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\", node!~\"$non_default_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)))/max(kube_node_status_capacity{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\", node!~\"$non_default_nodes\"})",
@@ -397,7 +401,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -480,6 +484,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
@@ -548,6 +553,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
@@ -616,6 +622,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
@@ -684,6 +691,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
@@ -752,6 +760,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
@@ -820,6 +829,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
@@ -836,7 +846,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "Free Nodes in Non-Default Pool for RAM, CPU and Spare Nodes (safely removable from the cluster) ",
       "fieldConfig": {
@@ -890,7 +900,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "expr": "(sum(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\",  node=~\"$non_default_nodes\"}) - sum (max by (namespace, pod, container) (kube_pod_container_resource_requests{resource=\"cpu\",job=\"kube-state-metrics\", cluster=\"$cluster\",  node=~\"$non_default_nodes\"}) * on(namespace, pod) group_left() max by (namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)))/max(kube_node_status_capacity{job=\"kube-state-metrics\",resource=\"cpu\",cluster=\"$cluster\",  node=~\"$non_default_nodes\"})",
@@ -904,7 +914,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -987,6 +997,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
@@ -1055,6 +1066,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
@@ -1398,6 +1410,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "expr": "sum(kube_pod_owner{job=\"kube-state-metrics\", cluster=\"$cluster\"}) by (namespace)",
@@ -1410,6 +1423,7 @@
         },
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "expr": "count(avg(namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\"}) by (workload, namespace)) by (namespace)",
@@ -1422,6 +1436,7 @@
         },
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\"}) by (namespace)",
@@ -1434,6 +1449,7 @@
         },
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "expr": "sum(namespace_cpu:kube_pod_container_resource_requests:sum{cluster=\"$cluster\"}) by (namespace)",
@@ -1446,6 +1462,7 @@
         },
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\"}) by (namespace) / sum(namespace_cpu:kube_pod_container_resource_requests:sum{cluster=\"$cluster\"}) by (namespace)",
@@ -1458,6 +1475,7 @@
         },
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "expr": "sum(namespace_cpu:kube_pod_container_resource_limits:sum{cluster=\"$cluster\"}) by (namespace)",
@@ -1470,6 +1488,7 @@
         },
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\"}) by (namespace) / sum(namespace_cpu:kube_pod_container_resource_limits:sum{cluster=\"$cluster\"}) by (namespace)",
@@ -1779,6 +1798,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "expr": "sum(kube_pod_owner{job=\"kube-state-metrics\", cluster=\"$cluster\"}) by (namespace)",
@@ -1791,6 +1811,7 @@
         },
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "expr": "count(avg(namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\"}) by (workload, namespace)) by (namespace)",
@@ -1803,6 +1824,7 @@
         },
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "expr": "sum(container_memory_rss{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\", container!=\"\"}) by (namespace)",
@@ -1815,6 +1837,7 @@
         },
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "expr": "sum(namespace_memory:kube_pod_container_resource_requests:sum{cluster=\"$cluster\"}) by (namespace)",
@@ -1827,6 +1850,7 @@
         },
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "expr": "sum(container_memory_rss{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\", container!=\"\"}) by (namespace) / sum(namespace_memory:kube_pod_container_resource_requests:sum{cluster=\"$cluster\"}) by (namespace)",
@@ -1839,6 +1863,7 @@
         },
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "expr": "sum(namespace_memory:kube_pod_container_resource_limits:sum{cluster=\"$cluster\"}) by (namespace)",
@@ -1851,6 +1876,7 @@
         },
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "expr": "sum(container_memory_rss{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\", container!=\"\"}) by (namespace) / sum(namespace_memory:kube_pod_container_resource_limits:sum{cluster=\"$cluster\"}) by (namespace)",
@@ -1933,6 +1959,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
@@ -2026,6 +2053,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
@@ -2171,6 +2199,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
@@ -2264,6 +2293,7 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
@@ -2367,12 +2397,13 @@
           "value": "app"
         },
         "datasource": {
-          "type": "datasource",
+          "type": "prometheus",
           "uid": "$datasource"
         },
         "definition": "",
         "hide": 0,
         "includeAll": false,
+        "label": "Cluster",
         "multi": false,
         "name": "cluster",
         "options": [],
@@ -2401,7 +2432,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "${datasource}"
+          "uid": "$datasource"
         },
         "definition": "label_values(kube_node_spec_taint{cluster=\"$cluster\"}, node)",
         "description": "Nodes with specific taints that do not belong to \"default\" pool",

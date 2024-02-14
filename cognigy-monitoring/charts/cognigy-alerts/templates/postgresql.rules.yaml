@@ -54,6 +54,20 @@ spec:
           description: "PostgreSQL has dead-locks\n  VALUE = {{`{{`}} $value }}\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
       {{- end }}
 
+      {{- if (.Values.rules.postgresql.tooManyLocks.enabled ) }}
+      - alert: PostgresqlTooManyLocksAcquired
+        expr: (sum by(pod)(pg_locks_count))/(avg by (pod) (pg_settings_max_locks_per_transaction * pg_settings_max_connections))
+              > {{ $.Values.rules.postgresql.tooManyLocks.threshold }}
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Postgresql too many locks acquired (instance {{`{{`}} $labels.pod }})
+          description: "Too many locks acquired on the database
+          \n  VALUE = {{`{{`}} $value }}\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}
+          If this alert happens frequently, increase the postgres setting max_locks_per_transaction"
+      {{- end }}
+
       {{- if (.Values.rules.postgresql.unusedReplicationSlot.enabled ) }}
       - alert: PostgresqlUnusedReplicationSlot
         expr: pg_replication_slots_active == 0

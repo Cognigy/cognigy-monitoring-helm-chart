@@ -1,0 +1,3651 @@
+{{- /*
+Generated from json dashboard 'dashboards/services/postgresql-patroni.json'.
+Do not change in-place! In order to change this file first modify the json dashboard 'dashboards/services/postgresql-patroni.json'
+and then run the 'scripts/convert-dashboard/convert-dashboard.py' script.
+*/ -}}
+{{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
+{{- if and 
+    (index .Values "products" "services" "enabled")
+    (index .Values "products" "services" "dashboards" "postgresql-patroni" "enabled")
+    (index .Values "products" "services" "dashboards" "postgresql-patroni" "yamlVersion")
+    (not .Values.forceDeployJsonDashboards)
+    (semverCompare ">=1.14.0-0" $kubeTargetVersion)
+    (semverCompare "<9.9.9-9" $kubeTargetVersion)
+     
+}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ template "cognigy-dashboards.namespace" . }}
+  name: {{ printf "%s-%s" (include "cognigy-dashboards.fullname" $) "postgresql-patroni" | trunc 63 | trimSuffix "-" }}
+  {{- with $.Values.grafana.sidecar.dashboards.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- if $.Values.grafana.sidecar.dashboards.label }}
+    {{ $.Values.grafana.sidecar.dashboards.label }}: {{ ternary $.Values.grafana.sidecar.dashboards.labelValue "1" (not (empty $.Values.grafana.sidecar.dashboards.labelValue)) | quote }}
+    {{- end }}
+    app: {{ template "cognigy-dashboards.name" $ }}-grafana
+    {{- include "cognigy-dashboards.labels" $ | nindent 4 }}
+data:
+  postgresql-patroni.json: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "datasource",
+              "uid": "grafana"
+            },
+            "enable": true,
+            "hide": false,
+            "iconColor": "#e0752d",
+            "limit": 100,
+            "matchAny": true,
+            "name": "PMM Annotations",
+            "showIn": 0,
+            "tags": [
+              "pmm_annotation",
+              "$service_name"
+            ],
+            "target": {
+              "limit": 100,
+              "matchAny": true,
+              "tags": [
+                "pmm_annotation",
+                "$service_name"
+              ],
+              "type": "tags"
+            },
+            "type": "tags"
+          },
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "datasource",
+              "uid": "grafana"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "#6ed0e0",
+            "limit": 100,
+            "name": "Annotations & Alerts",
+            "showIn": 0,
+            "tags": [],
+            "target": {
+              "limit": 100,
+              "matchAny": false,
+              "tags": [],
+              "type": "dashboard"
+            },
+            "type": "dashboard"
+          }
+        ]
+      },
+      "description": "Patroni dashboard for use with Percona Monitoring and Management version 2.",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "gnetId": 18870,
+      "graphTooltip": 1,
+      "id": 95,
+      "links": [
+        {
+          "icon": "doc",
+          "includeVars": true,
+          "keepTime": true,
+          "tags": [
+            "Home"
+          ],
+          "targetBlank": false,
+          "title": "Home",
+          "type": "link",
+          "url": "/graph/d/pmm-home/home-dashboard"
+        },
+        {
+          "icon": "dashboard",
+          "includeVars": true,
+          "keepTime": true,
+          "tags": [
+            "Query Analytics"
+          ],
+          "targetBlank": false,
+          "title": "Query Analytics",
+          "type": "link",
+          "url": "/graph/d/pmm-qan/pmm-query-analytics"
+        },
+        {
+          "icon": "bolt",
+          "includeVars": true,
+          "keepTime": true,
+          "tags": [
+            "Compare"
+          ],
+          "targetBlank": false,
+          "title": "Compare",
+          "type": "link",
+          "url": "/graph/d/postgresql-instance-compare/postgresql-instances-compare"
+        },
+        {
+          "asDropdown": true,
+          "includeVars": true,
+          "keepTime": true,
+          "tags": [
+            "PostgreSQL"
+          ],
+          "targetBlank": false,
+          "title": "PostgreSQL",
+          "type": "dashboards"
+        },
+        {
+          "asDropdown": true,
+          "includeVars": false,
+          "keepTime": true,
+          "tags": [
+            "Services"
+          ],
+          "targetBlank": false,
+          "title": "Services",
+          "type": "dashboards"
+        },
+        {
+          "asDropdown": true,
+          "includeVars": false,
+          "keepTime": true,
+          "tags": [
+            "PMM"
+          ],
+          "targetBlank": false,
+          "title": "PMM",
+          "type": "dashboards"
+        }
+      ],
+      "liveNow": false,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 30,
+          "links": [],
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "<h1 style='color:#5991A7;font-weight:bold;text-align:center;font-style:italic'>Data for <span style='color:#e68a00'>$service_name</span> with <span style='color:#e68a00'>$interval</span> resolution</h1>",
+            "mode": "html"
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "refId": "A"
+            }
+          ],
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Reports Patroni version number.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "text": "NO"
+                    },
+                    "1": {
+                      "text": "YES"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 0
+                  },
+                  {
+                    "color": "#299c46",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 0,
+            "y": 3
+          },
+          "id": 63,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "patroni_version{cluster=\"$cluster\",service_name=~\"$service_name\",scope=~\"$scope_name\"}",
+              "format": "time_series",
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Patroni Version",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "index": 0,
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "dateTimeFromNow"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 4,
+            "y": 3
+          },
+          "id": 1012,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {
+              "valueSize": 20
+            },
+            "textMode": "value"
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "patroni_dcs_last_seen{cluster=\"$cluster\",service_name=~\"$service_name\",scope=~\"$scope_name\"}*1000",
+              "format": "time_series",
+              "instant": true,
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Patroni DCS Last Seen",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "text",
+                      "index": 1,
+                      "text": "No"
+                    },
+                    "1": {
+                      "color": "text",
+                      "index": 2,
+                      "text": "Yes"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "index": 0,
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 8,
+            "y": 3
+          },
+          "id": 1005,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {
+              "valueSize": 20
+            },
+            "textMode": "value"
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "patroni_primary{cluster=\"$cluster\",service_name=~\"$service_name\",scope=~\"$scope_name\"}",
+              "format": "time_series",
+              "instant": true,
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "title": "Patroni Leader",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "text",
+                      "index": 1,
+                      "text": "No"
+                    },
+                    "1": {
+                      "color": "text",
+                      "index": 2,
+                      "text": "Yes"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "index": 0,
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 12,
+            "y": 3
+          },
+          "id": 1007,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {
+              "valueSize": 20
+            },
+            "textMode": "value"
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "patroni_replica{cluster=\"$cluster\",service_name=~\"$service_name\",scope=~\"$scope_name\"}",
+              "format": "time_series",
+              "instant": true,
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "title": "Patroni Replica",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "text",
+                      "index": 1,
+                      "text": "No"
+                    },
+                    "1": {
+                      "color": "text",
+                      "index": 2,
+                      "text": "Yes"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "index": 0,
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 16,
+            "y": 3
+          },
+          "id": 1006,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {
+              "valueSize": 20
+            },
+            "textMode": "value"
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "patroni_standby_leader{cluster=\"$cluster\",service_name=~\"$service_name\",scope=~\"$scope_name\"}",
+              "format": "time_series",
+              "instant": true,
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "title": "Patroni Standby Leader",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "text",
+                      "index": 1,
+                      "text": "Enabled"
+                    },
+                    "1": {
+                      "color": "text",
+                      "index": 2,
+                      "text": "Disabled"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "index": 0,
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 20,
+            "y": 3
+          },
+          "id": 1014,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {
+              "valueSize": 20
+            },
+            "textMode": "value"
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "patroni_is_paused{cluster=\"$cluster\",service_name=~\"$service_name\",scope=~\"$scope_name\"}",
+              "format": "time_series",
+              "instant": true,
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "title": "Patroni Autofailover",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Reports Patroni version number.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "text": "NO"
+                    },
+                    "1": {
+                      "text": "YES"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 0
+                  },
+                  {
+                    "color": "#299c46",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 0,
+            "y": 6
+          },
+          "id": 1010,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "patroni_postgres_server_version{cluster=\"$cluster\",service_name=~\"$service_name\",scope=~\"$scope_name\"}",
+              "format": "time_series",
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "PostgreSQL Version",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "index": 0,
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "dateTimeFromNow"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 4,
+            "y": 6
+          },
+          "id": 1009,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {
+              "valueSize": 20
+            },
+            "textMode": "value"
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "patroni_postmaster_start_time{cluster=\"$cluster\",service_name=~\"$service_name\",scope=~\"$scope_name\"}*1000",
+              "format": "time_series",
+              "instant": true,
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "title": "PostgreSQL Uptime",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "index": 0,
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "patroni_postgres_running.*"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "options": {
+                          "0": {
+                            "color": "dark-red",
+                            "index": 0,
+                            "text": "No"
+                          },
+                          "1": {
+                            "color": "dark-green",
+                            "index": 1,
+                            "text": "Yes"
+                          }
+                        },
+                        "type": "value"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 8,
+            "y": 6
+          },
+          "id": 86,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {
+              "valueSize": 20
+            },
+            "textMode": "value"
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "patroni_postgres_running{cluster=\"$cluster\",service_name=~\"$service_name\",scope=~\"$scope_name\"}",
+              "format": "time_series",
+              "instant": true,
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "patroni_postgres_timeline{cluster=\"$cluster\",service_name=~\"$service_name\",scope=~\"$scope_name\"}",
+              "hide": false,
+              "instant": true,
+              "interval": "$interval",
+              "legendFormat": "",
+              "range": false,
+              "refId": "B"
+            }
+          ],
+          "title": "PostgreSQL Running (Timeline)",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "dark-green",
+                      "index": 1,
+                      "text": "No"
+                    },
+                    "1": {
+                      "color": "dark-orange",
+                      "index": 2,
+                      "text": "Yes"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "index": 0,
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 12,
+            "y": 6
+          },
+          "id": 1013,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {
+              "valueSize": 20
+            },
+            "textMode": "value"
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "patroni_pending_restart{cluster=\"$cluster\",service_name=~\"$service_name\",scope=~\"$scope_name\"}",
+              "format": "time_series",
+              "instant": true,
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "title": "PostgreSQL Pending Restart",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "dark-green",
+                      "index": 1,
+                      "text": "Enabled"
+                    },
+                    "1": {
+                      "color": "dark-red",
+                      "index": 2,
+                      "text": "Paused"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "index": 0,
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 16,
+            "y": 6
+          },
+          "id": 1016,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {
+              "valueSize": 20
+            },
+            "textMode": "value"
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "patroni_xlog_paused{cluster=\"$cluster\",service_name=~\"$service_name\",scope=~\"$scope_name\"}",
+              "format": "time_series",
+              "instant": true,
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "title": "PostgreSQL WAL Replay",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "text",
+                      "index": 1,
+                      "text": "No"
+                    },
+                    "1": {
+                      "color": "text",
+                      "index": 2,
+                      "text": "Yes"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "index": 0,
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 20,
+            "y": 6
+          },
+          "id": 1008,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {
+              "valueSize": 20
+            },
+            "textMode": "value"
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "patroni_sync_standby{cluster=\"$cluster\",service_name=~\"$service_name\",scope=~\"$scope_name\"}",
+              "format": "time_series",
+              "instant": true,
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "title": "Sync Standby",
+          "type": "stat"
+        },
+        {
+          "collapsed": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 9
+          },
+          "id": 74,
+          "panels": [],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "refId": "A"
+            }
+          ],
+          "title": "Patroni",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "decimals": 0,
+              "links": [],
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Total "
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "#bf1b00",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 10
+          },
+          "id": 23,
+          "links": [],
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max",
+                "min"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "patroni_primary{cluster=\"$cluster\",scope=~\"$scope_name\"}",
+              "format": "time_series",
+              "hide": false,
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Patroni Primary Node",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "decimals": 0,
+              "links": [],
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Total "
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "#bf1b00",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 10
+          },
+          "id": 1015,
+          "links": [],
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max",
+                "min"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "patroni_replica{cluster=\"$cluster\",scope=~\"$scope_name\"}",
+              "format": "time_series",
+              "hide": false,
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Patroni Secondary Nodes",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 18
+          },
+          "id": 76,
+          "panels": [],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "refId": "A"
+            }
+          ],
+          "title": "PostgreSQL",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "decimals": 2,
+              "links": [],
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 19
+          },
+          "id": 36,
+          "links": [],
+          "options": {
+            "legend": {
+              "calcs": [
+                "max",
+                "min"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "patroni_xlog_paused{cluster=\"$cluster\",scope=~\"$scope_name\"}",
+              "format": "time_series",
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "WAL Replay Paused",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "decimals": 2,
+              "links": [],
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 19
+          },
+          "id": 1017,
+          "links": [],
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max",
+                "min"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "patroni_xlog_location{cluster=\"$cluster\",scope=~\"$scope_name\"}",
+              "format": "time_series",
+              "instant": false,
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Primary WAL Location",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "decimals": 2,
+              "links": [],
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 27
+          },
+          "id": 1018,
+          "links": [],
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max",
+                "min"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "patroni_xlog_received_location{cluster=\"$cluster\",scope=~\"$scope_name\"}",
+              "format": "time_series",
+              "instant": false,
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Replicas Received WAL Location",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "decimals": 2,
+              "links": [],
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 27
+          },
+          "id": 1019,
+          "links": [],
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max",
+                "min"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "patroni_xlog_replayed_location{cluster=\"$cluster\",scope=~\"$scope_name\"}",
+              "format": "time_series",
+              "instant": false,
+              "interval": "$interval",
+              "intervalFactor": 1,
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Replicas Replayed WAL Location",
+          "type": "timeseries"
+        }
+      ],
+      "refresh": "{{ index .Values "products" "services" "dashboards" "postgresql-patroni" "refreshInterval" | default "5m" }}",
+      "schemaVersion": 37,
+      "style": "dark",
+      "tags": [],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "hide": 0,
+            "includeAll": false,
+            "label": "Data Source",
+            "multi": false,
+            "name": "datasource",
+            "options": [],
+            "query": "prometheus",
+            "queryValue": "",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "type": "datasource"
+          },
+          {
+            "allValue": null,
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+            "hide": {{ if .Values.grafana.sidecar.dashboards.multicluster.global.enabled }}0{{ else }}2{{ end }},
+            "includeAll": false,
+            "label": "Cluster",
+            "multi": false,
+            "name": "cluster",
+            "options": [],
+            "query": {
+              "query": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+              "refId": "Metrics-cluster-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "auto": true,
+            "auto_count": 200,
+            "auto_min": "1s",
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "hide": 0,
+            "label": "Interval",
+            "name": "interval",
+            "options": [
+              {
+                "selected": true,
+                "text": "auto",
+                "value": "$__auto_interval_interval"
+              },
+              {
+                "selected": false,
+                "text": "1s",
+                "value": "1s"
+              },
+              {
+                "selected": false,
+                "text": "5s",
+                "value": "5s"
+              },
+              {
+                "selected": false,
+                "text": "1m",
+                "value": "1m"
+              },
+              {
+                "selected": false,
+                "text": "5m",
+                "value": "5m"
+              },
+              {
+                "selected": false,
+                "text": "1h",
+                "value": "1h"
+              },
+              {
+                "selected": false,
+                "text": "6h",
+                "value": "6h"
+              },
+              {
+                "selected": false,
+                "text": "1d",
+                "value": "1d"
+              }
+            ],
+            "query": "1s,5s,1m,5m,1h,6h,1d",
+            "refresh": 2,
+            "skipUrlSync": false,
+            "type": "interval"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "work_mem",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_work_mem_bytes{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-work_mem-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(pg_up{cluster=\"$cluster\",service_name=~\"$service_name\"},node_name)",
+            "hide": 2,
+            "includeAll": false,
+            "label": "Node Name",
+            "multi": false,
+            "name": "node_name",
+            "options": [],
+            "query": {
+              "query": "label_values(pg_up{cluster=\"$cluster\",service_name=~\"$service_name\"},node_name)",
+              "refId": "Metrics-node_name-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(patroni_version{cluster=\"$cluster\"}, service_name)",
+            "hide": 0,
+            "includeAll": false,
+            "label": "Service Name",
+            "multi": false,
+            "name": "service_name",
+            "options": [],
+            "query": {
+              "query": "label_values(patroni_version{cluster=\"$cluster\"}, service_name)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "version",
+            "options": [],
+            "query": {
+              "query": "label_values(pg_static{cluster=\"$cluster\",service_name=~\"$service_name\"},version)",
+              "refId": "Metrics-version-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 2,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "max_connections",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_max_connections{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-max_connections-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "shared_buffers",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_shared_buffers_bytes{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-shared_buffers-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "wal_buffers",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_wal_buffers_bytes{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-wal_buffers-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "wal_segment_size",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_wal_segment_size_bytes{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-wal_segment_size-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "maintenance_work_mem",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_maintenance_work_mem_bytes{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-maintenance_work_mem-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "block_size",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_block_size{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-block_size-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "checkpoint_segments",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_checkpoint_segments{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-checkpoint_segments-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "checkpoint_timeout",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_checkpoint_timeout_seconds{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-checkpoint_timeout-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "fsync",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_fsync{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-fsync-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "default_statistics_target",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_default_statistics_target{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-default_statistics_target-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "seq_page_cost",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_seq_page_cost{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-seq_page_cost-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "random_page_cost",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_random_page_cost{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-random_page_cost-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "effective_cache_size",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_effective_cache_size_bytes{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-effective_cache_size-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "effective_io_concurrency",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_effective_io_concurrency{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-effective_io_concurrency-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "autovacuum",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_autovacuum{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-autovacuum-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "autovacuum_analyze_scale_factor",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_autovacuum_analyze_scale_factor{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-autovacuum_analyze_scale_factor-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "autovacuum_analyze_threshold",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_autovacuum_analyze_threshold{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-autovacuum_analyze_threshold-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "autovacuum_vacuum_scale_factor",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_autovacuum_vacuum_scale_factor{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-autovacuum_vacuum_scale_factor-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "autovacuum_vacuum_threshold",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_autovacuum_vacuum_threshold{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-autovacuum_vacuum_threshold-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "autovacuum_vacuum_cost_limit",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_autovacuum_vacuum_cost_limit{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-autovacuum_vacuum_cost_limit-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "autovacuum_vacuum_cost_delay",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_autovacuum_vacuum_cost_delay_seconds{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-autovacuum_vacuum_cost_delay-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "autovacuum_max_workers",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_autovacuum_max_workers{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-autovacuum_max_workers-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "autovacuum_naptime",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_autovacuum_naptime_seconds{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-autovacuum_naptime-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "autovacuum_freeze_max_age",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_autovacuum_freeze_max_age{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-autovacuum_freeze_max_age-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "logging_collector",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_logging_collector{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-logging_collector-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "log_min_duration_statement",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_log_min_duration_statement_seconds{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-log_min_duration_statement-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "log_duration",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_log_duration{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-log_duration-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "log_lock_waits",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_log_lock_waits{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-log_lock_waits-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "max_wal_senders",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_max_wal_senders{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-max_wal_senders-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "max_wal_size",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_max_wal_size_bytes{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-max_wal_size-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "min_wal_size",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_min_wal_size_bytes{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-min_wal_size-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "wal_compression",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_wal_compression{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-wal_compression-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "max_worker_processes",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_max_worker_processes{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-max_worker_processes-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "max_parallel_workers_per_gather",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_max_parallel_workers_per_gather{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-max_parallel_workers_per_gather-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "max_parallel_workers",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_max_parallel_workers_per_gather{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-max_parallel_workers-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "autovacuum_work_mem",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_autovacuum_work_mem_bytes{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-autovacuum_work_mem-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "autovacuum_multixact_freeze_max_age",
+            "options": [],
+            "query": {
+              "query": "query_result(pg_settings_autovacuum_multixact_freeze_max_age{cluster=\"$cluster\",service_name=~\"$service_name\"})",
+              "refId": "Metrics-autovacuum_multixact_freeze_max_age-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "/ ([0-9\\.]+)/",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "allValue": ".*",
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values({__name__=~\"pg_up|mysql_up|mongodb_up|proxysql_mysql_status_active_transactions\", cluster=\"$cluster\"}, environment)",
+            "hide": 2,
+            "includeAll": true,
+            "label": "Environment",
+            "multi": true,
+            "name": "environment",
+            "options": [],
+            "query": {
+              "query": "label_values({__name__=~\"pg_up|mysql_up|mongodb_up|proxysql_mysql_status_active_transactions\", cluster=\"$cluster\"}, environment)",
+              "refId": "Metrics-environment-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values({__name__=~\"pg_up|mysql_up|mongodb_up|proxysql_mysql_status_active_transactions\", cluster=\"$cluster\"}, replication_set)",
+            "hide": 2,
+            "includeAll": true,
+            "label": "Replication Set",
+            "multi": true,
+            "name": "replication_set",
+            "options": [],
+            "query": {
+              "query": "label_values({__name__=~\"pg_up|mysql_up|mongodb_up|proxysql_mysql_status_active_transactions\", cluster=\"$cluster\"}, replication_set)",
+              "refId": "Metrics-replication_set-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values({__name__=~\"pg_up|mysql_up|mongodb_up|proxysql_mysql_status_active_transactions\", cluster=\"$cluster\"}, node_type)",
+            "hide": 2,
+            "includeAll": true,
+            "label": "Type",
+            "multi": true,
+            "name": "node_type",
+            "options": [],
+            "query": {
+              "query": "label_values({__name__=~\"pg_up|mysql_up|mongodb_up|proxysql_mysql_status_active_transactions\", cluster=\"$cluster\"}, node_type)",
+              "refId": "Metrics-node_type-Variable-Query"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values({__name__=~\"pg_up|mysql_up|mongodb_up|proxysql_mysql_status_active_transactions\", cluster=\"$cluster\"}, service_type)",
+            "hide": 2,
+            "includeAll": true,
+            "label": "Type",
+            "multi": true,
+            "name": "service_type",
+            "options": [],
+            "query": {
+              "query": "label_values({__name__=~\"pg_up|mysql_up|mongodb_up|proxysql_mysql_status_active_transactions\", cluster=\"$cluster\"}, service_type)",
+              "refId": "Metrics-service_type-Variable-Query"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(mysql_info_schema_user_statistics_connected_time_seconds_total{service_name=\"$service_name\"},user)",
+            "hide": 2,
+            "includeAll": true,
+            "label": "Username",
+            "multi": true,
+            "name": "username",
+            "options": [],
+            "query": {
+              "query": "label_values(mysql_info_schema_user_statistics_connected_time_seconds_total{service_name=\"$service_name\"},user)",
+              "refId": "Metrics-username-Variable-Query"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values({__name__=~\"pg_up|mysql_up|mongodb_up|proxysql_mysql_status_active_transactions\", cluster=\"$cluster\"}, schema)",
+            "hide": 2,
+            "includeAll": true,
+            "label": "Schema",
+            "multi": true,
+            "name": "schema",
+            "options": [],
+            "query": {
+              "query": "label_values({__name__=~\"pg_up|mysql_up|mongodb_up|proxysql_mysql_status_active_transactions\", cluster=\"$cluster\"}, schema)",
+              "refId": "Metrics-schema-Variable-Query"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(pg_up{cluster=\"$cluster\",service_name=\"$service_name\"}, service_id)",
+            "hide": 2,
+            "includeAll": false,
+            "label": "Service ID",
+            "multi": false,
+            "name": "service_id",
+            "options": [],
+            "query": {
+              "query": "label_values(pg_up{cluster=\"$cluster\",service_name=\"$service_name\"}, service_id)",
+              "refId": "Metrics-service_id-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(patroni_version{cluster=\"$cluster\"}, scope)",
+            "hide": 0,
+            "includeAll": false,
+            "label": "Scope Name",
+            "multi": false,
+            "name": "scope_name",
+            "options": [],
+            "query": {
+              "query": "label_values(patroni_version{cluster=\"$cluster\"}, scope)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 5,
+            "tagValuesQuery": "",
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          }
+        ]
+      },
+      "time": {
+        "from": "{{ index .Values "products" "services" "dashboards" "postgresql-patroni" "timeFrom" | default "now-3h" }}",
+        "to": "now"
+      },
+      "timepicker": {
+        "hidden": false,
+        "refresh_intervals": [
+          "5s",
+          "10s",
+          "30s",
+          "1m",
+          "5m",
+          "15m",
+          "30m",
+          "1h",
+          "2h",
+          "1d"
+        ],
+        "time_options": [
+          "5m",
+          "15m",
+          "1h",
+          "6h",
+          "12h",
+          "24h",
+          "2d",
+          "7d",
+          "30d"
+        ]
+      },
+      "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
+      "title": "PostgreSQL Patroni",
+      "uid": "rLzu8z_Vk",
+      "version": 5,
+      "weekStart": ""
+    }
+{{- end }}

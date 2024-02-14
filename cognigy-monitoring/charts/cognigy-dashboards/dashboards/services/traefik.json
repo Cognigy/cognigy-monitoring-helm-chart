@@ -56,6 +56,7 @@
     },
     {
       "datasource": {
+        "type": "prometheus",
         "uid": "$datasource"
       },
       "fieldConfig": {
@@ -119,9 +120,10 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
-          "expr": "count(kube_pod_status_ready{namespace=\"$namespace\",condition=\"true\",pod=~\"traefik.*\"})",
+          "expr": "count(kube_pod_status_ready{cluster=\"$cluster\", namespace=\"$namespace\",condition=\"true\",pod=~\"traefik.*\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -139,6 +141,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": {
+        "type": "prometheus",
         "uid": "$datasource"
       },
       "fieldConfig": {
@@ -190,9 +193,10 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
-          "expr": "histogram_quantile(0.$percentiles, sum(rate(traefik_entrypoint_request_duration_seconds_bucket{namespace=\"$namespace\", code=\"200\",method=\"GET\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.$percentiles, sum(rate(traefik_entrypoint_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", code=\"200\",method=\"GET\"}[5m])) by (le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -288,10 +292,11 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.$percentiles, rate(traefik_entrypoint_request_duration_seconds_bucket{namespace=\"$namespace\",code=\"200\",method=\"GET\"}[5m]))",
+          "expr": "histogram_quantile(0.$percentiles, rate(traefik_entrypoint_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\",code=\"200\",method=\"GET\"}[5m]))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ instance }}",
@@ -387,10 +392,11 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(increase(traefik_service_requests_total{namespace=\"$namespace\"}[1m])) by (service)",
+          "expr": "sum(increase(traefik_service_requests_total{cluster=\"$cluster\", namespace=\"$namespace\"}[1m])) by (service)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{ backend }}",
@@ -431,7 +437,8 @@
     {
       "collapsed": false,
       "datasource": {
-        "uid": "datasource"
+        "type": "prometheus",
+        "uid": "$datasource"
       },
       "gridPos": {
         "h": 1,
@@ -444,7 +451,8 @@
       "targets": [
         {
           "datasource": {
-            "uid": "datasource"
+            "type": "prometheus",
+            "uid": "$datasource"
           },
           "refId": "A"
         }
@@ -510,10 +518,11 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(traefik_entrypoint_open_connections{namespace=\"$namespace\"})",
+          "expr": "sum(traefik_entrypoint_open_connections{cluster=\"$cluster\", namespace=\"$namespace\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ method }}",
@@ -608,10 +617,11 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(traefik_entrypoint_open_connections{namespace=\"$namespace\"}) by (method)",
+          "expr": "sum(traefik_entrypoint_open_connections{cluster=\"$cluster\", namespace=\"$namespace\"}) by (method)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ method }}",
@@ -704,10 +714,11 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(rate(traefik_entrypoint_request_duration_seconds_bucket{namespace=\"$namespace\",le=\"0.1\",code=\"200\"}[5m])) by (job) / sum(rate(traefik_entrypoint_request_duration_seconds_count{namespace=\"$namespace\",code=\"200\"}[5m])) by (job)",
+          "expr": "sum(rate(traefik_entrypoint_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\",le=\"0.1\",code=\"200\"}[5m])) by (job) / sum(rate(traefik_entrypoint_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\",code=\"200\"}[5m])) by (job)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Code 200",
@@ -748,7 +759,8 @@
     {
       "collapsed": false,
       "datasource": {
-        "uid": "datasource"
+        "type": "prometheus",
+        "uid": "$datasource"
       },
       "gridPos": {
         "h": 1,
@@ -761,7 +773,8 @@
       "targets": [
         {
           "datasource": {
-            "uid": "datasource"
+            "type": "prometheus",
+            "uid": "$datasource"
           },
           "refId": "A"
         }
@@ -826,10 +839,11 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(increase(traefik_service_requests_total{code=~\"2.*\", namespace=\"$namespace\"}[1m])) by (method, code)",
+          "expr": "sum(increase(traefik_service_requests_total{code=~\"2.*\", cluster=\"$cluster\", namespace=\"$namespace\"}[1m])) by (method, code)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{ method }} : {{ code }}",
@@ -924,10 +938,11 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(increase(traefik_service_requests_total{namespace=\"$namespace\",code=~\"3..\"}[1m])) by (method, code)",
+          "expr": "sum(increase(traefik_service_requests_total{cluster=\"$cluster\", namespace=\"$namespace\",code=~\"3..\"}[1m])) by (method, code)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{ method }} : {{ code }}",
@@ -1020,10 +1035,11 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(increase(traefik_service_requests_total{code=~\"4.*\", namespace=\"$namespace\"}[1m])) by (method, code)",
+          "expr": "sum(increase(traefik_service_requests_total{code=~\"4.*\", cluster=\"$cluster\", namespace=\"$namespace\"}[1m])) by (method, code)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{ method }} : {{ code }}",
@@ -1116,10 +1132,11 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(increase(traefik_service_requests_total{code=~\"5.*\", namespace=\"$namespace\"}[1m])) by (method, code)",
+          "expr": "sum(increase(traefik_service_requests_total{code=~\"5.*\", cluster=\"$cluster\", namespace=\"$namespace\"}[1m])) by (method, code)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{ method }} : {{ code }}",
@@ -1214,10 +1231,11 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(increase(traefik_service_requests_total{code=~\"2.*\", namespace=\"$namespace\"}[1m])) by (service, code)",
+          "expr": "sum(increase(traefik_service_requests_total{code=~\"2.*\", cluster=\"$cluster\", namespace=\"$namespace\"}[1m])) by (service, code)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{ service }} : {{ code }}",
@@ -1312,10 +1330,11 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(increase(traefik_service_requests_total{namespace=\"$namespace\",code!~\"2..|5..|4..\"}[1m])) by (service ,code)",
+          "expr": "sum(increase(traefik_service_requests_total{cluster=\"$cluster\", namespace=\"$namespace\",code!~\"2..|5..|4..\"}[1m])) by (service ,code)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{ service }} : {{ code }}",
@@ -1410,10 +1429,11 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(increase(traefik_service_requests_total{code=~\"4.*\", namespace=\"$namespace\"}[1m])) by (service ,code)",
+          "expr": "sum(increase(traefik_service_requests_total{code=~\"4.*\", cluster=\"$cluster\", namespace=\"$namespace\"}[1m])) by (service ,code)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{ service }} : {{ code}}",
@@ -1508,10 +1528,11 @@
       "targets": [
         {
           "datasource": {
+            "type": "prometheus",
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(increase(traefik_service_requests_total{code=~\"5.*\", namespace=\"$namespace\"}[1m])) by (service ,code)",
+          "expr": "sum(increase(traefik_service_requests_total{code=~\"5.*\", cluster=\"$cluster\", namespace=\"$namespace\"}[1m])) by (service ,code)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{ service }} : {{ code}}",
@@ -1559,20 +1580,51 @@
     "list": [
       {
         "current": {
-          "selected": false,
-          "text": "Prometheus",
-          "value": "Prometheus"
+          "text": "",
+          "value": ""
         },
         "hide": 0,
         "includeAll": false,
+        "label": "Data Source",
         "multi": false,
         "name": "datasource",
         "options": [],
         "query": "prometheus",
+        "queryValue": "",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "type": "datasource"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "$datasource"
+        },
+        "definition": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Cluster",
+        "multi": false,
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "query": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+          "refId": "Metrics-cluster-Variable-Query"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       },
       {
         "current": {
@@ -1584,14 +1636,14 @@
           "type": "prometheus",
           "uid": "$datasource"
         },
-        "definition": "label_values(traefik_config_reloads_total, namespace)",
+        "definition": "label_values(traefik_config_reloads_total{cluster=\"$cluster\"}, namespace)",
         "hide": 0,
         "includeAll": false,
         "multi": false,
         "name": "namespace",
         "options": [],
         "query": {
-          "query": "label_values(traefik_config_reloads_total, namespace)",
+          "query": "label_values(traefik_config_reloads_total{cluster=\"$cluster\"}, namespace)",
           "refId": "Prometheus-namespace-Variable-Query"
         },
         "refresh": 1,

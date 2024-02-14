@@ -19,6 +19,15 @@ spec:
         summary: Velero backup has failed (instance {{`{{`}} $labels.instance }})
         description: "Velero backup has failed\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
 
+    - alert: VeleroBackupPartiallyFailed
+      expr:  velero_backup_partial_failure_total > 0
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: Velero backup has failed partially (instance {{`{{`}} $labels.instance }})
+        description: "Velero backup has failed partially \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+
     - alert: Velero backup absent
       expr: absent(velero_backup_success_total)
       for: 15m

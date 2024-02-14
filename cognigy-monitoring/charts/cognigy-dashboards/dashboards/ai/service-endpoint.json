@@ -24,14 +24,14 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 28,
+  "id": 41,
   "links": [],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "gridPos": {
         "h": 1,
@@ -44,7 +44,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "refId": "A"
         }
@@ -55,7 +55,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "description": "Number of uncaught errors in service-endpoint microservice",
       "fieldConfig": {
@@ -108,7 +108,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 6,
         "w": 11,
         "x": 0,
         "y": 1
@@ -131,12 +131,14 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "sum( rate(cognigy_endpoint_uncaught_error_total{container=\"service-endpoint\"}[5m]) )",
+          "expr": "sum(rate(cognigy_endpoint_uncaught_error_total{cluster=\"$cluster\", container=\"service-endpoint\"}[5m]) )",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "error",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -146,7 +148,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -198,7 +200,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 6,
         "w": 13,
         "x": 11,
         "y": 1
@@ -206,8 +208,12 @@
       "id": 34,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "last",
+            "min",
+            "max"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
@@ -221,13 +227,13 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum(increase(cognigy_endpoint_raw_messages_count[1m]))",
+          "expr": "sum(increase(cognigy_endpoint_raw_messages_count{cluster=\"$cluster\"}[1m]))",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "message/min",
           "range": true,
           "refId": "A"
         }
@@ -238,7 +244,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "description": "The number of Endpoint Transformers which failed during execution.",
       "fieldConfig": {
@@ -291,10 +297,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 6,
         "w": 11,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "id": 29,
       "options": {
@@ -314,12 +320,14 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "sum(increase(cognigy_endpoint_transformer_error_count{container=\"service-endpoint\"}[1m]))",
+          "expr": "sum(increase(cognigy_endpoint_transformer_error_count{cluster=\"$cluster\", container=\"service-endpoint\"}[1m]))",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "error",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -329,7 +337,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -380,16 +388,20 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 6,
         "w": 13,
         "x": 11,
-        "y": 6
+        "y": 7
       },
       "id": 32,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "last",
+            "min",
+            "max"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
@@ -403,14 +415,14 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum(rate(cognigy_endpoint_raw_messages_count[1m]))",
+          "expr": "sum(rate(cognigy_endpoint_raw_messages_count{cluster=\"$cluster\"}[1m]))",
           "hide": false,
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "message/sec",
           "range": true,
           "refId": "B"
         }
@@ -425,7 +437,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "fill": 10,
       "fillGradient": 0,
@@ -433,7 +445,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 13
       },
       "hiddenSeries": false,
       "id": 40,
@@ -466,15 +478,15 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{}\n  * on(pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{ workload=\"service-endpoint\", workload_type=\"deployment\"}\n)",
+          "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{}\n  * on(pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\", workload=\"service-endpoint\", workload_type=\"deployment\"}\n)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{pod}}",
+          "legendFormat": "cpu",
           "range": true,
           "refId": "A",
           "step": 10
@@ -516,7 +528,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -575,7 +587,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 20
       },
       "id": 38,
       "options": {
@@ -594,10 +606,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "exemplar": true,
-          "expr": "sum by (kind)(rate(nodejs_gc_duration_seconds_sum{container=\"service-endpoint\"}[5m])) / sum by (kind)(rate(nodejs_gc_duration_seconds_count{container=\"service-endpoint\"}[5m]))",
+          "expr": "sum by (kind)(rate(nodejs_gc_duration_seconds_sum{cluster=\"$cluster\", container=\"service-endpoint\"}[5m])) / sum by (kind)(rate(nodejs_gc_duration_seconds_count{cluster=\"$cluster\", container=\"service-endpoint\"}[5m]))",
           "interval": "",
           "legendFormat": "{{kind}}",
           "refId": "A"
@@ -610,13 +622,13 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 28
       },
       "id": 15,
       "panels": [],
@@ -624,7 +636,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "refId": "A"
         }
@@ -635,7 +647,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -659,7 +671,7 @@
         "h": 8,
         "w": 5,
         "x": 0,
-        "y": 27
+        "y": 29
       },
       "id": 8,
       "options": {
@@ -682,10 +694,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "exemplar": true,
-          "expr": "sum(cognigy_endpoint_tcp_socket_count)",
+          "expr": "sum(cognigy_endpoint_tcp_socket_count{cluster=\"$cluster\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -697,7 +709,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "description": "Number of open TCP connections per service-endpoint replica",
       "fieldConfig": {
@@ -755,7 +767,7 @@
         "h": 8,
         "w": 19,
         "x": 5,
-        "y": 27
+        "y": 29
       },
       "id": 6,
       "options": {
@@ -775,12 +787,14 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "cognigy_endpoint_tcp_socket_count",
+          "expr": "cognigy_endpoint_tcp_socket_count{cluster=\"$cluster\"}",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "{{pod}}",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -791,13 +805,13 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 35
+        "y": 37
       },
       "id": 17,
       "panels": [],
@@ -805,7 +819,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "refId": "A"
         }
@@ -816,7 +830,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "description": "How long did Cognigy.AI need in order to process the input entirely?",
       "fieldConfig": {
@@ -872,12 +886,16 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 36
+        "y": 38
       },
       "id": 4,
       "options": {
         "legend": {
-          "calcs": [],
+          "calcs": [
+            "last",
+            "min",
+            "mean"
+          ],
           "displayMode": "table",
           "placement": "right",
           "showLegend": true
@@ -892,11 +910,11 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "histogram_quantile(0.80, sum(increase(cognigy_endpoint_raw_messages_response_time_bucket[1m])) by (le))",
+          "expr": "histogram_quantile(0.80, sum(increase(cognigy_endpoint_raw_messages_response_time_bucket{cluster=\"$cluster\"}[1m])) by (le))",
           "hide": false,
           "interval": "",
           "legendFormat": "80th",
@@ -906,11 +924,11 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "histogram_quantile(0.90, sum(increase(cognigy_endpoint_raw_messages_response_time_bucket[1m])) by (le))",
+          "expr": "histogram_quantile(0.90, sum(increase(cognigy_endpoint_raw_messages_response_time_bucket{cluster=\"$cluster\"}[1m])) by (le))",
           "hide": false,
           "interval": "",
           "legendFormat": "90th",
@@ -920,11 +938,11 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "histogram_quantile(0.95, sum(increase(cognigy_endpoint_raw_messages_response_time_bucket[1m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(increase(cognigy_endpoint_raw_messages_response_time_bucket{cluster=\"$cluster\"}[1m])) by (le))",
           "instant": false,
           "interval": "",
           "legendFormat": "95th",
@@ -933,11 +951,11 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "histogram_quantile(0.99, sum(increase(cognigy_endpoint_raw_messages_response_time_bucket[1m])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(increase(cognigy_endpoint_raw_messages_response_time_bucket{cluster=\"$cluster\"}[1m])) by (le))",
           "hide": false,
           "interval": "",
           "legendFormat": "99th",
@@ -961,7 +979,7 @@
       "dataFormat": "tsbuckets",
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "description": "How long did Cognigy.AI need in order to process the input entirely?",
       "fieldConfig": {
@@ -983,7 +1001,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 44
+        "y": 46
       },
       "heatmap": {},
       "hideZeroBuckets": true,
@@ -1036,11 +1054,11 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum by(le) (increase(cognigy_endpoint_raw_messages_response_time_bucket[1m]))",
+          "expr": "sum by(le) (increase(cognigy_endpoint_raw_messages_response_time_bucket{cluster=\"$cluster\"}[1m]))",
           "format": "heatmap",
           "hide": false,
           "interval": "",
@@ -1069,13 +1087,13 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 52
+        "y": 54
       },
       "id": 24,
       "panels": [],
@@ -1083,7 +1101,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "refId": "A"
         }
@@ -1094,7 +1112,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "description": "",
       "fieldConfig": {
@@ -1154,13 +1172,17 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 53
+        "y": 55
       },
       "id": 35,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "last",
+            "min",
+            "mean"
+          ],
+          "displayMode": "table",
           "placement": "right",
           "showLegend": true
         },
@@ -1174,11 +1196,11 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "histogram_quantile(0.80, sum(increase(cognigy_endpoint_transformer_execution_time_bucket[1m])) by (le))",
+          "expr": "histogram_quantile(0.80, sum(increase(cognigy_endpoint_transformer_execution_time_bucket{cluster=\"$cluster\"}[1m])) by (le))",
           "hide": false,
           "interval": "",
           "legendFormat": "80th",
@@ -1188,11 +1210,11 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "histogram_quantile(0.90, sum(increase(cognigy_endpoint_transformer_execution_time_bucket[1m])) by (le))",
+          "expr": "histogram_quantile(0.90, sum(increase(cognigy_endpoint_transformer_execution_time_bucket{cluster=\"$cluster\"}[1m])) by (le))",
           "hide": false,
           "interval": "",
           "legendFormat": "90th",
@@ -1202,11 +1224,11 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "histogram_quantile(0.95, sum(increase(cognigy_endpoint_transformer_execution_time_bucket[1m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(increase(cognigy_endpoint_transformer_execution_time_bucket{cluster=\"$cluster\"}[1m])) by (le))",
           "instant": false,
           "interval": "",
           "legendFormat": "95th",
@@ -1215,11 +1237,11 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "histogram_quantile(0.99, sum(increase(cognigy_endpoint_transformer_execution_time_bucket[1m])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(increase(cognigy_endpoint_transformer_execution_time_bucket{cluster=\"$cluster\"}[1m])) by (le))",
           "hide": false,
           "interval": "",
           "legendFormat": "99th",
@@ -1233,11 +1255,15 @@
     },
     {
       "collapsed": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 61
+        "y": 63
       },
       "id": 42,
       "panels": [],
@@ -1247,7 +1273,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
       "description": "The total amount of dead-lettered Messages",
       "fieldConfig": {
@@ -1306,7 +1332,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 62
+        "y": 64
       },
       "id": 44,
       "options": {
@@ -1325,10 +1351,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "$datasource"
           },
           "editorMode": "builder",
-          "expr": "sum(increase(cognigy_endpoint_expired_messages_count[1m])) by (pod)",
+          "expr": "sum(increase(cognigy_endpoint_expired_messages_count{cluster=\"$cluster\"}[1m])) by (pod)",
           "legendFormat": "{{pod}}",
           "range": true,
           "refId": "A"
@@ -1338,7 +1364,7 @@
       "type": "timeseries"
     }
   ],
-  "refresh": false,
+  "refresh": "30s",
   "schemaVersion": 37,
   "style": "dark",
   "tags": [
@@ -1349,20 +1375,51 @@
     "list": [
       {
         "current": {
-          "selected": false,
-          "text": "Prometheus",
-          "value": "Prometheus"
+          "text": "",
+          "value": ""
         },
         "hide": 0,
         "includeAll": false,
+        "label": "Data Source",
         "multi": false,
         "name": "datasource",
         "options": [],
         "query": "prometheus",
+        "queryValue": "",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "type": "datasource"
+      },
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "$datasource"
+        },
+        "definition": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Cluster",
+        "multi": false,
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "query": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+          "refId": "Metrics-cluster-Variable-Query"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },

@@ -1,5 +1,20 @@
 # Release Notes
 
+
+### 1.20.0
+**Released** February 14th, 2024
+
+#### Changes
+- **IMPORTANT:** Legacy single-replica Redis and MongoDB exporters are deprecated. This release is compatible with Cognigy.AI and Cognigy.VG
+v4.65+ only which are deployed with Redis HA setups.
+- NLPv1 is removed from `Agents Overview`. Knowledge AI panels are fixed.
+- Added `LiveAgentEndpointSlowRequest` and `PostgresqlTooManyLocksAcquired` alerts.
+- `MongoDB Overview` dashboard is refactored.
+- Dashboards are converted into YAML format for Thanos compatibility.
+
+#### Bugfixes
+- `LiveAgentHighHttpErrorRate` alert is fixed to catch sparsely distributed errors.
+
 ### 1.19.0
 **Released** January 10th, 2024
 

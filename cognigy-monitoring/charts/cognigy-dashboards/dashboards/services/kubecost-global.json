@@ -5,7 +5,7 @@
         "builtIn": 1,
         "datasource": {
           "type": "datasource",
-          "uid": "${datasource}"
+          "uid": "$datasource"
         },
         "enable": true,
         "hide": true,
@@ -32,7 +32,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "",
       "fieldConfig": {
@@ -111,7 +111,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -125,7 +125,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -141,7 +141,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "expr": "sum by (cluster) ( (avg(pv_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) by (persistentvolume,cluster,cloud) * 730 * avg(kube_persistentvolume_capacity_bytes{cloud=~\"$cloud\", cluster=~\"$cluster\"}) by (persistentvolume,cluster,cloud) / 1024 / 1024 / 1024 ))\n+\nsum by (cluster) (node_filesystem_size_bytes{cloud=~\"$cloud\", cluster=~\"$cluster\", job=\"node-exporter\", fstype!=\"\", fstype!=\"tmpfs\", fstype!=\"nfs4\"}) /1024 /1024 /1024 * $localStorageGBCost",
@@ -155,7 +155,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "expr": "kubernetes_build_info{cloud=~\"$cloud\", cluster=~\"$cluster\"}",
@@ -301,7 +301,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "Sum of compute, memory, and storage costs",
       "fill": 1,
@@ -344,7 +344,7 @@
       "targets": [
         {
           "datasource": {
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "expr": "sum by (cluster) ((avg by (node,cluster,cloud) (kube_node_status_capacity{resource=\"cpu\", unit=\"core\", cloud=~\"$cloud\", cluster=~\"$cluster\"}) * avg by (node,cluster,cloud) ((node_cpu_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) * 730)) + (avg by (node,cluster,cloud) (node_gpu_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) * 730))\n+\nsum by (cluster) ((avg by (node,cluster,cloud) (kube_node_status_capacity{resource=\"memory\", unit=\"byte\",cloud=~\"$cloud\" , cluster=~\"$cluster\"})/1024/1024/1024* avg by (node,cluster,cloud) ((node_ram_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) * 730)))\n+\nsum by (cluster) ( (avg(pv_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) by (persistentvolume,cluster,cloud) * 730 * avg(kube_persistentvolume_capacity_bytes{cloud=~\"$cloud\", cluster=~\"$cluster\"}) by (persistentvolume,cluster,cloud) / 1024 / 1024 / 1024 ))\n+\nsum by (cluster) (node_filesystem_size_bytes{cloud=~\"$cloud\", cluster=~\"$cluster\", job=\"node-exporter\", fstype!=\"\", fstype!=\"tmpfs\", fstype!=\"nfs4\"}) /1024 /1024 /1024 * $localStorageGBCost",
@@ -394,7 +394,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "Total Costs per Cloud Provider",
       "fill": 1,
@@ -437,7 +437,8 @@
       "targets": [
         {
           "datasource": {
-            "uid": "${datasource}"
+            "type":"prometheus",
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "expr": "sum by (cloud) ((avg by (node,cluster,cloud) (kube_node_status_capacity{resource=\"cpu\", unit=\"core\", cloud=~\"$cloud\", cluster=~\"$cluster\"}) * avg by (node,cluster,cloud) ((node_cpu_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) * 730)) + (avg by (node,cluster,cloud) (node_gpu_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) * 730))\n+\nsum by (cloud) ((avg by (node,cluster,cloud) (kube_node_status_capacity{resource=\"memory\", unit=\"byte\",cloud=~\"$cloud\" , cluster=~\"$cluster\"})/1024/1024/1024* avg by (node,cluster,cloud) ((node_ram_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) * 730)))\n+\nsum by (cloud) ((avg(pv_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) by (persistentvolume,cluster,cloud) * 730 * avg(kube_persistentvolume_capacity_bytes{cloud=~\"$cloud\", cluster=~\"$cluster\"}) by (persistentvolume,cluster,cloud) / 1024 / 1024 / 1024 ))\n+\nsum by (cloud) (node_filesystem_size_bytes{cloud=~\"$cloud\", cluster=~\"$cluster\", job=\"node-exporter\", fstype!=\"\", fstype!=\"tmpfs\", fstype!=\"nfs4\"}) /1024 /1024 /1024 * $localStorageGBCost",
@@ -487,7 +488,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "Monthly run rate of CPU + GPU costs",
       "fill": 1,
@@ -530,7 +531,8 @@
       "targets": [
         {
           "datasource": {
-            "uid": "${datasource}"
+            "type":"prometheus",
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "expr": "sum by (cluster) ((avg by (node,cluster,cloud) (kube_node_status_capacity{resource=\"cpu\", unit=\"core\", cloud=~\"$cloud\", cluster=~\"$cluster\"}) * avg by (node,cluster,cloud) ((node_cpu_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) * 730)) + (avg by (node,cluster,cloud) (node_gpu_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) * 730))",
@@ -581,7 +583,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "Monthly run rate of memory costs",
       "fill": 1,
@@ -624,7 +626,8 @@
       "targets": [
         {
           "datasource": {
-            "uid": "${datasource}"
+            "type":"prometheus",
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "expr": "sum by (cluster) ((avg by (node,cluster,cloud) (kube_node_status_capacity{resource=\"memory\", unit=\"byte\",cloud=~\"$cloud\" , cluster=~\"$cluster\"})/1024/1024/1024* avg by (node,cluster,cloud) ((node_ram_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) * 730)))",
@@ -675,7 +678,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "Monthly run rate of attached disk + PV storage costs",
       "fill": 1,
@@ -719,7 +722,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "expr": "sum by (cluster) ( (avg(pv_hourly_cost{cloud=~\"$cloud\", cluster=~\"$cluster\"}) by (persistentvolume,cluster,cloud) * 730 * avg(kube_persistentvolume_capacity_bytes{cloud=~\"$cloud\", cluster=~\"$cluster\"}) by (persistentvolume,cluster,cloud) / 1024 / 1024 / 1024 ))\n+\nsum by (cluster) (node_filesystem_size_bytes{cloud=~\"$cloud\", cluster=~\"$cluster\", job=\"node-exporter\", fstype!=\"\", fstype!=\"tmpfs\", fstype!=\"nfs4\"}) /1024 /1024 /1024 * $localStorageGBCost",
@@ -859,12 +862,12 @@
       },
       {
         "current": {
-          "selected": false,
-          "text": "0-thanos-prod",
-          "value": "0-thanos-prod"
+          "text": "",
+          "value": ""
         },
         "hide": 0,
         "includeAll": false,
+        "label": "Data Source",
         "multi": false,
         "name": "datasource",
         "options": [],
@@ -876,20 +879,13 @@
         "type": "datasource"
       },
       {
-        "current": {
-          "selected": true,
-          "text": [
-            "aws",
-            "azure"
-          ],
-          "value": [
-            "aws",
-            "azure"
-          ]
+        "current":{
+          "text":"",
+          "value":""
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "${datasource}"
+          "uid": "$datasource"
         },
         "definition": "label_values(kube_node_status_capacity{}, cloud)",
         "hide": 0,
@@ -919,12 +915,12 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "${datasource}"
+          "uid": "$datasource"
         },
         "definition": "label_values(kube_node_status_capacity{cloud=~\"$cloud\"}, cluster)",
         "hide": 0,
         "includeAll": true,
-        "label": "cluster",
+        "label": "Cluster",
         "multi": true,
         "name": "cluster",
         "options": [],
