@@ -56,7 +56,7 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 56,
+      "id": 53,
       "links": [],
       "liveNow": false,
       "panels": [
@@ -1312,6 +1312,171 @@ data:
           "type": "timeseries"
         },
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "center",
+                "displayMode": "auto",
+                "filterable": false,
+                "inspect": false
+              },
+              "displayName": "Model Reference ID",
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "cognigy_nlp_classifier_score_model_file_size_in_bytes (lastNotNull)"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Model File Size"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "cognigy_nlp_classifier_score_model_in_memory_size_in_bytes (lastNotNull)"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Model In-Memory Size"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 57
+          },
+          "id": 77,
+          "options": {
+            "footer": {
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "modelReferenceId"
+              }
+            ]
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "builder",
+              "expr": "cognigy_nlp_classifier_score_model_file_size_in_bytes",
+              "format": "time_series",
+              "hide": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "builder",
+              "expr": "cognigy_nlp_classifier_score_model_in_memory_size_in_bytes",
+              "hide": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Model Size",
+          "transformations": [
+            {
+              "id": "joinByLabels",
+              "options": {
+                "join": [
+                  "modelReferenceId"
+                ],
+                "value": "__name__"
+              }
+            },
+            {
+              "id": "groupBy",
+              "options": {
+                "fields": {
+                  "cognigy_nlp_classifier_score_model_file_size_in_bytes": {
+                    "aggregations": [
+                      "lastNotNull"
+                    ],
+                    "operation": "aggregate"
+                  },
+                  "cognigy_nlp_classifier_score_model_in_memory_size_in_bytes": {
+                    "aggregations": [
+                      "lastNotNull"
+                    ],
+                    "operation": "aggregate"
+                  },
+                  "modelReferenceId": {
+                    "aggregations": [
+                      "last"
+                    ],
+                    "operation": "groupby"
+                  }
+                }
+              }
+            },
+            {
+              "id": "filterByValue",
+              "options": {
+                "filters": [
+                  {
+                    "config": {
+                      "id": "isNull",
+                      "options": {}
+                    },
+                    "fieldName": "modelReferenceId"
+                  }
+                ],
+                "match": "any",
+                "type": "exclude"
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        },
+        {
           "collapsed": false,
           "datasource": {
             "type": "prometheus",
@@ -1321,7 +1486,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 57
+            "y": 65
           },
           "id": 72,
           "panels": [],
@@ -1415,7 +1580,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 58
+            "y": 66
           },
           "id": 74,
           "options": {
@@ -1539,7 +1704,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 58
+            "y": 66
           },
           "id": 75,
           "options": {
@@ -1611,7 +1776,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 67
+            "y": 75
           },
           "id": 39,
           "panels": [],
@@ -1664,8 +1829,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1681,7 +1845,7 @@ data:
             "h": 11,
             "w": 12,
             "x": 0,
-            "y": 68
+            "y": 76
           },
           "id": 47,
           "interval": "1m",
@@ -1764,8 +1928,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1781,7 +1944,7 @@ data:
             "h": 11,
             "w": 12,
             "x": 12,
-            "y": 68
+            "y": 76
           },
           "id": 48,
           "interval": "1m",
@@ -1865,8 +2028,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "transparent",
-                    "value": null
+                    "color": "transparent"
                   },
                   {
                     "color": "red",
@@ -1882,7 +2044,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 79
+            "y": 87
           },
           "id": 62,
           "interval": "1m",
@@ -1966,8 +2128,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "transparent",
-                    "value": null
+                    "color": "transparent"
                   },
                   {
                     "color": "red",
@@ -2008,7 +2169,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 79
+            "y": 87
           },
           "id": 63,
           "interval": "1m",
@@ -2067,8 +2228,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2248,7 +2408,7 @@ data:
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 88
+            "y": 96
           },
           "id": 50,
           "interval": "1m",
@@ -2357,7 +2517,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 95
+            "y": 103
           },
           "id": 41,
           "panels": [],
@@ -2410,8 +2570,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2427,7 +2586,7 @@ data:
             "h": 13,
             "w": 12,
             "x": 0,
-            "y": 96
+            "y": 104
           },
           "id": 66,
           "interval": "1m",
@@ -2510,8 +2669,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2527,7 +2685,7 @@ data:
             "h": 13,
             "w": 12,
             "x": 12,
-            "y": 96
+            "y": 104
           },
           "id": 53,
           "interval": "1m",
@@ -2586,8 +2744,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2767,7 +2924,7 @@ data:
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 109
+            "y": 117
           },
           "id": 55,
           "interval": "1m",
@@ -2892,7 +3049,6 @@ data:
             "type": "datasource"
           },
           {
-            "allValue": null,
             "current": {
               "text": "",
               "value": ""
@@ -2914,6 +3070,7 @@ data:
             },
             "refresh": 2,
             "regex": "",
+            "skipUrlSync": false,
             "sort": 1,
             "tagValuesQuery": "",
             "tags": [],
@@ -2987,7 +3144,7 @@ data:
       "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
       "title": "Service NLP Classifier",
       "uid": "xezPk014z",
-      "version": 1,
+      "version": 2,
       "weekStart": ""
     }
 {{- end }}

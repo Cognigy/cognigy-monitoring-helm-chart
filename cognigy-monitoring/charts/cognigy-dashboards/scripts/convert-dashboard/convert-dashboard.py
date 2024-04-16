@@ -130,7 +130,7 @@ def patch_dashboards_json(content, multicluster_key, dashboard_type, resource_na
         }
 
         for variable in content_struct['templating']['list']:
-            logging.debug(f'Checking {variable['name']} variable')
+            logging.debug(f"Checking {variable['name']} variable")
             variable['current'] = {
                 "text": "",
                 "value": ""
@@ -149,6 +149,7 @@ def patch_dashboards_json(content, multicluster_key, dashboard_type, resource_na
                 logging.debug('datasource exists')
 
             if not variable['type'] == 'datasource':
+                logging.debug(f'Updating datasource of {variable["name"]} variable')
                 variable['datasource'] = {
                     "type": "prometheus",
                     "uid": "$datasource"
@@ -172,38 +173,47 @@ def patch_dashboards_json(content, multicluster_key, dashboard_type, resource_na
             """
             datasource_exception_list = ['grafana', '__expr__']
             if 'datasource' not in panel:
+                logging.debug(f'Adding datasource of panel')
                 panel['datasource'] = {
                     "type": "prometheus",
                     "uid": "$datasource"
                 }
             else:
-                if 'uid' in panel['datasource']:
-                    if panel['datasource']['uid'] not in datasource_exception_list:
-                        panel['datasource'] = {
-                            "type": "prometheus",
-                            "uid": "$datasource"
-                        }
+                if type(panel['datasource']) is dict:
+                    if 'uid' in panel['datasource']:
+                        if panel['datasource']['uid'] not in datasource_exception_list:
+                            logging.debug(f'Adding uid to datasource of panel')
+                            panel['datasource'] = {
+                                "type": "prometheus",
+                                "uid": "$datasource"
+                            }
                 else:
+                    logging.debug(f'Updating datasource of panel')
                     panel['datasource'] = {
                         "type": "prometheus",
                         "uid": "$datasource"
                     }
 
             if 'targets' in panel:
+                logging.debug(f'Checking datasource of targets in panel')
                 for target in panel['targets']:
                     if 'datasource' not in target:
+                        logging.debug(f'Adding datasource of targets in panel')
                         target['datasource'] = {
                             "type": "prometheus",
                             "uid": "$datasource"
                         }
                     else:
-                        if 'uid' in target['datasource']:
-                            if target['datasource']['uid'] not in datasource_exception_list:
-                                target['datasource'] = {
-                                    "type": "prometheus",
-                                    "uid": "$datasource"
-                                }
+                        if type(target['datasource']) is dict:
+                            if 'uid' in target['datasource']:
+                                if target['datasource']['uid'] not in datasource_exception_list:
+                                    logging.debug(f'Adding uid to datasource of targets in panel')
+                                    target['datasource'] = {
+                                        "type": "prometheus",
+                                        "uid": "$datasource"
+                                    }
                         else:
+                            logging.debug(f'Updating datasource of targets in panel')
                             target['datasource'] = {
                                 "type": "prometheus",
                                 "uid": "$datasource"
@@ -239,12 +249,13 @@ def patch_dashboards_json(content, multicluster_key, dashboard_type, resource_na
         )
 
     except Exception as e:
-        logging.error(f'Exception: {e}')
+        logging.error(f'Exception in patch_dashboards_json: {e}')
 
     return json.dumps(content, indent=2)
 
 
 def patch_json_set_timezone_as_variable(content):
+    logging.debug('Parameterizing timezone variable')
     # content is no more in json format, so we have to replace using regex
     return re.sub(r'"timezone"\s*:\s*"(?:\\.|[^\"])*"',
                   '"timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}"',
@@ -253,6 +264,7 @@ def patch_json_set_timezone_as_variable(content):
 
 
 def patch_double_curly_brackets(content):
+    logging.debug('Updating dashboard so that helm can handle curly brackets')
     content = re.sub(r'{{', ':opening_bracket:', content, flags=re.IGNORECASE)
     content = re.sub(r'}}', ':closing_bracket:', content, flags=re.IGNORECASE)
     content = re.sub(r':opening_bracket:', '{{`{{`}}', content, flags=re.IGNORECASE)
@@ -322,7 +334,7 @@ def main():
             dashboard['max_kubernetes'] = '9.9.9-9'
 
         if 'source' not in dashboard:
-            dashboard['source'] = f'../../dashboards/{dashboard['dashboard_type']}'
+            dashboard['source'] = f"../../dashboards/{dashboard['dashboard_type']}"
 
         if 'destination' not in dashboard:
             dashboard['destination'] = '../../templates/dashboards'
@@ -339,7 +351,7 @@ def main():
                             content=json.dumps(raw_text, indent=2),
                             url=dashboard['source'],
                             dashboard_type=dashboard["dashboard_type"],
-                            destination=f'{dashboard['destination']}/{dashboard["dashboard_type"]}',
+                            destination=f"{dashboard['destination']}/{dashboard['dashboard_type']}",
                             min_kubernetes=dashboard['min_kubernetes'],
                             max_kubernetes=dashboard['max_kubernetes'],
                             multicluster_key=dashboard['multicluster_key']

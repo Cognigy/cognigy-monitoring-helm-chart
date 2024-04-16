@@ -1,5 +1,22 @@
 # Release Notes
 
+### 1.21.0
+**Released** April 16th, 2024
+
+#### Changes
+- Grafana updated to v10.4.1
+- Thanos dashboards are introduced
+- Kubernetes v1.28 is supported
+- New panels are introduced in `Service NLP Classifier` dashboard
+- MongoDB dashboard is updated
+- `HighConversationVolume` alert rule is introduced
+- `KubePodCrashLooping` alert is parametrized
+- RabbitMQ alert rules are parametrized
+
+#### Bugfixes
+- Default dashboard refresh interval is set to 5 minutes
+- `Service-API` dashboard is fixed
+- Dashboard conversion script is fixed
 
 ### 1.20.0
 **Released** February 14th, 2024

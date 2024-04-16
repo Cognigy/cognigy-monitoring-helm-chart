@@ -8,6 +8,20 @@ metadata:
     {{- include "cognigy-monitors.labels" . | nindent 4 }}
 spec:
   groups:
+  {{- if (.Values.rules.ai.conversationVolume.enabled ) }}
+  - name: cognigy.alert.conversation-volume
+    rules:
+      - alert: highConversationVolume
+        expr: sum(increase(cognigy_endpoint_raw_messages_count[1m])) >
+          {{$.Values.rules.ai.conversationVolume.threshold }}
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: Messages/min rate is high (instance {{`{{`}} $labels.instance }})
+          description: "Messages/min rate has crossed {{$.Values.rules.ai.conversationVolume.threshold }} threshold: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+  {{- end }}
+
   {{- if (.Values.rules.ai.nlpMatcher.enabled ) }}
   - name: cognigy.alert.nlp-matcher
     rules:
