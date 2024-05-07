@@ -1,13 +1,13 @@
 {{- /*
-Generated from json dashboard 'dashboards/ai/weaviate-object-operations.json'.
-Do not change in-place! In order to change this file first modify the json dashboard 'dashboards/ai/weaviate-object-operations.json'
+Generated from json dashboard 'dashboards/ai/service-handover.json'.
+Do not change in-place! In order to change this file first modify the json dashboard 'dashboards/ai/service-handover.json'
 and then run the 'scripts/convert-dashboard/convert-dashboard.py' script.
 */ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and 
     (index .Values "products" "ai" "enabled")
-    (index .Values "products" "ai" "dashboards" "weaviate-object-operations" "enabled")
-    (index .Values "products" "ai" "dashboards" "weaviate-object-operations" "yamlVersion")
+    (index .Values "products" "ai" "dashboards" "service-handover" "enabled")
+    (index .Values "products" "ai" "dashboards" "service-handover" "yamlVersion")
     (not .Values.forceDeployJsonDashboards)
     (semverCompare ">=1.14.0-0" $kubeTargetVersion)
     (semverCompare "<9.9.9-9" $kubeTargetVersion)
@@ -17,7 +17,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   namespace: {{ template "cognigy-dashboards.namespace" . }}
-  name: {{ printf "%s-%s" (include "cognigy-dashboards.fullname" $) "weaviate-object-operations" | trunc 63 | trimSuffix "-" }}
+  name: {{ printf "%s-%s" (include "cognigy-dashboards.fullname" $) "service-handover" | trunc 63 | trimSuffix "-" }}
   {{- with $.Values.grafana.sidecar.dashboards.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -29,15 +29,15 @@ metadata:
     app: {{ template "cognigy-dashboards.name" $ }}-grafana
     {{- include "cognigy-dashboards.labels" $ | nindent 4 }}
 data:
-  weaviate-object-operations.json: |-
+  service-handover.json: |-
     {
       "annotations": {
         "list": [
           {
             "builtIn": 1,
             "datasource": {
-              "type": "grafana",
-              "uid": "-- Grafana --"
+              "type": "datasource",
+              "uid": "grafana"
             },
             "enable": true,
             "hide": true,
@@ -53,6 +53,7 @@ data:
           }
         ]
       },
+      "description": "Service-Handover metrics",
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
@@ -64,13 +65,14 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "Operations typically happen highly concurrently, so the per object time is often close to the overall batch time. Use this data to draw conclusions about relative changes over time, not for interpreting absolute values.",
+          "description": "Handover External HTTP Requests /min Rate filter by route (provider) ",
           "fieldConfig": {
             "defaults": {
               "color": {
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -84,6 +86,7 @@ data:
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -91,7 +94,7 @@ data:
                   "type": "linear"
                 },
                 "showPoints": "auto",
-                "spanNulls": false,
+                "spanNulls": true,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -105,225 +108,31 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "blue",
                     "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
                   }
                 ]
               },
-              "unit": "ms"
+              "unit": "short"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 8,
-            "w": 12,
+            "h": 6,
+            "w": 24,
             "x": 0,
             "y": 0
-          },
-          "id": 2,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "rate(objects_durations_ms_sum{cluster=\"$cluster\", operation=\"put\"}[$__interval])/rate(objects_durations_ms_count{cluster=\"$cluster\", operation=\"put\"}[$__interval])",
-              "legendFormat": "{{`{{`}}step{{`}}`}} ({{`{{`}}class_name{{`}}`}}/{{`{{`}}shard_name{{`}}`}})",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "PUT (individual operations)",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "description": "",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "continuous-RdYlGr"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "ms"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 12,
-            "x": 12,
-            "y": 0
-          },
-          "id": 4,
-          "maxDataPoints": 25,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "9.3.6",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "exemplar": true,
-              "expr": "rate(objects_durations_ms_sum{cluster=\"$cluster\", step=\"total\"}[$__interval]) / rate(objects_durations_ms_count{cluster=\"$cluster\", step=\"total\"}[$__interval])",
-              "format": "time_series",
-              "interval": "",
-              "legendFormat": "{{`{{`}}step{{`}}`}} ({{`{{`}}class_name{{`}}`}}/{{`{{`}}shard_name{{`}}`}})",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "PUT Object (Total)",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "description": "",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "continuous-GrYlRd"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "ms"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 7
           },
           "id": 5,
-          "maxDataPoints": 25,
           "options": {
             "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
+              "calcs": [
+                "last",
+                "min",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
               "showLegend": true
             },
             "tooltip": {
@@ -331,7 +140,7 @@ data:
               "sort": "none"
             }
           },
-          "pluginVersion": "9.3.6",
+          "pluginVersion": "8.0.5",
           "targets": [
             {
               "datasource": {
@@ -340,15 +149,14 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "rate(objects_durations_ms_sum{cluster=\"$cluster\", step=\"upsert_object_store\"}[$__interval]) / rate(objects_durations_ms_count{cluster=\"$cluster\", step=\"upsert_object_store\"}[$__interval])",
-              "format": "time_series",
+              "expr": "sum by (status) (increase(cognigy_http_request_duration_count{cluster=\"$cluster\", container=\"service-handover\", route=~\"$route\"}[1m]))",
               "interval": "",
-              "legendFormat": "{{`{{`}}step{{`}}`}} ({{`{{`}}class_name{{`}}`}}/{{`{{`}}shard_name{{`}}`}})",
+              "legendFormat": "{{`{{`}}status{{`}}`}}",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "PUT Object (Upsert Object)",
+          "title": "Handover External HTTP Requests / min ",
           "type": "timeseries"
         },
         {
@@ -356,12 +164,14 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "Handover External HTTP Requests Latency filter by route (provider) ",
           "fieldConfig": {
             "defaults": {
               "color": {
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -375,20 +185,21 @@ data:
                   "tooltip": false,
                   "viz": false
                 },
-                "lineInterpolation": "linear",
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
                 "lineWidth": 1,
-                "pointSize": 5,
+                "pointSize": 1,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "auto",
-                "spanNulls": false,
+                "spanNulls": true,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
                 },
                 "thresholdsStyle": {
-                  "mode": "off"
+                  "mode": "line"
                 }
               },
               "mappings": [],
@@ -398,10 +209,6 @@ data:
                   {
                     "color": "green",
                     "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
                   }
                 ]
               },
@@ -411,16 +218,20 @@ data:
           },
           "gridPos": {
             "h": 8,
-            "w": 12,
+            "w": 24,
             "x": 0,
-            "y": 8
+            "y": 6
           },
-          "id": 8,
+          "id": 4,
           "options": {
             "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
+              "calcs": [
+                "last",
+                "min",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "right",
               "showLegend": true
             },
             "tooltip": {
@@ -428,102 +239,7 @@ data:
               "sort": "none"
             }
           },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "exemplar": true,
-              "expr": "rate(batch_delete_durations_ms_sum{cluster=\"$cluster\"}[$__interval])/rate(batch_delete_durations_ms_count{cluster=\"$cluster\"}[$__interval])",
-              "interval": "",
-              "legendFormat": "{{`{{`}} operation {{`}}`}} ({{`{{`}}class_name{{`}}`}}/{{`{{`}}shard_name{{`}}`}})",
-              "refId": "A"
-            }
-          ],
-          "title": "Batch Delete Durations",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "description": "",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "continuous-BlYlRd"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "ms"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 15
-          },
-          "id": 6,
-          "maxDataPoints": 25,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "9.3.6",
+          "pluginVersion": "8.0.5",
           "targets": [
             {
               "datasource": {
@@ -532,21 +248,420 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "rate(objects_durations_ms_sum{cluster=\"$cluster\", step=\"inverted_total\"}[$__interval]) / rate(objects_durations_ms_count{cluster=\"$cluster\", step=\"inverted_total\"}[$__interval])",
-              "format": "time_series",
+              "expr": "histogram_quantile(0.80, sum(increase(cognigy_http_request_duration_bucket{cluster=\"$cluster\", container=\"service-handover\", route=~\"$route\"}[1m])) by (le))",
+              "hide": false,
               "interval": "",
-              "legendFormat": "{{`{{`}}step{{`}}`}} ({{`{{`}}class_name{{`}}`}}/{{`{{`}}shard_name{{`}}`}})",
+              "legendFormat": "80th",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "histogram_quantile(0.90, sum(increase(cognigy_http_request_duration_bucket{cluster=\"$cluster\", container=\"service-handover\", route=~\"$route\"}[1m])) by (le))",
+              "hide": false,
+              "interval": "",
+              "legendFormat": "90th",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.95, sum(increase(cognigy_http_request_duration_bucket{cluster=\"$cluster\", container=\"service-handover\", route=~\"$route\"}[1m])) by (le))",
+              "instant": false,
+              "interval": "",
+              "legendFormat": "95th",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "histogram_quantile(0.99, sum(increase(cognigy_http_request_duration_bucket{cluster=\"$cluster\", container=\"service-handover\", route=~\"$route\"}[1m])) by (le))",
+              "hide": false,
+              "interval": "",
+              "legendFormat": "99th",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "thresholds": [],
+          "title": "Handover External HTTP Requests Latency",
+          "type": "timeseries"
+        },
+        {
+          "cards": {},
+          "color": {
+            "cardColor": "#b4ff00",
+            "colorScale": "sqrt",
+            "colorScheme": "interpolateOranges",
+            "exponent": 0.5,
+            "mode": "spectrum"
+          },
+          "dataFormat": "tsbuckets",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Handover External HTTP Requests Latency filtered by route (provider)",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 14
+          },
+          "heatmap": {},
+          "hideZeroBuckets": true,
+          "highlightCards": true,
+          "id": 3,
+          "legend": {
+            "show": false
+          },
+          "maxDataPoints": 123,
+          "options": {
+            "calculate": false,
+            "calculation": {},
+            "cellGap": 2,
+            "cellValues": {},
+            "color": {
+              "exponent": 0.5,
+              "fill": "#b4ff00",
+              "mode": "scheme",
+              "reverse": false,
+              "scale": "exponential",
+              "scheme": "Oranges",
+              "steps": 128
+            },
+            "exemplars": {
+              "color": "rgba(255,0,255,0.7)"
+            },
+            "filterValues": {
+              "le": 1e-09
+            },
+            "legend": {
+              "show": false
+            },
+            "rowsFrame": {
+              "layout": "auto"
+            },
+            "showValue": "never",
+            "tooltip": {
+              "mode": "single",
+              "showColorScale": false,
+              "yHistogram": false
+            },
+            "yAxis": {
+              "axisPlacement": "left",
+              "reverse": false,
+              "unit": "ms"
+            }
+          },
+          "pluginVersion": "10.4.1",
+          "reverseYBuckets": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum by(le) (increase(cognigy_http_request_duration_bucket{cluster=\"$cluster\", container=\"service-handover\", route=~\"$route\"}[1m]))",
+              "format": "heatmap",
+              "hide": false,
+              "interval": "",
+              "legendFormat": "{{`{{`}}le{{`}}`}}:{{`{{`}}route{{`}}`}}",
+              "range": true,
+              "refId": "E"
+            }
+          ],
+          "title": "Handover External HTTP Requests Latency",
+          "tooltip": {
+            "show": true,
+            "showHistogram": false
+          },
+          "type": "heatmap",
+          "xAxis": {
+            "show": true
+          },
+          "yAxis": {
+            "format": "short",
+            "logBase": 1,
+            "show": true
+          },
+          "yBucketBound": "auto"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Handover internal RPC Requests (handover-rpc-queue) / min rate by request type ",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 22
+          },
+          "id": 7,
+          "options": {
+            "legend": {
+              "calcs": [
+                "last",
+                "min",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum by (type) (increase(cognigy_services_histogram_rpc_execution_time_count{cluster=\"$cluster\", queue=\"handover-rpc-queue\"}[1m]))",
+              "interval": "",
+              "legendFormat": "{{`{{`}}type{{`}}`}}",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "PUT Object (Inverted Index)",
+          "title": "Handover RPC Requests / min ",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Handover internal RPC Requests Latency",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "line"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 28
+          },
+          "id": 6,
+          "options": {
+            "legend": {
+              "calcs": [
+                "last",
+                "min",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "histogram_quantile(0.80, sum(increase(cognigy_services_histogram_rpc_execution_time_bucket{cluster=\"$cluster\", queue=\"handover-rpc-queue\",type=\"requestHandover\"}[1m])) by (le))",
+              "hide": false,
+              "interval": "",
+              "legendFormat": "80th",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "histogram_quantile(0.90, sum(increase(cognigy_services_histogram_rpc_execution_time_bucket{cluster=\"$cluster\", queue=\"handover-rpc-queue\",type=\"requestHandover\"}[1m])) by (le))",
+              "hide": false,
+              "interval": "",
+              "legendFormat": "90th",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.95, sum(increase(cognigy_services_histogram_rpc_execution_time_bucket{cluster=\"$cluster\", queue=\"handover-rpc-queue\",type=\"requestHandover\"}[1m])) by (le))",
+              "instant": false,
+              "interval": "",
+              "legendFormat": "95th",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "histogram_quantile(0.99, sum(increase(cognigy_services_histogram_rpc_execution_time_bucket{cluster=\"$cluster\", queue=\"handover-rpc-queue\",type=\"requestHandover\"}[1m])) by (le))",
+              "hide": false,
+              "interval": "",
+              "legendFormat": "99th",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "thresholds": [],
+          "title": "Handover RPC Requests Latency",
           "type": "timeseries"
         }
       ],
-      "refresh": "{{ index .Values "products" "ai" "dashboards" "weaviate-object-operations" "refreshInterval" | default "5m" }}",
-      "schemaVersion": 37,
-      "style": "dark",
+      "refresh": "{{ index .Values "products" "ai" "dashboards" "service-handover" "refreshInterval" | default "5m" }}",
+      "schemaVersion": 39,
       "tags": [],
       "templating": {
         "list": [
@@ -569,7 +684,6 @@ data:
             "type": "datasource"
           },
           {
-            "allValue": null,
             "current": {
               "text": "",
               "value": ""
@@ -591,23 +705,64 @@ data:
             },
             "refresh": 2,
             "regex": "",
+            "skipUrlSync": false,
             "sort": 1,
             "tagValuesQuery": "",
             "tags": [],
             "tagsQuery": "",
             "type": "query",
             "useTags": false
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(cognigy_http_request_duration_count{cluster=\"$cluster\"},route)",
+            "description": "handover route",
+            "hide": 0,
+            "includeAll": true,
+            "multi": true,
+            "name": "route",
+            "options": [],
+            "query": {
+              "qryType": 1,
+              "query": "label_values(cognigy_http_request_duration_count{cluster=\"$cluster\"},route)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
           }
         ]
       },
       "time": {
-        "from": "{{ index .Values "products" "ai" "dashboards" "weaviate-object-operations" "timeFrom" | default "now-3h" }}",
+        "from": "{{ index .Values "products" "ai" "dashboards" "service-handover" "timeFrom" | default "now-3h" }}",
         "to": "now"
       },
-      "timepicker": {},
+      "timepicker": {
+        "refresh_intervals": [
+          "5s",
+          "10s",
+          "30s",
+          "1m",
+          "5m",
+          "15m",
+          "30m",
+          "1h",
+          "2h",
+          "1d"
+        ]
+      },
       "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
-      "title": "Weaviate: Object Operations",
-      "uid": "X48CZzj7k",
+      "title": "Service-Handover",
+      "uid": "Ra24krBVz",
       "version": 1,
       "weekStart": ""
     }

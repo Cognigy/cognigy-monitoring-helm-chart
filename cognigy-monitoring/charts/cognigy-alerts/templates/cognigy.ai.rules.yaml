@@ -95,13 +95,34 @@ spec:
   - name: cognigy.alert.service-handover
     rules:
       - alert: ServiceHandoverErrorsHigh
-        expr: sum (increase(cognigy_ai_handover_error_amount[5m])) by (projectId) >  {{ $.Values.rules.ai.serviceHandover.errorsThreshold }}
+        expr: sum (increase(cognigy_ai_handover_error_amount[5m])) by (organisationId, projectId) >  {{ $.Values.rules.ai.serviceHandover.errorsThreshold }}
         for: 5m
         labels:
           severity: warning
         annotations:
-          summary: handover errors in (projectId {{`{{`}} $labels.projectId }}) is high
+          summary: handover errors in organisationId {{`{{`}} $labels.organisationId }} projectId {{`{{`}} $labels.projectId }} is high
           description: "Number of handover errors is {{`{{`}} $value }} in last 5 minutes\n LABELS = {{`{{`}} $labels }}"
+      - alert: ServiceHandoverRequestLatencyHigh
+        expr: >
+          histogram_quantile( {{ $.Values.rules.ai.serviceHandover.requestLatencyHighQuantile }},
+          sum(rate(cognigy_http_request_duration_bucket{container="service-handover"}[1m])) by (le, route))/1000 >
+              {{ $.Values.rules.ai.serviceHandover.requestLatencyHighThreshold }}
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: service-handover HTTP requests latency for provider {{`{{`}} $labels.route }} is high
+          description: "service-handover HTTP requests latency is higher than {{`{{`}} $value }} sec\n LABELS = {{`{{`}} $labels }}"
+      - alert: ServiceHandoverRequest5xxErrorRate
+        expr: >
+          sum by (route) (increase(cognigy_http_request_duration_count{container="service-handover", status=~"5.*"}[1m])) >
+            {{ $.Values.rules.ai.serviceHandover.requestErrorThreshold }}
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: service-handover 5xx HTTP requests rate for provider {{`{{`}} $labels.route }} is high
+          description: "service-handover 5xx HTTP requests rate for is {{`{{`}} $value }} requests/min\n LABELS = {{`{{`}} $labels }}"
   {{- end }}
 
 {{- end -}}

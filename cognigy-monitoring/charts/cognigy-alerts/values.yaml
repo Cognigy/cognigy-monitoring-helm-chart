@@ -33,7 +33,9 @@ rules:
     containerOOMKilled:
       enabled: true
       severity: warning
-      timeout: 1m
+      timeout: 5m
+      threshold: 3
+      offset: 3h
     cpuThrottlingBackendServiceHigh:
       enabled: true
       severity: warning
@@ -153,16 +155,22 @@ rules:
       enabled: true
     serviceHandover:
       enabled: true
-      # threshold on number of errors service handover to trigger alert
+      # threshold on number of service handover errors per 5 min
       errorsThreshold: 2
+      requestLatencyHighQuantile: 0.95
+      # threshold (seconds) for high requests latency to external providers
+      requestLatencyHighThreshold: 2
+      # threshold for 5xx errors to external providers per minute
+      requestErrorThreshold: 2
+
     serviceEndpoint:
       enabled: true
       # Message processing Time quantile to analyze
-      messageProcessingTimeQuantile: 0.95
+      messageProcessingTimeQuantile: 0.8
       # Threshold (sec) of Message processing Time for EndpointMessageProcessingTimeHigh to start firing
-      messageProcessingTimeThreshold: 30
+      messageProcessingTimeThreshold: 50
       # Threshold of increase (%) of Message Processing Time for EndpointMessageProcessingTimeIncreasing to start firing
-      messageProcessingTimeIncreasingThreshold: 200
+      messageProcessingTimeIncreasingThreshold: 300
       # Baseline for Message processing Time (sec) to avoid false positives of EndpointMessageProcessingTimeIncreasing alert,
       # increases above messageProcessingTimeIncreasingThreshold and with the baseline below messageProcessingTimeBaseline are ignored
       messageProcessingTimeBaseline: 10

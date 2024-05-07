@@ -12,8 +12,8 @@ spec:
       rules:
     {{- if (.Values.rules.la.HighHttpErrorRate.enabled ) }}
       - alert: LiveAgentHighHttpErrorRate
-        expr: 100 * (sum(increase(ruby_http_requests_total{controller=~"api/v1/accounts/.*", status!~"2..|3..|404|401|412"}[5m])) by (action, controller, status)) /
-              (sum(increase(ruby_http_requests_total{controller=~"api/v1/accounts/.*"}[5m])) by (action, controller, status))
+        expr: 100 * (sum(increase(ruby_http_requests_total{status!~"-1|2..|3..|401|404|412"}[5m])) by (action, controller, status)) /
+              (sum(increase(ruby_http_requests_total[5m])) by (action, controller, status))
               > {{ $.Values.rules.la.HighHttpErrorRate.threshold }}
         for: 15m
         labels:

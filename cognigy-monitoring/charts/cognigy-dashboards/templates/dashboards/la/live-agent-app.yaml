@@ -56,6 +56,7 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
+      "id": 64,
       "links": [],
       "liveNow": false,
       "panels": [
@@ -132,7 +133,6 @@ data:
             }
           ],
           "title": "Accounts Endpoints Status Codes",
-          "transformations": [],
           "type": "piechart"
         },
         {
@@ -208,7 +208,6 @@ data:
             }
           ],
           "title": "Inbox Endpoints Status Codes",
-          "transformations": [],
           "type": "piechart"
         },
         {
@@ -284,7 +283,6 @@ data:
             }
           ],
           "title": "Conversation Endpoints Status Codes",
-          "transformations": [],
           "type": "piechart"
         },
         {
@@ -360,7 +358,6 @@ data:
             }
           ],
           "title": "Contacts Endpoint Status Codes",
-          "transformations": [],
           "type": "piechart"
         },
         {
@@ -433,7 +430,6 @@ data:
             }
           ],
           "title": "Messages  Endpoints Status Codes",
-          "transformations": [],
           "type": "piechart"
         },
         {
@@ -509,7 +505,6 @@ data:
             }
           ],
           "title": "Agent Bot  Platform Endpoints Status Codes",
-          "transformations": [],
           "type": "piechart"
         },
         {
@@ -585,7 +580,6 @@ data:
             }
           ],
           "title": "Old Agent Bot Endpoints Status Codes",
-          "transformations": [],
           "type": "piechart"
         },
         {
@@ -613,7 +607,7 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 9,
+            "h": 5,
             "w": 24,
             "x": 0,
             "y": 13
@@ -631,9 +625,11 @@ data:
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
           },
-          "pluginVersion": "9.2.3",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -661,6 +657,7 @@ data:
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "Requests",
@@ -674,6 +671,7 @@ data:
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -708,18 +706,20 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 12,
+            "h": 9,
             "w": 24,
             "x": 0,
-            "y": 22
+            "y": 18
           },
           "id": 1,
           "options": {
             "legend": {
               "calcs": [
+                "lastNotNull",
+                "mean",
                 "sum"
               ],
-              "displayMode": "list",
+              "displayMode": "table",
               "placement": "right",
               "showLegend": true
             },
@@ -736,7 +736,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum by (status, method, action, controller) (increase(ruby_http_requests_total{cluster=\"$cluster\", controller=~\"api/v1/accounts/.*\"}[1m]))",
+              "expr": "sum by (status, method, action, controller) (increase(ruby_http_requests_total{cluster=\"$cluster\"}[1m]))",
               "legendFormat": "{{`{{`}}method{{`}}`}} {{`{{`}}status{{`}}`}} {{`{{`}}controller{{`}}`}}/{{`{{`}}action{{`}}`}}",
               "range": true,
               "refId": "A"
@@ -757,6 +757,7 @@ data:
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "Error Rate (%)",
@@ -770,6 +771,7 @@ data:
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -805,19 +807,21 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 16,
-            "w": 11,
+            "h": 8,
+            "w": 24,
             "x": 0,
-            "y": 34
+            "y": 27
           },
           "id": 5,
           "options": {
             "legend": {
               "calcs": [
+                "lastNotNull",
+                "mean",
                 "sum"
               ],
-              "displayMode": "list",
-              "placement": "bottom",
+              "displayMode": "table",
+              "placement": "right",
               "showLegend": true
             },
             "tooltip": {
@@ -833,7 +837,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "100*sum(rate(ruby_http_requests_total{cluster=\"$cluster\", controller=~\"api/v1/accounts/.*\", status!~\"2..|3..|404\"}[1m])) by (action, controller, status) /sum(rate(ruby_http_requests_total{cluster=\"$cluster\", controller=~\"api/v1/accounts/.*\"}[1m])) by (action, controller, status)",
+              "expr": "100*sum(rate(ruby_http_requests_total{cluster=\"$cluster\", status!~\"2..|3..|404\"}[1m])) by (action, controller, status) /sum(rate(ruby_http_requests_total{cluster=\"$cluster\"}[1m])) by (action, controller, status)",
               "legendFormat": "{{`{{`}}status{{`}}`}} {{`{{`}}controller{{`}}`}}/{{`{{`}}action{{`}}`}}",
               "range": true,
               "refId": "A"
@@ -854,6 +858,7 @@ data:
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -867,6 +872,7 @@ data:
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -897,18 +903,24 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 16,
-            "w": 12,
-            "x": 11,
-            "y": 34
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 35
           },
           "id": 11,
           "options": {
             "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
+              "calcs": [
+                "lastNotNull",
+                "mean",
+                "sum"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Total",
+              "sortDesc": true
             },
             "tooltip": {
               "mode": "single",
@@ -945,6 +957,7 @@ data:
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -958,6 +971,7 @@ data:
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "smooth",
                 "lineWidth": 1,
                 "pointSize": 1,
@@ -990,18 +1004,24 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 22,
+            "h": 9,
             "w": 24,
             "x": 0,
-            "y": 50
+            "y": 44
           },
           "id": 6,
           "options": {
             "legend": {
-              "calcs": [],
-              "displayMode": "list",
+              "calcs": [
+                "lastNotNull",
+                "mean",
+                "stdDev"
+              ],
+              "displayMode": "table",
               "placement": "right",
-              "showLegend": true
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
             },
             "tooltip": {
               "mode": "single",
@@ -1049,7 +1069,9 @@ data:
             "defaults": {
               "custom": {
                 "align": "auto",
-                "displayMode": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
                 "inspect": false
               },
               "mappings": [],
@@ -1073,11 +1095,13 @@ data:
             "h": 13,
             "w": 12,
             "x": 0,
-            "y": 72
+            "y": 53
           },
           "id": 3,
           "options": {
+            "cellHeight": "sm",
             "footer": {
+              "countRows": false,
               "enablePagination": false,
               "fields": "",
               "reducer": [
@@ -1094,7 +1118,7 @@ data:
             ]
           },
           "pageSize": 10,
-          "pluginVersion": "9.2.3",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -1103,7 +1127,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum by (action, controller) (increase(ruby_http_requests_total{cluster=\"$cluster\", controller=~\"api/v1/accounts/.*\"}[1m]))\t",
+              "expr": "sum by (action, controller) (increase(ruby_http_requests_total{cluster=\"$cluster\"}[1m]))\t",
               "format": "table",
               "instant": false,
               "legendFormat": "{{`{{`}}controller{{`}}`}}",
@@ -1196,7 +1220,9 @@ data:
               },
               "custom": {
                 "align": "auto",
-                "displayMode": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
                 "inspect": false
               },
               "mappings": [],
@@ -1222,11 +1248,13 @@ data:
             "h": 13,
             "w": 12,
             "x": 12,
-            "y": 72
+            "y": 53
           },
           "id": 20,
           "options": {
+            "cellHeight": "sm",
             "footer": {
+              "countRows": false,
               "enablePagination": false,
               "fields": "",
               "reducer": [
@@ -1243,7 +1271,7 @@ data:
             ]
           },
           "pageSize": 10,
-          "pluginVersion": "9.2.3",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -1252,7 +1280,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "avg (ruby_http_request_duration_seconds{cluster=\"$cluster\", controller=~\"api/v1/accounts/.*\", quantile='0.99'}) by (controller)",
+              "expr": "avg (ruby_http_request_duration_seconds{cluster=\"$cluster\", quantile='0.99'}) by (controller)",
               "format": "table",
               "hide": false,
               "instant": false,
@@ -1266,7 +1294,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "avg (ruby_http_request_duration_seconds{cluster=\"$cluster\", controller=~\"api/v1/accounts/.*\", quantile='0.9'})  by (controller)",
+              "expr": "avg (ruby_http_request_duration_seconds{cluster=\"$cluster\", quantile='0.9'})  by (controller)",
               "format": "table",
               "hide": false,
               "legendFormat": "__auto",
@@ -1279,7 +1307,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "avg (ruby_http_request_duration_seconds{cluster=\"$cluster\", controller=~\"api/v1/accounts/.*\", quantile='0.5'}) by (controller)",
+              "expr": "avg (ruby_http_request_duration_seconds{cluster=\"$cluster\", quantile='0.5'}) by (controller)",
               "format": "table",
               "hide": false,
               "legendFormat": "__auto",
@@ -1384,8 +1412,7 @@ data:
         }
       ],
       "refresh": "{{ index .Values "products" "la" "dashboards" "live-agent-app" "refreshInterval" | default "5m" }}",
-      "schemaVersion": 37,
-      "style": "dark",
+      "schemaVersion": 39,
       "tags": [],
       "templating": {
         "list": [
@@ -1408,7 +1435,6 @@ data:
             "type": "datasource"
           },
           {
-            "allValue": null,
             "current": {
               "text": "",
               "value": ""
@@ -1430,6 +1456,7 @@ data:
             },
             "refresh": 2,
             "regex": "",
+            "skipUrlSync": false,
             "sort": 1,
             "tagValuesQuery": "",
             "tags": [],
@@ -1447,7 +1474,7 @@ data:
       "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
       "title": "Live Agent Overview",
       "uid": "laov2",
-      "version": 4,
+      "version": 1,
       "weekStart": ""
     }
 {{- end }}

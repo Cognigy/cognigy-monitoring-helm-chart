@@ -1,5 +1,19 @@
 # Release Notes
 
+### 1.22.0
+**Released** May 7th, 2024
+
+#### Changes
+- deprecated and removed Weaviate dashboards
+- refactored `Service-Handover` dashboard (renamed from `Request Handover`)
+- added additional panels to `Service-Handover` dashboard
+- Introduced `ServiceHandoverRequestLatencyHigh` and `ServiceHandoverRequest5xxErrorRate` alerts
+- updated `Live Agent Overview` dashboard panels
+
+#### Bugfixes
+- stabilized `ContainerOOMKilled` and `EndpointMessageProcessingTimeHigh` alerts
+- fixed `Container Health` dashboard panels
+
 ### 1.21.0
 **Released** April 16th, 2024
 
