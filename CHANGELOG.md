@@ -1,36 +1,52 @@
 # Release Notes
 
+### 1.23.0 💥
+**Released** July 9th, 2024
+
+**IMPORTANT**: This release updates all the dependency charts to the latest versions. Check the [upgrade documentation](upgrade/upgrade-1.23.md) before updating to this version!
+
+#### Changes
+- Updated dependency charts to the latest version.
+- Restructured the naming convention for the Cognigy dashboards.
+- Replaced outdated Angular plugins in Grafana dashboards.
+- Renamed Agent Assist dashboards to AI Copilot.
+- Added `PostgresReplicationLag` alert.
+- Added Cognigy license file.
+- Added Kubernetes v1.29 support.
+- Added new metrics to `VG / SBC-Inbound` and `VG / SBC-Outbound`dashboards.
+- Added new metrics to `AI / Service NLP Classifier` dashboard.
+
 ### 1.22.0
 **Released** May 7th, 2024
 
 #### Changes
-- deprecated and removed Weaviate dashboards
-- refactored `Service-Handover` dashboard (renamed from `Request Handover`)
-- added additional panels to `Service-Handover` dashboard
-- Introduced `ServiceHandoverRequestLatencyHigh` and `ServiceHandoverRequest5xxErrorRate` alerts
-- updated `Live Agent Overview` dashboard panels
+- deprecated and removed Weaviate dashboards.
+- refactored `Service-Handover` dashboard (renamed from `Request Handover`).
+- added additional panels to `Service-Handover` dashboard.
+- Introduced `ServiceHandoverRequestLatencyHigh` and `ServiceHandoverRequest5xxErrorRate` alerts.
+- updated `Live Agent Overview` dashboard panels.
 
 #### Bugfixes
-- stabilized `ContainerOOMKilled` and `EndpointMessageProcessingTimeHigh` alerts
-- fixed `Container Health` dashboard panels
+- stabilized `ContainerOOMKilled` and `EndpointMessageProcessingTimeHigh` alerts.
+- fixed `Container Health` dashboard panels.
 
 ### 1.21.0
 **Released** April 16th, 2024
 
 #### Changes
-- Grafana updated to v10.4.1
-- Thanos dashboards are introduced
-- Kubernetes v1.28 is supported
-- New panels are introduced in `Service NLP Classifier` dashboard
-- MongoDB dashboard is updated
-- `HighConversationVolume` alert rule is introduced
-- `KubePodCrashLooping` alert is parametrized
-- RabbitMQ alert rules are parametrized
+- Grafana updated to v10.4.1.
+- Thanos dashboards are introduced.
+- Kubernetes v1.28 is supported.
+- New panels are introduced in `Service NLP Classifier` dashboard.
+- MongoDB dashboard is updated.
+- `HighConversationVolume` alert rule is introduced.
+- `KubePodCrashLooping` alert is parametrized.
+- RabbitMQ alert rules are parametrized.
 
 #### Bugfixes
-- Default dashboard refresh interval is set to 5 minutes
-- `Service-API` dashboard is fixed
-- Dashboard conversion script is fixed
+- Default dashboard refresh interval is set to 5 minutes.
+- `Service-API` dashboard is fixed.
+- Dashboard conversion script is fixed.
 
 ### 1.20.0
 **Released** February 14th, 2024

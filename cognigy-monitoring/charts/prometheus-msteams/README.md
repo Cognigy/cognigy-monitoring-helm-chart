@@ -31,7 +31,7 @@ Create a helm values file to configure your Microsoft Teams channel connectors a
 replicaCount: 1
 image:
   repository: quay.io/prometheusmsteams/prometheus-msteams
-  tag: v1.5.0
+  tag: v1.5.1
 
 connectors:
 # in alertmanager, this will be used as http://prometheus-msteams:2000/bar
@@ -127,7 +127,7 @@ connectorsWithCustomTemplates:
 | Parameter                                  | Description                                                                                                                                                   | Default                                         |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
 | `image.repository`                         | Image repository                                                                                                                                              | `quay.io/prometheusmsteams/prometheus-msteams`  |
-| `image.tag`                                | Image tag                                                                                                                                                     | `v1.5.0`                                        |
+| `image.tag`                                | Image tag                                                                                                                                                     | `v1.5.1`                                        |
 | `image.pullPolicy`                         | Image pull policy                                                                                                                                             | `Always`                                        |
 | `imagePullSecrets`                         | Configuration for [imagePullSecrets](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret) so that you can use a private registry for your image | `[]` |
 | `extraEnvs`                                | Extra environment variables                                                                                                                                   | `{}`                                            |
@@ -144,6 +144,7 @@ connectorsWithCustomTemplates:
 | `priorityClassName`                        | Pod priority class                                                                                                                                            | `""`                                            |
 | `podAnnotations`                           | Pod annotations                                                                                                                                               | `{}`                                            |
 | `podLabels`                                | Labels to add to each pod                                                                                                                                     | `{}`                                            |
+| `containerSecurityContext`                 | Pod containerSecurityContext                                                                                                                                  | `{}`                                            |
 | `podSecurityContext`                       | Pod securityContext                                                                                                                                           | See [default](./values.yaml)                    |
 | `customCardTemplate`                       | Custom message card template for MS teams                                                                                                                     | `""`                                            |
 | `metrics.serviceMonitor.enabled`           | Set this to `true` to create ServiceMonitor for Prometheus operator                                                                                           | `false`                                         |

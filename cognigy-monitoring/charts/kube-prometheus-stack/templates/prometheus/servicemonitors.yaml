@@ -15,6 +15,7 @@ items:
 {{ toYaml .additionalLabels | indent 8 }}
         {{- end }}
     spec:
+      {{- include "servicemonitor.scrapeLimits" . | nindent 6 }}
       endpoints:
 {{ toYaml .endpoints | indent 8 }}
     {{- if .jobLabel }}
@@ -33,6 +34,14 @@ items:
     {{- if .podTargetLabels }}
       podTargetLabels:
 {{ toYaml .podTargetLabels | indent 8 }}
+    {{- end }}
+    {{- if .metricRelabelings }}
+      metricRelabelings:
+{{ toYaml .metricRelabelings | indent 8 }}
+    {{- end }}
+    {{- if .relabelings }}
+      relabelings:
+{{ toYaml .relabelings | indent 8 }}
     {{- end }}
 {{- end }}
 {{- end }}

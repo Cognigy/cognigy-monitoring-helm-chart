@@ -2,8 +2,11 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: {{ template "cadvisor.name" . }}
+  namespace: {{ .Release.Namespace }}
+  {{- with .Values.daemonsetAnnotations }}
   annotations:
-      seccomp.security.alpha.kubernetes.io/pod: 'docker/default'
+{{ toYaml . | indent 4 }}
+  {{- end }}
   labels:
     app: {{ template "cadvisor.name" . }}
     chart: {{ template "cadvisor.chart" . }}
@@ -19,6 +22,9 @@ spec:
       labels:
         app: {{ template "cadvisor.name" . }}
         release: {{ .Release.Name }}
+        {{- range $key, $value := .Values.podLabels }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
       annotations:
         {{- range $key, $value := .Values.podAnnotations }}
         {{ $key }}: {{ $value | quote }}
@@ -49,7 +55,7 @@ spec:
         {{- range .Values.container.hostPaths }}
         - name: {{ .name }}
           mountPath: {{ default .path .mount }}
-          readOnly: true
+          readOnly: {{ list nil true | has .readOnly }}
         {{- end }}
         {{ if .Values.podSecurityContext.create }}
         securityContext:

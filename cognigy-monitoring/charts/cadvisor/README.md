@@ -48,7 +48,7 @@ The following table lists the configurable parameters of the cAdvisor chart and 
 | Parameter                      | Description                                      | Default                    |
 | ------------------------------ | ------------------------------------------------ | -------------------------- |
 | `image.repository`             | container image repository                       | `gcr.io/cadvisor/cadvisor` |
-| `image.tag`                    | container image tag                              | `v0.44.0`                  |
+| `image.tag`                    | container image tag                              | `v0.49.1`                  |
 | `image.pullPolicy`             | container image pull policy                      | `IfNotPresent`             |
 | `image.pullSecrets`            | container image pull secrets                     | `[]`                       |
 | `nodeSelector`                 | node labels for pod assignment                   | `{}`                       |
@@ -60,7 +60,9 @@ The following table lists the configurable parameters of the cAdvisor chart and 
 | `resources`                    | pod resource requests & limits                   | `{}`                       |
 | `serviceAccount.create`        | create a own serviceAccount for the pod          | `true`                     |
 | `serviceAccount.name`          | name of the serviceAccount to create             | `""`                       |
+| `daemonsetAnnotations`         | annotations for the daemonset                    | `{}`                       |
 | `podAnnotations`               | annotations for the daemonset pods               | `{}`                       |
+| `podLabels`                    | labels for the daemonset pods                    | `{}`                       |
 | `priorityClassName`            | priority classes name for the pod                | `{}`                       |
 | `podSecurityPolicy.create`     | create a own PodSecurityPolicy for the pod       | `false`                    |
 | `podSecurityPolicy.privileged` | create the PodSecurityPolicy as privileged       | `false`                    |
@@ -68,8 +70,8 @@ The following table lists the configurable parameters of the cAdvisor chart and 
 | `podSecurityContext.privileged`| set podSecurityContext privileged to true        | `false`                    |
 | `metrics.enabled`              | create ServiceMonitor CR for Prometheus operator | `false`                    |
 | `metrics.relabelings`          | add pre-scraping relabeling to ServiceMonitor    | `[]`                       |
-| `metrics.interval`             | scraping interval for the ServiceMonitor         | `30s`                       |
-| `metrics.scrapeTimeout`        | scraping timeout for the ServiceMonitor          | `30s`                       |
+| `metrics.interval`             | scraping interval for the ServiceMonitor         | `30s`                      |
+| `metrics.scrapeTimeout`        | scraping timeout for the ServiceMonitor          | `30s`                      |
 | `metrics.metricsRelabelings`   | add pre-ingestion relabeling to ServiceMonitor   | `[]`                       |
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
@@ -88,3 +90,6 @@ $ helm install --name my-release -f values.yaml ckotzbauer/cadvisor
 ```
 
 > **Tip**: You can use the default [values.yaml](values.yaml)
+
+## Centos, Fedora and RHEL
+You may need to run the container with additional configuration. Please see [this article](https://github.com/google/cadvisor/blob/master/docs/running.md#centos-fedora-and-rhel).

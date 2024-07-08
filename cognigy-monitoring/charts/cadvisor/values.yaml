@@ -1,6 +1,6 @@
 image:
   repository: gcr.io/cadvisor/cadvisor
-  tag: v0.44.0
+  tag: v0.49.1
   pullPolicy: IfNotPresent
 
   ## Reference to one or more secrets to be used when pulling images
@@ -21,14 +21,19 @@ container:
     - name: rootfs
       path: "/"
       mount: "/rootfs"
+      readOnly: true
     - name: varrun
       path: "/var/run"
+      readOnly: true
     - name: sys
       path: "/sys"
+      readOnly: true
     - name: docker
       path: "/var/lib/docker"
+      readOnly: true
     - name: disk
       path: "/dev/disk"
+      readOnly: true
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -43,6 +48,10 @@ resources: {}
   #   memory: 128Mi
 
 podAnnotations: {}
+podLabels: {}
+
+daemonsetAnnotations:
+  seccomp.security.alpha.kubernetes.io/pod: 'docker/default'
 
 # priorityClassName: system-cluster-critical
 priorityClassName: {}

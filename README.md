@@ -1,4 +1,4 @@
-![Cognigy.AI banner](https://raw.githubusercontent.com/Cognigy/kubernetes/main/docs/assets/cognigy-ai.png)
+![Cognigy.AI banner](assets/cognigy-ai.png)
 
 # Cognigy Monitoring Stack Helm Chart
 This chart installs Cognigy Monitoring Stack which is based on [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)
@@ -19,7 +19,7 @@ This chart installs Cognigy Monitoring Stack which is based on [kube-prometheus-
    --username <your-username> \
    --password <your-password>
    ```
-   * Install Helm Chart into a separate `cognigy-ai` namespace:
+   * Install Helm Chart into a separate `monitoring` namespace:
    ```shell
    helm upgrade --install --create-namespace -n monitoring monitoring-stack oci://cognigy.azurecr.io/helm/cognigy-monitoring --version HELM_CHART_VERSION --values YOUR_VALUES_FILE.yaml
    ```
@@ -31,10 +31,20 @@ This chart installs Cognigy Monitoring Stack which is based on [kube-prometheus-
 5. If Grafana ingress is enabled, add Grafana hostname to DNS and access Grafana via browser.
 6. Enable Prometheus Monitors for Cognigy products in respective Helm Charts:
    - For [MongoDB Helm Chart](https://github.com/Cognigy/cognigy-mongodb-helm-chart/tree/master/charts/bitnami/mongodb) set `metrics.serviceMonitor.enabled: true` in `values.yaml` of MongoDB Helm Release.
-   - For [Cognigy.AI Helm Chart](https://github.com/Cognigy/cognigy-ai-helm-chart) set `podMonitors.enabled: true` and `podMonitors.namespace: "monitoring"` in  `values.yaml` of Cognigy.AI Helm Release.
-   - For [Live Agent Helm Chart](https://github.com/Cognigy/cognigy-live-agent-helm-chart) set `monitoring.enabled: true` in  `values.yaml` of Cognigy LA Helm Release.
-   - For [Voice Gateway Helm Chart](https://github.com/Cognigy/cognigy-vg-helm-chart) set `podMonitors.enabled: true` and `podMonitors.namespace: "monitoring"` in  `values.yaml` of Cognigy VG Helm Release.
-   - To enable additional serviceMonitors for databases and backends included as dependencies in the Cognigy Helm Charts (AI, LA, VG) enable `serviceMonitor` according to the `values.yaml` of the respective Chart.
+   - For [Cognigy.AI Helm Chart](https://github.com/Cognigy/cognigy-ai-helm-chart) set `podMonitors.enabled: true` and `podMonitors.namespace: "monitoring"` in `values.yaml` of Cognigy.AI Helm Release.
+   - For [Live Agent Helm Chart](https://github.com/Cognigy/cognigy-live-agent-helm-chart) set `monitoring.enabled: true` in `values.yaml` of Cognigy LA Helm Release.
+   - For [Voice Gateway Helm Chart](https://github.com/Cognigy/cognigy-vg-helm-chart) set `podMonitors.enabled: true` and `podMonitors.namespace: "monitoring"` in `values.yaml` of Cognigy VG Helm Release.
+   - To enable additional `ServiceMonitor` for databases and backends included as dependencies in the Cognigy Helm Charts (AI, LA, VG) enable `serviceMonitor` according to the `values.yaml` of the respective Chart.
+
+## Upgrading Chart
+
+```console
+helm upgrade -n monitoring monitoring-stack oci://cognigy.azurecr.io/helm/cognigy-monitoring --version HELM_CHART_VERSION --values YOUR_VALUES_FILE.yaml
+```
+
+### From 1.22.x to 1.23.x
+
+This update includes breaking changes. Check [here](upgrade/upgrade-1.23.md) for detail instruction.
 
 ## Upgrading from legacy Monitoring Stack
 To upgrade from our legacy Monitoring stack, check [upgrade from legacy stack](upgrade-from-legacy.md) guide.
