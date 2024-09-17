@@ -57,7 +57,7 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 4,
+      "id": 100,
       "links": [],
       "liveNow": false,
       "panels": [
@@ -142,7 +142,7 @@ data:
               }
             ]
           },
-          "pluginVersion": "10.4.1",
+          "pluginVersion": "11.0.0",
           "targets": [
             {
               "datasource": {
@@ -335,6 +335,335 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "Unused nodes in the default pool",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "center",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "filterable": false,
+                "inspect": true
+              },
+              "decimals": 0,
+              "fieldMinMax": false,
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "yellow",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Free Nodes (Default)"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "thresholds"
+                    }
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green",
+                          "value": null
+                        },
+                        {
+                          "color": "blue",
+                          "value": -1
+                        },
+                        {
+                          "color": "green",
+                          "value": 0
+                        },
+                        {
+                          "color": "yellow",
+                          "value": 1
+                        },
+                        {
+                          "color": "orange",
+                          "value": 2
+                        },
+                        {
+                          "color": "red",
+                          "value": 3
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 13,
+            "w": 24,
+            "x": 0,
+            "y": 13
+          },
+          "id": 32,
+          "interval": "1h",
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "enablePagination": false,
+              "fields": [
+                "Free Default",
+                "Free CPU",
+                "Free RAM",
+                "Value #A (last)",
+                "Value #B (last)"
+              ],
+              "reducer": [
+                "sum"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Free Nodes (Default)"
+              }
+            ]
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum by (cluster) (kube_node_info{node!~\"$non_default_nodes\", cloud=~\"$cloud\", cluster=~\"$cluster\"})",
+              "format": "table",
+              "instant": false,
+              "interval": "",
+              "legendFormat": "Default Nodes",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (cluster) (kube_node_info{node=~\"$non_default_nodes\", cloud=~\"$cloud\", cluster=~\"$cluster\"})",
+              "format": "table",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Non-default Nodes",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "(sum by (cluster)(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"cpu\", cloud=~\"$cloud\", cluster=~\"$cluster\", node!~\"$non_default_nodes\"}) - sum by (cluster) (max by (cluster, namespace, pod, container) (kube_pod_container_resource_requests{resource=\"cpu\",job=\"kube-state-metrics\",  cloud=~\"$cloud\", cluster=~\"$cluster\", node!~\"$non_default_nodes\"}) * on(cluster, namespace, pod) group_left() max by (cluster,namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)))/max by (cluster)(kube_node_status_capacity{job=\"kube-state-metrics\",resource=\"cpu\", cloud=~\"$cloud\", cluster=~\"$cluster\", node!~\"$non_default_nodes\"})",
+              "format": "table",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Free CPU Default",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "(sum by (cluster)(kube_node_status_allocatable{job=\"kube-state-metrics\",resource=\"memory\", cloud=~\"$cloud\", cluster=~\"$cluster\", node!~\"$non_default_nodes\"}) - sum by (cluster) (max by (cluster, namespace, pod, container) (kube_pod_container_resource_requests{resource=\"memory\",job=\"kube-state-metrics\",  cloud=~\"$cloud\", cluster=~\"$cluster\", node!~\"$non_default_nodes\"}) * on(cluster, namespace, pod) group_left() max by (cluster,namespace, pod) (kube_pod_status_phase{phase=~\"Pending|Running\"} == 1)))/max by (cluster)(kube_node_status_capacity{job=\"kube-state-metrics\",resource=\"memory\", cloud=~\"$cloud\", cluster=~\"$cluster\", node!~\"$non_default_nodes\"})",
+              "format": "table",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Free RAM Default",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "title": "Cluster Spare Capacity",
+          "transformations": [
+            {
+              "id": "groupBy",
+              "options": {
+                "fields": {
+                  "Value #A": {
+                    "aggregations": [
+                      "last"
+                    ],
+                    "operation": "aggregate"
+                  },
+                  "Value #B": {
+                    "aggregations": [
+                      "last"
+                    ],
+                    "operation": "aggregate"
+                  },
+                  "Value #C": {
+                    "aggregations": [
+                      "last"
+                    ],
+                    "operation": "aggregate"
+                  },
+                  "Value #D": {
+                    "aggregations": [
+                      "last"
+                    ],
+                    "operation": "aggregate"
+                  },
+                  "cluster": {
+                    "aggregations": [],
+                    "operation": "groupby"
+                  }
+                }
+              }
+            },
+            {
+              "id": "joinByField",
+              "options": {
+                "byField": "cluster",
+                "mode": "outer"
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "Free CPU",
+                "binary": {
+                  "left": "Value #C (last)",
+                  "operator": "-",
+                  "right": "1"
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                },
+                "unary": {
+                  "fieldName": "Value #C (last)",
+                  "operator": "floor"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "Free RAM",
+                "binary": {
+                  "left": "Value #D (last)",
+                  "operator": "-",
+                  "right": "1"
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "unary",
+                "reduce": {
+                  "reducer": "sum"
+                },
+                "unary": {
+                  "fieldName": "Free CPU",
+                  "operator": "floor"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "unary",
+                "reduce": {
+                  "reducer": "sum"
+                },
+                "unary": {
+                  "fieldName": "Free RAM",
+                  "operator": "floor"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "Free Default",
+                "index": {
+                  "asPercentile": false
+                },
+                "mode": "reduceRow",
+                "reduce": {
+                  "include": [
+                    "floor(Free CPU)",
+                    "floor(Free RAM)"
+                  ],
+                  "reducer": "min"
+                },
+                "replaceFields": false
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Value #C (last)": true,
+                  "Value #D (last)": true,
+                  "floor(Free CPU)": true,
+                  "floor(Free RAM)": true
+                },
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "Free CPU": "Free CPU (Default)",
+                  "Free Default": "Free Nodes (Default)",
+                  "Free RAM": "Free RAM (Default)",
+                  "Value #A (last)": "Default Nodes",
+                  "Value #B (last)": "Non-Default Nodes",
+                  "Value #D (last)": "",
+                  "cluster": "Cluster"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
           "description": "Sum of compute, memory, and storage costs",
           "fieldConfig": {
             "defaults": {
@@ -396,7 +725,7 @@ data:
             "h": 18,
             "w": 24,
             "x": 0,
-            "y": 13
+            "y": 26
           },
           "id": 22,
           "interval": "30m",
@@ -408,6 +737,7 @@ data:
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "multi",
               "sort": "none"
             }
@@ -481,8 +811,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -498,7 +827,7 @@ data:
             "h": 18,
             "w": 24,
             "x": 0,
-            "y": 31
+            "y": 44
           },
           "id": 31,
           "interval": "24h",
@@ -510,6 +839,7 @@ data:
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "multi",
               "sort": "none"
             }
@@ -583,8 +913,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -600,7 +929,7 @@ data:
             "h": 17,
             "w": 24,
             "x": 0,
-            "y": 49
+            "y": 62
           },
           "id": 6,
           "interval": "30m",
@@ -612,6 +941,7 @@ data:
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "multi",
               "sort": "none"
             }
@@ -684,8 +1014,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -701,7 +1030,7 @@ data:
             "h": 18,
             "w": 12,
             "x": 0,
-            "y": 66
+            "y": 79
           },
           "id": 9,
           "interval": "30m",
@@ -785,8 +1114,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -802,7 +1130,7 @@ data:
             "h": 18,
             "w": 12,
             "x": 12,
-            "y": 66
+            "y": 79
           },
           "id": 30,
           "interval": "30m",
@@ -1025,6 +1353,34 @@ data:
             "skipUrlSync": false,
             "sort": 0,
             "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(kube_node_spec_taint{cluster=~\"$cluster\"},node)",
+            "description": "Nodes with specific taints that do not belong to \"default\" pool",
+            "hide": 0,
+            "includeAll": true,
+            "label": "non_default_nodes",
+            "multi": false,
+            "name": "non_default_nodes",
+            "options": [],
+            "query": {
+              "qryType": 1,
+              "query": "label_values(kube_node_spec_taint{cluster=~\"$cluster\"},node)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "type": "query"
           }
         ]
       },
@@ -1032,6 +1388,7 @@ data:
         "from": "{{ index .Values "products" "services" "dashboards" "kubecost-global" "timeFrom" | default "now-3h" }}",
         "to": "now"
       },
+      "timeRangeUpdatedDuringEditOrView": false,
       "timepicker": {
         "refresh_intervals": [
           "5s",

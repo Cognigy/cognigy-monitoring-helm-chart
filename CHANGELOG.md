@@ -1,5 +1,18 @@
 # Release Notes
 
+### 1.24.0
+**Released** September 17th, 2024
+
+#### Changes
+- Introduced `IN / Insights Service Collector` dashboard.
+- Introduced `Services / Qdrant` dashboard.
+- Improved `Services / Kubecost Global` dashboard.
+- Added Kubernetes v1.30 support.
+
+#### Bugfixes
+- Fixed default timezone of dashboards to the local browser. 
+- Protected `/metrics` endpoint for Grafana with Basic Auth.
+
 ### 1.23.0 💥
 **Released** July 9th, 2024
 
