@@ -25,8 +25,9 @@ spec:
     {{- if (.Values.rules.vg.featureServer.enabled ) }}
     - name: cognigy.vg.alert.feature-server
       rules:
+      {{- if (.Values.rules.vg.featureServer.uncaughtErrors.enabled ) }}
       - alert: UncaughtErrorsFeatureServer
-        expr: sum(increase(vg_feature_server_uncaught_error_total[5m])) > 5
+        expr: sum(increase(vg_feature_server_uncaught_error_total[5m])) > {{$.Values.rules.vg.featureServer.uncaughtErrors.threshold }}
         for: 5m
         labels:
           severity: warning
@@ -34,9 +35,23 @@ spec:
         annotations:
           summary: feature-server had uncaught errors on (instance {{`{{`}} $labels.instance }})
           description: "feature-server had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
-      
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.taskErrors.enabled ) }}
+      - alert: TaskErrorsFeatureServer
+        expr: sum(increase(vg_feature_server_task_error[1m])) by (task) > {{$.Values.rules.vg.featureServer.taskErrors.threshold }}
+        for: 5m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "Task: Error/min rate is high (instance {{`{{`}} $labels.instance }})"
+          description: "Task: Error/min rate has crossed {{$.Values.rules.vg.threshold }} threshold: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.handoverErrors.enabled ) }}
       - alert: HandoverErrorsFeatureServer
-        expr: sum(increase(vg_feature_server_handover_error_total[5m])) > 5
+        expr: sum(increase(vg_feature_server_handover_error_total[5m])) >  {{$.Values.rules.vg.featureServer.handoverErrors.threshold }}
         for: 5m
         labels:
           severity: warning
@@ -44,22 +59,26 @@ spec:
         annotations:
           summary: feature-server had handover errors (instance {{`{{`}} $labels.instance }})
           description: "feature-server had handover errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
-      
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.analyticsDataErrors.enabled ) }}
       - alert: AnalyticsDataErrorsFeatureServer
-        expr: sum(increase(vg_feature_server_analytics_submit_error_total[5m])) > 5
+        expr: sum(increase(vg_feature_server_analytics_submit_error_total[5m])) > {{$.Values.rules.vg.featureServer.analyticsDataErrors.threshold }}
         for: 5m
         labels:
           severity: warning
           group: vg-custom-alert-rules
         annotations:
           summary: feature-server had errors sending analytics data to insights (instance {{`{{`}} $labels.instance }})
-          description: "feature-server had errors sending analytics data to insights: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"      
+          description: "feature-server had errors sending analytics data to insights: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
     {{- end }}
-    
+
     # billing-app rules
     {{- if (.Values.rules.vg.billingApp.enabled ) }}
     - name: cognigy.vg.alert.billing-app
       rules:
+      {{- if (.Values.rules.vg.billingApp.uncaughtErrors.enabled ) }}
       - alert: UncaughtErrorsBillingApp
         expr: sum(increase(vg_billing_app_uncaught_error_total[5m])) > 5
         for: 5m
@@ -69,25 +88,30 @@ spec:
         annotations:
           summary: billing-app had uncaught errors on (instance {{`{{`}} $labels.instance }})
           description: "billing-app had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
 
-      - alert: UpdateCallHistoryErrors
-        expr: vg_billing_app_update_call_history_error_total > 0
-        for: 0m
+      {{- if (.Values.rules.vg.billingApp.updateCallHistoryErrors.enabled ) }}
+      - alert: UpdateCallHistoryErrorsBillingApp
+        expr: vg_billing_app_update_call_history_error_total > {{$.Values.rules.vg.billingApp.updateCallHistoryErrors.threshold }}
+        for: 1m
         labels:
           severity: warning
           group: vg-custom-alert-rules
         annotations:
           summary: billing-app had errors when update call history on (instance {{`{{`}} $labels.instance }})
           description: "billing-app had errors when update call history: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
-      
-      - alert: RouteUpdateCallHistoryErrors
-        expr: vg_billing_app_route_update_call_history_error_total > 0
-        for: 0m
+      {{- end }}
+
+      {{- if (.Values.rules.vg.billingApp.routeUpdateCallHistoryErrors.enabled ) }}
+      - alert: RouteUpdateCallHistoryErrorsBillingApp
+        expr: vg_billing_app_route_update_call_history_error_total > {{$.Values.rules.vg.billingApp.routeUpdateCallHistoryErrors.threshold }}
+        for: 1m
         labels:
           severity: warning
           group: vg-custom-alert-rules
         annotations:
           summary: billing-app had errors in route of update call history on (instance {{`{{`}} $labels.instance }})
           description: "billing-app had errors in route of update call history: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
     {{- end }}
 {{- end -}}

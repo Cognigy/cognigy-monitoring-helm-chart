@@ -1,5 +1,14 @@
 # Release Notes
 
+### 1.25.0
+**Released** January 7th, 2025
+
+#### Changes
+- Extended `AI / Service Handover`, `LA / Live Agent Overview`, `AI / Service HTTP` dashboards with additional panels.
+- Introduced `VG / Overview v2` and `VG / Drachtio Server` dashboards for VoiceGateway with Prometheus metrics.
+- Deprecated `VG / Feature Server` dashboard.
+- Parametrized and adjusted VG alerts.
+
 ### 1.24.0
 **Released** September 17th, 2024
 

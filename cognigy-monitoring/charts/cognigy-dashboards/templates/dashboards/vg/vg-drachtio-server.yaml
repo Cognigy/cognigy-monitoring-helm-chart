@@ -1,13 +1,13 @@
 {{- /*
-Generated from json dashboard 'dashboards/vg/vg-feature-server.json'.
-Do not change in-place! In order to change this file first modify the json dashboard 'dashboards/vg/vg-feature-server.json'
+Generated from json dashboard 'dashboards/vg/vg-drachtio-server.json'.
+Do not change in-place! In order to change this file first modify the json dashboard 'dashboards/vg/vg-drachtio-server.json'
 and then run the 'scripts/convert-dashboard/convert-dashboard.py' script.
 */ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and 
     (index .Values "products" "vg" "enabled")
-    (index .Values "products" "vg" "dashboards" "vg-feature-server" "enabled")
-    (index .Values "products" "vg" "dashboards" "vg-feature-server" "yamlVersion")
+    (index .Values "products" "vg" "dashboards" "vg-drachtio-server" "enabled")
+    (index .Values "products" "vg" "dashboards" "vg-drachtio-server" "yamlVersion")
     (not .Values.forceDeployJsonDashboards)
     (semverCompare ">=1.14.0-0" $kubeTargetVersion)
     (semverCompare "<9.9.9-9" $kubeTargetVersion)
@@ -17,7 +17,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   namespace: {{ template "cognigy-dashboards.namespace" . }}
-  name: {{ printf "%s-%s" (include "cognigy-dashboards.fullname" $) "vg-feature-server" | trunc 63 | trimSuffix "-" }}
+  name: {{ printf "%s-%s" (include "cognigy-dashboards.fullname" $) "vg-drachtio-server" | trunc 63 | trimSuffix "-" }}
   {{- with $.Values.grafana.sidecar.dashboards.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -29,7 +29,7 @@ metadata:
     app: {{ template "cognigy-dashboards.name" $ }}-grafana
     {{- include "cognigy-dashboards.labels" $ | nindent 4 }}
 data:
-  vg-feature-server.json: |-
+  vg-drachtio-server.json: |-
     {
       "annotations": {
         "list": [
@@ -43,155 +43,31 @@ data:
             "hide": true,
             "iconColor": "rgba(0, 211, 255, 1)",
             "name": "Annotations & Alerts",
-            "target": {
-              "limit": 100,
-              "matchAny": false,
-              "tags": [],
-              "type": "dashboard"
-            },
             "type": "dashboard"
           }
         ]
       },
       "editable": true,
       "fiscalYearStartMonth": 0,
-      "graphTooltip": 0,
-      "id": 54,
+      "graphTooltip": 1,
+      "id": 101,
       "links": [],
-      "liveNow": false,
       "panels": [
         {
+          "collapsed": false,
           "datasource": {
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "All errors in the last 24 hours",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "fixedColor": "dark-red",
-                "mode": "fixed"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
           "gridPos": {
-            "h": 6,
+            "h": 1,
             "w": 24,
             "x": 0,
             "y": 0
           },
-          "id": 32,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "9.2.3",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "round(sum(increase(vg_feature_server_uncaught_error_total{cluster=\"$cluster\"}[24h])))",
-              "legendFormat": "Uncaught Errors",
-              "range": true,
-              "refId": "Uncaught Errors"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "round(sum(increase(vg_feature_server_handover_error_total{cluster=\"$cluster\"}[24h])))",
-              "hide": false,
-              "legendFormat": "Handover Errors",
-              "range": true,
-              "refId": "Handover Errors"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "round(sum(increase(vg_feature_server_analytics_schema_error_total{cluster=\"$cluster\"}[24h])))",
-              "hide": false,
-              "legendFormat": "Analytics Schema Errors",
-              "range": true,
-              "refId": "Analytics Schema Errors"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "round(sum(increase(vg_feature_server_analytics_process_command_error_total{cluster=\"$cluster\"}[24h])))",
-              "hide": false,
-              "legendFormat": "Analytics Process Command Errors",
-              "range": true,
-              "refId": "Analytics Process Command Errors"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "round(sum(increase(vg_feature_server_unhandled_rejection_total{cluster=\"$cluster\"}[24h])))",
-              "hide": false,
-              "legendFormat": "Unhandled Rejections",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Feature Server Errors 24h",
-          "type": "stat"
-        },
-        {
-          "collapsed": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 6
-          },
-          "id": 20,
+          "id": 11,
           "panels": [],
-          "title": "Errors",
+          "title": "General",
           "type": "row"
         },
         {
@@ -199,45 +75,13 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "Total amount of INVITES",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "fixedColor": "red",
+                "fixedColor": "green",
                 "mode": "fixed"
               },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineStyle": {
-                  "fill": "solid"
-                },
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": true,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
@@ -256,282 +100,12 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 8,
+            "h": 7,
+            "w": 4,
             "x": 0,
-            "y": 7
+            "y": 1
           },
-          "id": 2,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum(rate(vg_feature_server_uncaught_error_total{cluster=\"$cluster\"}[1m]))",
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Uncaught Errors",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "fixedColor": "red",
-                "mode": "fixed"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineStyle": {
-                  "fill": "solid"
-                },
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": true,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 8,
-            "x": 8,
-            "y": 7
-          },
-          "id": 36,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum(rate(vg_feature_server_unhandled_rejection_total{cluster=\"$cluster\"}[1m]))",
-              "interval": "",
-              "legendFormat": "Unhandled Rejections",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Unhandled Rejections",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "description": "Errors while transferring a call via sip:refer or dial\nEach status code received > 400 is counted as error",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "fixedColor": "red",
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 8,
-            "x": 16,
-            "y": 7
-          },
-          "id": 22,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum(rate(vg_feature_server_handover_error_total{cluster=\"$cluster\", container=\"feature-server\"}[5m])) by (type, status)",
-              "legendFormat": "Type: {{`{{`}}type{{`}}`}} | Status: {{`{{`}}status{{`}}`}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Handover Errors",
-          "type": "timeseries"
-        },
-        {
-          "collapsed": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 13
-          },
-          "id": 18,
-          "panels": [],
-          "title": "Calls",
-          "type": "row"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 8,
-            "x": 0,
-            "y": 14
-          },
-          "id": 35,
+          "id": 17,
           "options": {
             "colorMode": "value",
             "graphMode": "area",
@@ -544,9 +118,11 @@ data:
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
           },
-          "pluginVersion": "9.2.3",
+          "pluginVersion": "11.0.0",
           "targets": [
             {
               "datasource": {
@@ -554,13 +130,26 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(vg_feature_server_call_session_count{cluster=\"$cluster\", container=\"feature-server\"})",
+              "expr": "sum(increase(drachtio_sip_requests_in_total{cluster=\"$cluster\", endpoint=\"$endpoint\", method=\"INVITE\", pod=~\"$pod\"}[$__range]))",
+              "hide": true,
+              "instant": false,
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
+            },
+            {
+              "datasource": {
+                "name": "Expression",
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "floor($A /2)",
+              "hide": false,
+              "refId": "B",
+              "type": "math"
             }
           ],
-          "title": "Active Calls",
+          "title": "Total INVITES",
           "type": "stat"
         },
         {
@@ -571,33 +160,31 @@ data:
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "palette-classic"
+                "mode": "continuous-GrYlRd"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
-                "axisGridShow": false,
-                "axisLabel": "Calls",
+                "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
                 "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
+                "fillOpacity": 20,
+                "gradientMode": "scheme",
                 "hideFrom": {
                   "legend": false,
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "smooth",
-                "lineStyle": {
-                  "fill": "solid"
-                },
-                "lineWidth": 1,
+                "lineWidth": 3,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
-                "showPoints": "never",
+                "showPoints": "auto",
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -620,31 +207,30 @@ data:
                     "value": 80
                   }
                 ]
-              },
-              "unit": "none"
+              }
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 8,
-            "x": 8,
-            "y": 14
+            "h": 7,
+            "w": 9,
+            "x": 4,
+            "y": 1
           },
-          "id": 38,
+          "id": 16,
           "options": {
             "legend": {
               "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
+              "displayMode": "hidden",
+              "placement": "right",
+              "showLegend": false
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "9.2.3",
           "targets": [
             {
               "datasource": {
@@ -652,15 +238,25 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "exemplar": false,
-              "expr": "sum by (pod) (vg_feature_server_call_session_count{cluster=\"$cluster\", container=\"feature-server\"})",
+              "expr": "sum(drachtio_stable_dialogs{endpoint=\"$endpoint\", pod=~\"$pod\", cluster=\"$cluster\"})",
               "instant": false,
-              "legendFormat": "{{`{{`}}pod{{`}}`}}",
+              "legendFormat": "__auto",
               "range": true,
               "refId": "A"
+            },
+            {
+              "datasource": {
+                "name": "Expression",
+                "type": "__expr__",
+                "uid": "__expr__"
+              },
+              "expression": "floor($A / 2)",
+              "hide": false,
+              "refId": "B",
+              "type": "math"
             }
           ],
-          "title": "Processed Calls",
+          "title": "Stable Dialogs",
           "type": "timeseries"
         },
         {
@@ -673,12 +269,264 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 19
+            "y": 8
           },
-          "id": 16,
+          "id": 9,
           "panels": [],
-          "title": "Memory related information",
+          "title": "Incoming",
           "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Incoming requests per second over the last minute",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "bars",
+                "fillOpacity": 100,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "normal"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "__systemRef": "hideSeriesFrom",
+                "matcher": {
+                  "id": "byNames",
+                  "options": {
+                    "mode": "exclude",
+                    "names": [
+                      "INVITE"
+                    ],
+                    "prefix": "All except:",
+                    "readOnly": true
+                  }
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 0,
+            "y": 9
+          },
+          "id": 6,
+          "options": {
+            "legend": {
+              "calcs": [
+                "last",
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (method) (increase(drachtio_sip_requests_in_total{endpoint=\"$endpoint\", pod=~\"$pod\", cluster=\"$cluster\"}[1m]))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "IN Requests/min Rate",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Incoming responses per second over the last minute",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "bars",
+                "fillOpacity": 100,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "normal"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "__systemRef": "hideSeriesFrom",
+                "matcher": {
+                  "id": "byNames",
+                  "options": {
+                    "mode": "exclude",
+                    "names": [
+                      "REGISTER"
+                    ],
+                    "prefix": "All except:",
+                    "readOnly": true
+                  }
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 9
+          },
+          "id": 7,
+          "options": {
+            "legend": {
+              "calcs": [
+                "last",
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (method) (increase(drachtio_sip_responses_in_total{endpoint=\"$endpoint\", pod=~\"$pod\", cluster=\"$cluster\"}[1m]))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "IN Responses/min Rate",
+          "type": "timeseries"
         },
         {
           "datasource": {
@@ -688,24 +536,18 @@ data:
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "palette-classic"
+                "mode": "continuous-GrYlRd"
               },
               "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "fillOpacity": 80,
-                "gradientMode": "none",
+                "fillOpacity": 70,
                 "hideFrom": {
                   "legend": false,
                   "tooltip": false,
                   "viz": false
                 },
-                "lineWidth": 1,
-                "scaleDistribution": {
-                  "type": "linear"
-                }
+                "insertNulls": false,
+                "lineWidth": 0,
+                "spanNulls": false
               },
               "mappings": [],
               "thresholds": {
@@ -726,32 +568,28 @@ data:
           },
           "gridPos": {
             "h": 8,
-            "w": 24,
+            "w": 12,
             "x": 0,
-            "y": 20
+            "y": 21
           },
-          "id": 8,
+          "id": 14,
           "options": {
-            "barRadius": 0,
-            "barWidth": 0.97,
-            "groupWidth": 0.7,
+            "alignValue": "left",
             "legend": {
-              "calcs": [],
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": false
+              "showLegend": true
             },
-            "orientation": "auto",
+            "mergeValues": true,
+            "rowHeight": 0.9,
             "showValue": "auto",
-            "stacking": "none",
             "tooltip": {
-              "mode": "none",
+              "maxHeight": 600,
+              "mode": "single",
               "sort": "none"
-            },
-            "xTickLabelRotation": 0,
-            "xTickLabelSpacing": -100
+            }
           },
-          "pluginVersion": "9.2.3",
+          "pluginVersion": "11.0.0",
           "targets": [
             {
               "datasource": {
@@ -759,40 +597,153 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\", workload=\"feature-server\",workload_type=\"statefulset\"}\n)",
+              "expr": "sum(increase(drachtio_sip_requests_in_total{endpoint=\"$endpoint\", pod=~\"$pod\", cluster=\"$cluster\"}[$__range])) by (method)",
+              "instant": false,
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "CPU Usage feature-server",
-          "type": "barchart"
+          "title": "Total SIP Requests In",
+          "type": "state-timeline"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-GrYlRd"
+              },
+              "custom": {
+                "fillOpacity": 70,
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineWidth": 0,
+                "spanNulls": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 21
+          },
+          "id": 4,
+          "options": {
+            "alignValue": "left",
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "mergeValues": true,
+            "rowHeight": 0.9,
+            "showValue": "auto",
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(drachtio_sip_responses_in_total{endpoint=\"$endpoint\", pod=~\"$pod\", cluster=\"$cluster\"}[$__range])) by (method)",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Total SIP Responses In",
+          "type": "state-timeline"
+        },
+        {
+          "collapsed": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 29
+          },
+          "id": 10,
+          "panels": [],
+          "title": "Outgoing",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Outgoing requests per second over the last minute",
           "fieldConfig": {
             "defaults": {
               "color": {
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
                 "axisPlacement": "auto",
-                "fillOpacity": 80,
-                "gradientMode": "none",
+                "barAlignment": 0,
+                "drawStyle": "bars",
+                "fillOpacity": 100,
+                "gradientMode": "hue",
                 "hideFrom": {
                   "legend": false,
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
                 "lineWidth": 1,
+                "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "normal"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
                 }
               },
               "mappings": [],
@@ -808,127 +759,30 @@ data:
                     "value": 80
                   }
                 ]
-              },
-              "unit": "bytes"
+              }
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 7,
-            "w": 24,
+            "h": 12,
+            "w": 12,
             "x": 0,
-            "y": 28
-          },
-          "id": 10,
-          "options": {
-            "barRadius": 0,
-            "barWidth": 0.97,
-            "groupWidth": 0.7,
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": false
-            },
-            "orientation": "auto",
-            "showValue": "auto",
-            "stacking": "none",
-            "tooltip": {
-              "mode": "none",
-              "sort": "none"
-            },
-            "xField": "Time",
-            "xTickLabelRotation": 0,
-            "xTickLabelSpacing": 100
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum(\n    container_memory_working_set_bytes{cluster=\"$cluster\", container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\", workload=\"feature-server\", workload_type=\"statefulset\"}\n)",
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Memory Usage",
-          "type": "barchart"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "s"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 24,
-            "x": 0,
-            "y": 35
+            "y": 30
           },
           "id": 12,
           "options": {
             "legend": {
-              "calcs": [],
-              "displayMode": "list",
+              "calcs": [
+                "last",
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
               "placement": "bottom",
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -940,20 +794,304 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum by (kind)(rate(nodejs_gc_duration_seconds_sum{cluster=\"$cluster\", container=\"feature-server\"}[5m])) / sum by (kind)(rate(nodejs_gc_duration_seconds_count{cluster=\"$cluster\", container=\"feature-server\"}[5m]))",
+              "expr": "sum by (method) (increase(drachtio_sip_requests_out_total{endpoint=\"$endpoint\", pod=~\"$pod\", cluster=\"$cluster\"}[1m]))",
+              "instant": false,
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "Garbage collector activity feature-server",
+          "title": "OUT Requests/min Rate",
           "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Outgoing responses per second over the last minute",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "bars",
+                "fillOpacity": 100,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "normal"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "__systemRef": "hideSeriesFrom",
+                "matcher": {
+                  "id": "byNames",
+                  "options": {
+                    "mode": "exclude",
+                    "names": [
+                      "OPTIONS"
+                    ],
+                    "prefix": "All except:",
+                    "readOnly": true
+                  }
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 30
+          },
+          "id": 13,
+          "options": {
+            "legend": {
+              "calcs": [
+                "last",
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (method) (increase(drachtio_sip_responses_out_total{endpoint=\"$endpoint\", pod=~\"$pod\", cluster=\"$cluster\"}[1m]))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "OUT Responses/min Rate",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-GrYlRd"
+              },
+              "custom": {
+                "fillOpacity": 70,
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineWidth": 0,
+                "spanNulls": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 42
+          },
+          "id": 3,
+          "options": {
+            "alignValue": "left",
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "mergeValues": true,
+            "rowHeight": 0.9,
+            "showValue": "auto",
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(drachtio_sip_requests_in_total{endpoint=\"$endpoint\", pod=~\"$pod\", cluster=\"$cluster\"}[$__range])) by (method)",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Total SIP Requests Out",
+          "type": "state-timeline"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-GrYlRd"
+              },
+              "custom": {
+                "fillOpacity": 70,
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineWidth": 0,
+                "spanNulls": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 42
+          },
+          "id": 5,
+          "options": {
+            "alignValue": "left",
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "mergeValues": true,
+            "rowHeight": 0.9,
+            "showValue": "auto",
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(drachtio_sip_responses_out_total{endpoint=\"$endpoint\", pod=~\"$pod\", cluster=\"$cluster\"}[$__range])) by (method)",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Total SIP Responses Out",
+          "type": "state-timeline"
         }
       ],
-      "refresh": "{{ index .Values "products" "vg" "dashboards" "vg-feature-server" "refreshInterval" | default "5m" }}",
-      "schemaVersion": 37,
-      "style": "dark",
-      "tags": [],
+      "refresh": "{{ index .Values "products" "vg" "dashboards" "vg-drachtio-server" "refreshInterval" | default "5m" }}",
+      "schemaVersion": 39,
+      "tags": [
+        "cognigy.vg"
+      ],
       "templating": {
         "list": [
           {
@@ -975,7 +1113,6 @@ data:
             "type": "datasource"
           },
           {
-            "allValue": null,
             "current": {
               "text": "",
               "value": ""
@@ -984,7 +1121,7 @@ data:
               "type": "prometheus",
               "uid": "$datasource"
             },
-            "definition": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+            "definition": "label_values(up{job=\"kube-state-metrics\"},cluster)",
             "hide": {{ if .Values.grafana.sidecar.dashboards.multicluster.global.enabled }}0{{ else }}2{{ end }},
             "includeAll": false,
             "label": "Cluster",
@@ -992,29 +1129,96 @@ data:
             "name": "cluster",
             "options": [],
             "query": {
-              "query": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
-              "refId": "Metrics-cluster-Variable-Query"
+              "qryType": 1,
+              "query": "label_values(up{job=\"kube-state-metrics\"},cluster)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 2,
             "regex": "",
+            "skipUrlSync": false,
             "sort": 1,
-            "tagValuesQuery": "",
-            "tags": [],
-            "tagsQuery": "",
-            "type": "query",
-            "useTags": false
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "hide": 0,
+            "includeAll": false,
+            "label": "Endpoint",
+            "multi": false,
+            "name": "endpoint",
+            "options": [
+              {
+                "selected": true,
+                "text": "sip-drachtio",
+                "value": "sip-drachtio"
+              },
+              {
+                "selected": false,
+                "text": "fs-drachtio",
+                "value": "fs-drachtio"
+              }
+            ],
+            "query": "sip-drachtio,\nfs-drachtio",
+            "queryValue": "",
+            "skipUrlSync": false,
+            "type": "custom"
+          },
+          {
+            "allValue": "sbc-sip-0|sbc-sip-1",
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "hide": 0,
+            "includeAll": true,
+            "label": "Pod",
+            "multi": false,
+            "name": "pod",
+            "options": [
+              {
+                "selected": true,
+                "text": "All",
+                "value": "$__all"
+              },
+              {
+                "selected": false,
+                "text": "sbc-sip-0",
+                "value": "sbc-sip-0"
+              },
+              {
+                "selected": false,
+                "text": "sbc-sip-1",
+                "value": "sbc-sip-1"
+              }
+            ],
+            "query": "sbc-sip-0,sbc-sip-1",
+            "queryValue": "",
+            "skipUrlSync": false,
+            "type": "custom"
           }
         ]
       },
       "time": {
-        "from": "{{ index .Values "products" "vg" "dashboards" "vg-feature-server" "timeFrom" | default "now-3h" }}",
+        "from": "{{ index .Values "products" "vg" "dashboards" "vg-drachtio-server" "timeFrom" | default "now-3h" }}",
         "to": "now"
       },
+      "timeRangeUpdatedDuringEditOrView": false,
       "timepicker": {},
       "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
-      "title": "VG / Feature Server",
-      "uid": "m6rFSIfVz",
-      "version": 15,
+      "title": "VG / Drachtio Server",
+      "uid": "bdxnyoqk1xywwb",
+      "version": 12,
       "weekStart": ""
     }
 {{- end }}

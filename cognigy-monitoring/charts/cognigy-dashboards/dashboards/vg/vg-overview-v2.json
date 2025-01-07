@@ -24,134 +24,21 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 54,
+  "id": 102,
   "links": [],
   "liveNow": false,
   "panels": [
     {
+      "collapsed": false,
       "datasource": {
         "type": "prometheus",
         "uid": "$datasource"
       },
-      "description": "All errors in the last 24 hours",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "dark-red",
-            "mode": "fixed"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "id": 32,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "9.2.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "round(sum(increase(vg_feature_server_uncaught_error_total{cluster=\"$cluster\"}[24h])))",
-          "legendFormat": "Uncaught Errors",
-          "range": true,
-          "refId": "Uncaught Errors"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "editorMode": "code",
-          "expr": "round(sum(increase(vg_feature_server_handover_error_total{cluster=\"$cluster\"}[24h])))",
-          "hide": false,
-          "legendFormat": "Handover Errors",
-          "range": true,
-          "refId": "Handover Errors"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "editorMode": "code",
-          "expr": "round(sum(increase(vg_feature_server_analytics_schema_error_total{cluster=\"$cluster\"}[24h])))",
-          "hide": false,
-          "legendFormat": "Analytics Schema Errors",
-          "range": true,
-          "refId": "Analytics Schema Errors"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "editorMode": "code",
-          "expr": "round(sum(increase(vg_feature_server_analytics_process_command_error_total{cluster=\"$cluster\"}[24h])))",
-          "hide": false,
-          "legendFormat": "Analytics Process Command Errors",
-          "range": true,
-          "refId": "Analytics Process Command Errors"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "editorMode": "code",
-          "expr": "round(sum(increase(vg_feature_server_unhandled_rejection_total{cluster=\"$cluster\"}[24h])))",
-          "hide": false,
-          "legendFormat": "Unhandled Rejections",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Feature Server Errors 24h",
-      "type": "stat"
-    },
-    {
-      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 0
       },
       "id": 20,
       "panels": [],
@@ -170,6 +57,7 @@
             "mode": "fixed"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -183,6 +71,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineStyle": {
               "fill": "solid"
@@ -223,17 +112,18 @@
         "h": 6,
         "w": 8,
         "x": 0,
-        "y": 7
+        "y": 1
       },
       "id": 2,
       "options": {
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
@@ -245,7 +135,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(rate(vg_feature_server_uncaught_error_total{cluster=\"$cluster\"}[1m]))",
+          "expr": "sum(increase({__name__=~\"(jambonz_api_server|sbc_rtpengine_sidecar|sbc_inbound|sbc_outbound|sbc_call_router|sbc_sip_sidecar|vg_feature_server)_uncaught_error_total\", cluster=\"$cluster\"}[1m])) by (container)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -266,6 +156,7 @@
             "mode": "fixed"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -279,6 +170,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineStyle": {
               "fill": "solid"
@@ -319,17 +211,18 @@
         "h": 6,
         "w": 8,
         "x": 8,
-        "y": 7
+        "y": 1
       },
       "id": 36,
       "options": {
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
@@ -341,7 +234,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(rate(vg_feature_server_unhandled_rejection_total{cluster=\"$cluster\"}[1m]))",
+          "expr": "sum(increase({__name__=~\"(jambonz_api_server|sbc_rtpengine_sidecar|sbc_inbound|sbc_outbound|sbc_call_router|sbc_sip_sidecar|vg_feature_server)_unhandled_rejection_total\", cluster=\"$cluster\"}[1m])) by (container)",
           "interval": "",
           "legendFormat": "Unhandled Rejections",
           "range": true,
@@ -364,6 +257,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -377,6 +271,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -414,17 +309,18 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 7
+        "y": 1
       },
       "id": 22,
       "options": {
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
@@ -447,11 +343,15 @@
     },
     {
       "collapsed": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 7
       },
       "id": 18,
       "panels": [],
@@ -466,7 +366,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "shades"
           },
           "mappings": [],
           "thresholds": {
@@ -487,9 +387,9 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 8,
+        "w": 5,
         "x": 0,
-        "y": 14
+        "y": 8
       },
       "id": 35,
       "options": {
@@ -504,9 +404,11 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "9.2.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -520,7 +422,7 @@
           "refId": "A"
         }
       ],
-      "title": "Active Calls",
+      "title": "Active Sessions (feature-server)",
       "type": "stat"
     },
     {
@@ -534,6 +436,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisGridShow": false,
@@ -548,6 +451,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "smooth",
             "lineStyle": {
               "fill": "solid"
@@ -587,9 +491,9 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 8,
-        "x": 8,
-        "y": 14
+        "w": 19,
+        "x": 5,
+        "y": 8
       },
       "id": 38,
       "options": {
@@ -600,6 +504,7 @@
           "showLegend": true
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
@@ -618,9 +523,22 @@
           "legendFormat": "{{pod}}",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "sum(sum by (pod) (vg_feature_server_call_session_count{cluster=\"$cluster\", container=\"feature-server\"}))",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Total",
+          "range": true,
+          "refId": "B"
         }
       ],
-      "title": "Processed Calls",
+      "title": "Processed Calls by feature-server",
       "type": "timeseries"
     },
     {
@@ -629,11 +547,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 13
       },
-      "id": 16,
+      "id": 39,
       "panels": [],
-      "title": "Memory related information",
+      "title": "Tasks",
       "type": "row"
     },
     {
@@ -641,26 +559,142 @@
         "type": "prometheus",
         "uid": "$datasource"
       },
+      "description": "Task processing time in feature-server",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "fillOpacity": 80,
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
+            "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 41,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(increase(vg_feature_server_task_duration_milliseconds{cluster=\"$cluster\"}[1m])) by (task)",
+          "format": "time_series",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Task Processing Time (feature-server)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "Errors by processed task in feature-server",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "scheme",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
             }
           },
           "mappings": [],
@@ -681,210 +715,21 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 24,
         "x": 0,
         "y": 20
       },
-      "id": 8,
-      "options": {
-        "barRadius": 0,
-        "barWidth": 0.97,
-        "groupWidth": 0.7,
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "orientation": "auto",
-        "showValue": "auto",
-        "stacking": "none",
-        "tooltip": {
-          "mode": "none",
-          "sort": "none"
-        },
-        "xTickLabelRotation": 0,
-        "xTickLabelSpacing": -100
-      },
-      "pluginVersion": "9.2.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "editorMode": "code",
-          "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\", workload=\"feature-server\",workload_type=\"statefulset\"}\n)",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "CPU Usage feature-server",
-      "type": "barchart"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "$datasource"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "fillOpacity": 80,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineWidth": 1,
-            "scaleDistribution": {
-              "type": "linear"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "bytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 24,
-        "x": 0,
-        "y": 28
-      },
-      "id": 10,
-      "options": {
-        "barRadius": 0,
-        "barWidth": 0.97,
-        "groupWidth": 0.7,
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "orientation": "auto",
-        "showValue": "auto",
-        "stacking": "none",
-        "tooltip": {
-          "mode": "none",
-          "sort": "none"
-        },
-        "xField": "Time",
-        "xTickLabelRotation": 0,
-        "xTickLabelSpacing": 100
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "editorMode": "code",
-          "expr": "sum(\n    container_memory_working_set_bytes{cluster=\"$cluster\", container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\", workload=\"feature-server\", workload_type=\"statefulset\"}\n)",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Memory Usage",
-      "type": "barchart"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "$datasource"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": 35
-      },
-      "id": 12,
+      "id": 40,
       "options": {
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
@@ -896,26 +741,334 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum by (kind)(rate(nodejs_gc_duration_seconds_sum{cluster=\"$cluster\", container=\"feature-server\"}[5m])) / sum by (kind)(rate(nodejs_gc_duration_seconds_count{cluster=\"$cluster\", container=\"feature-server\"}[5m]))",
+          "exemplar": false,
+          "expr": "sum(increase(vg_feature_server_task_error{cluster=\"$cluster\"}[1m])) by (task)",
+          "format": "time_series",
+          "instant": false,
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Garbage collector activity feature-server",
+      "title": "Task Errors (feature-server)",
       "type": "timeseries"
+    },
+    {
+      "collapsed": true,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "id": 16,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 27
+          },
+          "id": 8,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.97,
+            "fullHighlight": false,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "auto",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "none",
+              "sort": "none"
+            },
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": -100
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\", workload=\"feature-server\",workload_type=\"statefulset\"}\n)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "CPU Usage",
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 34
+          },
+          "id": 10,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.97,
+            "fullHighlight": false,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "auto",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "none",
+              "sort": "none"
+            },
+            "xField": "Time",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 100
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(\n    container_memory_working_set_bytes{cluster=\"$cluster\", container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\", workload=\"feature-server\", workload_type=\"statefulset\"}\n)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Memory Usage",
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 40
+          },
+          "id": 12,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (kind)(rate(nodejs_gc_duration_seconds_sum{cluster=\"$cluster\", container=\"feature-server\"}[5m])) / sum by (kind)(rate(nodejs_gc_duration_seconds_count{cluster=\"$cluster\", container=\"feature-server\"}[5m]))",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Garbage collector activity feature-server",
+          "type": "timeseries"
+        }
+      ],
+      "title": "Memory related information",
+      "type": "row"
     }
   ],
-  "refresh": "5s",
-  "schemaVersion": 37,
-  "style": "dark",
-  "tags": [],
+  "refresh": "5m",
+  "schemaVersion": 39,
+  "tags": [
+    "Cognigy.VG"
+  ],
   "templating": {
     "list": [
       {
         "current": {
-          "text": "",
-          "value": ""
+          "selected": false,
+          "text": "0-thanos-prod",
+          "value": "PCA2E52189C5FC2D9"
         },
         "hide": 0,
         "includeAll": false,
@@ -931,7 +1084,6 @@
         "type": "datasource"
       },
       {
-        "allValue": null,
         "current": {
           "text": "",
           "value": ""
@@ -941,7 +1093,7 @@
           "uid": "$datasource"
         },
         "definition": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
-        "hide": 2,
+        "hide": 0,
         "includeAll": false,
         "label": "Cluster",
         "multi": false,
@@ -953,6 +1105,7 @@
         },
         "refresh": 2,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 1,
         "tagValuesQuery": "",
         "tags": [],
@@ -963,13 +1116,14 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-6h",
     "to": "now"
   },
+  "timeRangeUpdatedDuringEditOrView": false,
   "timepicker": {},
   "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
-  "title": "VG / Feature Server",
-  "uid": "m6rFSIfVz",
-  "version": 15,
+  "title": "VG / Overview v2",
+  "uid": "m6rMMIfVz",
+  "version": 4,
   "weekStart": ""
 }
