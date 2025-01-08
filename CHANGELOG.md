@@ -1,5 +1,11 @@
 # Release Notes
 
+### 1.25.1
+**Released** January 8th, 2025
+
+#### Bugfixes
+- Fixed VG alerts severity and removed deprecated alerts. 
+
 ### 1.25.0
 **Released** January 7th, 2025
 

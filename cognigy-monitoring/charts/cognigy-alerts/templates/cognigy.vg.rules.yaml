@@ -42,7 +42,7 @@ spec:
         expr: sum(increase(vg_feature_server_task_error[1m])) by (task) > {{$.Values.rules.vg.featureServer.taskErrors.threshold }}
         for: 5m
         labels:
-          severity: warning
+          severity: critical
           group: vg-custom-alert-rules
         annotations:
           summary: "Task: Error/min rate is high (instance {{`{{`}} $labels.instance }})"
@@ -59,18 +59,6 @@ spec:
         annotations:
           summary: feature-server had handover errors (instance {{`{{`}} $labels.instance }})
           description: "feature-server had handover errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
-      {{- end }}
-
-      {{- if (.Values.rules.vg.featureServer.analyticsDataErrors.enabled ) }}
-      - alert: AnalyticsDataErrorsFeatureServer
-        expr: sum(increase(vg_feature_server_analytics_submit_error_total[5m])) > {{$.Values.rules.vg.featureServer.analyticsDataErrors.threshold }}
-        for: 5m
-        labels:
-          severity: warning
-          group: vg-custom-alert-rules
-        annotations:
-          summary: feature-server had errors sending analytics data to insights (instance {{`{{`}} $labels.instance }})
-          description: "feature-server had errors sending analytics data to insights: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
       {{- end }}
     {{- end }}
 
