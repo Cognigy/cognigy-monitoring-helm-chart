@@ -56,7 +56,6 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 102,
       "links": [],
       "liveNow": false,
       "panels": [
@@ -71,6 +70,136 @@ data:
             "w": 24,
             "x": 0,
             "y": 0
+          },
+          "id": 42,
+          "panels": [],
+          "title": "Connectivity",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Displaying the number of WebSocket connection timeouts. It's clustered by 1 or 2 retries. With the 3rd timeout it's considered as failed",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "red",
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 0,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 8,
+            "x": 0,
+            "y": 1
+          },
+          "id": 43,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(vg_feature_server__websocket_connection_retry{cluster=\"$cluster\", container=\"feature-server\"}[5m])) by (retries)",
+              "legendFormat": "Retries {{`{{`}}retries{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(vg_feature_server__websocket_connection_timeout_after_retries{cluster=\"$cluster\", container=\"feature-server\"}[5m]))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Connection Timeouts (after 3 retries)",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "WebSocket Connection",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 7
           },
           "id": 20,
           "panels": [],
@@ -144,14 +273,14 @@ data:
             "h": 6,
             "w": 8,
             "x": 0,
-            "y": 1
+            "y": 8
           },
           "id": 2,
           "options": {
             "legend": {
               "calcs": [],
               "displayMode": "list",
-              "placement": "right",
+              "placement": "bottom",
               "showLegend": true
             },
             "tooltip": {
@@ -243,14 +372,14 @@ data:
             "h": 6,
             "w": 8,
             "x": 8,
-            "y": 1
+            "y": 8
           },
           "id": 36,
           "options": {
             "legend": {
               "calcs": [],
               "displayMode": "list",
-              "placement": "right",
+              "placement": "bottom",
               "showLegend": true
             },
             "tooltip": {
@@ -341,14 +470,14 @@ data:
             "h": 6,
             "w": 8,
             "x": 16,
-            "y": 1
+            "y": 8
           },
           "id": 22,
           "options": {
             "legend": {
               "calcs": [],
               "displayMode": "list",
-              "placement": "right",
+              "placement": "bottom",
               "showLegend": true
             },
             "tooltip": {
@@ -364,7 +493,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(rate(vg_feature_server_handover_error_total{cluster=\"$cluster\", container=\"feature-server\"}[5m])) by (type, status)",
+              "expr": "sum(increase(vg_feature_server_handover_error_total{cluster=\"$cluster\", container=\"feature-server\"}[5m])) by (type, status)",
               "legendFormat": "Type: {{`{{`}}type{{`}}`}} | Status: {{`{{`}}status{{`}}`}}",
               "range": true,
               "refId": "A"
@@ -383,7 +512,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 7
+            "y": 14
           },
           "id": 18,
           "panels": [],
@@ -421,7 +550,7 @@ data:
             "h": 5,
             "w": 5,
             "x": 0,
-            "y": 8
+            "y": 15
           },
           "id": 35,
           "options": {
@@ -525,7 +654,7 @@ data:
             "h": 5,
             "w": 19,
             "x": 5,
-            "y": 8
+            "y": 15
           },
           "id": 38,
           "options": {
@@ -583,7 +712,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 13
+            "y": 20
           },
           "id": 39,
           "panels": [],
@@ -655,7 +784,7 @@ data:
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 14
+            "y": 21
           },
           "id": 41,
           "options": {
@@ -754,7 +883,7 @@ data:
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 20
+            "y": 27
           },
           "id": 40,
           "options": {
@@ -799,7 +928,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 26
+            "y": 33
           },
           "id": 16,
           "panels": [
@@ -839,8 +968,7 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green",
-                        "value": null
+                        "color": "green"
                       },
                       {
                         "color": "red",
@@ -933,8 +1061,7 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green",
-                        "value": null
+                        "color": "green"
                       },
                       {
                         "color": "red",
@@ -1039,8 +1166,7 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green",
-                        "value": null
+                        "color": "green"
                       },
                       {
                         "color": "red",
@@ -1159,7 +1285,7 @@ data:
       "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
       "title": "VG / Overview v2",
       "uid": "m6rMMIfVz",
-      "version": 4,
+      "version": 7,
       "weekStart": ""
     }
 {{- end }}
