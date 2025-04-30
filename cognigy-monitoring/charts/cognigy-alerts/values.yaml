@@ -157,6 +157,12 @@ rules:
       enabled: true
     serviceExecution:
       enabled: true
+    serviceHttp:
+      enabled: true
+      # quantile of http requests for high latency evaluation
+      requestLatencyHighQuantile: 0.8
+      # threshold (seconds) for high latency of http requests
+      requestLatencyHighThreshold: 15
     serviceHandover:
       enabled: true
       # threshold on number of service handover errors per 5 min
@@ -179,11 +185,17 @@ rules:
       # increases above messageProcessingTimeIncreasingThreshold and with the baseline below messageProcessingTimeBaseline are ignored
       messageProcessingTimeBaseline: 10
 
+    serviceCollaboration:
+      enabled: true
+      unhandledErrorThreshold: 5
+      requestLatencyHighThreshold: 500
+
   # Cognigy.AI runtime services rules
   runtime:
     enabled: true
     serviceAI:
       enabled: true
+
     serviceAppSessionManager:
       enabled: true
     serviceExecution:
@@ -215,17 +227,6 @@ rules:
       analyticsDataErrors:
         enabled: true
         threshold: 5
-    billingApp:
-      enabled: true
-      uncaughtErrors:
-        enabled: true
-        threshold: 0
-      updateCallHistoryErrors:
-        enabled: true
-        threshold: 0
-      routeUpdateCallHistoryErrors:
-        enabled: true
-        threshold: 0
   la:
     enabled: false
     HighHttpErrorRate:

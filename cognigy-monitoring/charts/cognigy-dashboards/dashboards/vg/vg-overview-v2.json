@@ -24,11 +24,16 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
+  "id": 104,
   "links": [],
   "liveNow": false,
   "panels": [
     {
-      "collapsed": false,
+      "collapsed": true,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -36,122 +41,122 @@
         "y": 0
       },
       "id": 42,
-      "panels": [],
-      "title": "Connectivity",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "$datasource"
-      },
-      "description": "Displaying the number of WebSocket connection timeouts. It's clustered by 1 or 2 retries. With the 3rd timeout it's considered as failed",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "red",
-            "mode": "palette-classic"
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
           },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 20,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
+          "description": "Displaying the number of WebSocket connection timeouts. It's clustered by 1 or 2 retries. With the 3rd timeout it's considered as failed",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "red",
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 0,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
             },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineStyle": {
-              "fill": "solid"
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 8,
+            "x": 0,
+            "y": 1
+          },
+          "id": 43,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
             },
-            "lineWidth": 0,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
             }
           },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
               },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 0,
-        "y": 1
-      },
-      "id": 43,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "maxHeight": 600,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "editorMode": "code",
-          "expr": "sum(increase(vg_feature_server__websocket_connection_retry{cluster=\"$cluster\", container=\"feature-server\"}[5m])) by (retries)",
-          "legendFormat": "Retries {{retries}}",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "editorMode": "code",
-          "expr": "sum(increase(vg_feature_server__websocket_connection_timeout_after_retries{cluster=\"$cluster\", container=\"feature-server\"}[5m]))",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "Connection Timeouts (after 3 retries)",
-          "range": true,
-          "refId": "B"
+              "editorMode": "code",
+              "expr": "sum(increase(vg_feature_server__websocket_connection_retry{cluster=\"$cluster\", container=\"feature-server\"}[5m])) by (retries)",
+              "legendFormat": "Retries {{retries}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(vg_feature_server__websocket_connection_timeout_after_retries{cluster=\"$cluster\", container=\"feature-server\"}[5m]))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Connection Timeouts (after 3 retries)",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "WebSocket Connection",
+          "type": "timeseries"
         }
       ],
-      "title": "WebSocket Connection",
-      "type": "timeseries"
+      "title": "Connectivity",
+      "type": "row"
     },
     {
       "collapsed": false,
@@ -163,7 +168,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 1
       },
       "id": 20,
       "panels": [],
@@ -197,7 +202,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineStyle": {
               "fill": "solid"
             },
@@ -237,7 +242,7 @@
         "h": 6,
         "w": 8,
         "x": 0,
-        "y": 8
+        "y": 2
       },
       "id": 2,
       "options": {
@@ -260,7 +265,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(increase({__name__=~\"(jambonz_api_server|sbc_rtpengine_sidecar|sbc_inbound|sbc_outbound|sbc_call_router|sbc_sip_sidecar|vg_feature_server)_uncaught_error_total\", cluster=\"$cluster\"}[1m])) by (container)",
+          "expr": "sum(increase({__name__=~\"(jambonz_api_server|sbc_rtpengine_sidecar|sbc_call_router|sbc_inbound|sbc_outbound|sbc_sip_sidecar|vg_feature_server)_uncaught_error_total\", cluster=\"$cluster\"}[1m])) by (container)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -336,7 +341,7 @@
         "h": 6,
         "w": 8,
         "x": 8,
-        "y": 8
+        "y": 2
       },
       "id": 36,
       "options": {
@@ -374,7 +379,7 @@
         "type": "prometheus",
         "uid": "$datasource"
       },
-      "description": "Errors while transferring a call via sip:refer or dial\nEach status code received > 400 is counted as error",
+      "description": "Errors while transferring a call via sip:refer or dial\nEach status code received > 400 is counted as error\n\nThese statuses won't trigger Alerts:\n`no-answer`: The call attempt failed because the destination endpoint was alerted but did not answer within the configured timeout period. Voice Gateway receives a `SIP 487 Request Terminated` response\n\n`busy`: The call attempt failed because the destination endpoint explicitly indicated it was busy. Voice Gateway receives a `SIP 486 Busy Here` or `600 Busy Everywhere` response",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -434,7 +439,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 8
+        "y": 2
       },
       "id": 22,
       "options": {
@@ -476,7 +481,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 8
       },
       "id": 18,
       "panels": [],
@@ -488,11 +493,13 @@
         "type": "prometheus",
         "uid": "$datasource"
       },
+      "description": "Active Sessions tracked via Call Counter in sbc-inbound and sbc-outbound",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "shades"
           },
+          "fieldMinMax": false,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -506,17 +513,203 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "none"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 6,
+        "w": 5,
+        "x": 0,
+        "y": 9
+      },
+      "id": 35,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "floor(sum(increase(sbc_active_sessions_total{cluster=\"$cluster\", container=~\"$container\"}[$__range])))",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Total Active Sessions: $container",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "Active Sessions tracked via Call Counter in sbc-inbound and sbc-outbound",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 19,
+        "x": 5,
+        "y": 9
+      },
+      "id": 44,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "sum by (account_sid) (sbc_active_sessions_gauge{cluster=\"$cluster\", container=~\"$container\"})",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "sum(\n  sum by (account_sid) (\n    sbc_active_sessions_gauge{cluster=\"$cluster\", container=~\"$container\"}\n  )\n)",
+          "hide": true,
+          "instant": false,
+          "legendFormat": "Total",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Active Sessions $container",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "Processed sessions in feature-servers",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "shades"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
         "w": 5,
         "x": 0,
         "y": 15
       },
-      "id": 35,
+      "id": 45,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -547,7 +740,7 @@
           "refId": "A"
         }
       ],
-      "title": "Active Sessions (feature-server)",
+      "title": "Total Processed Calls (feature-server)",
       "type": "stat"
     },
     {
@@ -615,7 +808,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 6,
         "w": 19,
         "x": 5,
         "y": 15
@@ -624,8 +817,8 @@
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -676,7 +869,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 21
       },
       "id": 39,
       "panels": [],
@@ -748,13 +941,13 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 22
       },
       "id": 41,
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "list",
+          "displayMode": "table",
           "placement": "right",
           "showLegend": true
         },
@@ -847,7 +1040,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 27
+        "y": 28
       },
       "id": 40,
       "options": {
@@ -892,7 +1085,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 33
+        "y": 34
       },
       "id": 16,
       "panels": [
@@ -1239,11 +1432,45 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "allValue": "sbc-inbound|sbc-outbound",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 0,
+        "includeAll": true,
+        "label": "Container",
+        "multi": false,
+        "name": "container",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": false,
+            "text": "sbc-inbound",
+            "value": "sbc-inbound"
+          },
+          {
+            "selected": false,
+            "text": "sbc-outbound",
+            "value": "sbc-outbound"
+          }
+        ],
+        "query": "sbc-inbound,sbc-outbound",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
       }
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-5m",
     "to": "now"
   },
   "timeRangeUpdatedDuringEditOrView": false,

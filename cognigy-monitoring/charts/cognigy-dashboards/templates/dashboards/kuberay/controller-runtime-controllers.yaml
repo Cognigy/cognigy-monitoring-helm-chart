@@ -1,13 +1,13 @@
 {{- /*
-Generated from json dashboard 'dashboards/vg/vg-sbc-inbound.json'.
-Do not change in-place! In order to change this file first modify the json dashboard 'dashboards/vg/vg-sbc-inbound.json'
+Generated from json dashboard 'dashboards/kuberay/controller-runtime-controllers.json'.
+Do not change in-place! In order to change this file first modify the json dashboard 'dashboards/kuberay/controller-runtime-controllers.json'
 and then run the 'scripts/convert-dashboard/convert-dashboard.py' script.
 */ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and 
-    (index .Values "products" "vg" "enabled")
-    (index .Values "products" "vg" "dashboards" "vg-sbc-inbound" "enabled")
-    (index .Values "products" "vg" "dashboards" "vg-sbc-inbound" "yamlVersion")
+    (index .Values "products" "kuberay" "enabled")
+    (index .Values "products" "kuberay" "dashboards" "controller-runtime-controllers" "enabled")
+    (index .Values "products" "kuberay" "dashboards" "controller-runtime-controllers" "yamlVersion")
     (not .Values.forceDeployJsonDashboards)
     (semverCompare ">=1.14.0-0" $kubeTargetVersion)
     (semverCompare "<9.9.9-9" $kubeTargetVersion)
@@ -17,7 +17,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   namespace: {{ template "cognigy-dashboards.namespace" . }}
-  name: {{ printf "%s-%s" (include "cognigy-dashboards.fullname" $) "vg-sbc-inbound" | trunc 63 | trimSuffix "-" }}
+  name: {{ printf "%s-%s" (include "cognigy-dashboards.fullname" $) "controller-runtime-controllers" | trunc 63 | trimSuffix "-" }}
   {{- with $.Values.grafana.sidecar.dashboards.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -29,15 +29,15 @@ metadata:
     app: {{ template "cognigy-dashboards.name" $ }}-grafana
     {{- include "cognigy-dashboards.labels" $ | nindent 4 }}
 data:
-  vg-sbc-inbound.json: |-
+  controller-runtime-controllers.json: |-
     {
       "annotations": {
         "list": [
           {
             "builtIn": 1,
             "datasource": {
-              "type": "grafana",
-              "uid": "-- Grafana --"
+              "type": "datasource",
+              "uid": "grafana"
             },
             "enable": true,
             "hide": true,
@@ -53,10 +53,12 @@ data:
           }
         ]
       },
+      "description": "Profiling performance-related metrics based on controller-runtime.",
       "editable": true,
       "fiscalYearStartMonth": 0,
+      "gnetId": 15920,
       "graphTooltip": 0,
-      "id": 57,
+      "id": 91,
       "links": [],
       "liveNow": false,
       "panels": [
@@ -65,13 +67,218 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "All errors in the last 24 hours",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "fixedColor": "#c4162a",
-                "mode": "fixed"
+                "mode": "palette-classic"
               },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "links": [],
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "/^.*\\s-\\smean$/i"
+                },
+                "properties": [
+                  {
+                    "id": "custom.fillOpacity",
+                    "value": 0
+                  },
+                  {
+                    "id": "custom.lineStyle",
+                    "value": {
+                      "dash": [
+                        10,
+                        10
+                      ],
+                      "fill": "dash"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byValue",
+                  "options": {
+                    "op": "gte",
+                    "reducer": "allIsZero",
+                    "value": 0
+                  }
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "legend": true,
+                      "tooltip": true,
+                      "viz": false
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 0
+          },
+          "id": 18,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "8.4.5",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "exemplar": true,
+              "expr": "histogram_quantile(0.50, sum(rate(controller_runtime_reconcile_time_seconds_bucket{cluster=\"$cluster\", job=\"$Service\",controller=~\"$Controller\"}[$__rate_interval])) by (job,le,controller))",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "{{`{{`}}job{{`}}`}} - {{`{{`}}controller{{`}}`}} - 50%",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "exemplar": true,
+              "expr": "histogram_quantile(0.95, sum(rate(controller_runtime_reconcile_time_seconds_bucket{cluster=\"$cluster\", job=~\"$Service\"}[$__rate_interval])) by (job,le,controller))",
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "{{`{{`}}job{{`}}`}} - {{`{{`}}controller{{`}}`}} - 95%",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(rate(controller_runtime_reconcile_time_seconds_sum{cluster=\"$cluster\", job=~\"$Service\"}[$__rate_interval])) by (job,controller) / sum(rate(controller_runtime_reconcile_time_seconds_count{cluster=\"$cluster\", job=~\"$Service\"}[$__rate_interval])) by (job,controller)",
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "{{`{{`}}job{{`}}`}} - {{`{{`}}controller{{`}}`}} - mean",
+              "range": true,
+              "refId": "C"
+            }
+          ],
+          "title": "Reconciling Latency Quantile (in 1m)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "decimals": 0,
+              "links": [],
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
@@ -88,59 +295,245 @@ data:
               },
               "unit": "short"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "/.*\\s-\\s.*\\/error$/i"
+                },
+                "properties": [
+                  {
+                    "id": "custom.drawStyle",
+                    "value": "line"
+                  },
+                  {
+                    "id": "custom.lineWidth",
+                    "value": 2
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byValue",
+                  "options": {
+                    "op": "gte",
+                    "reducer": "allIsZero",
+                    "value": 0
+                  }
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "legend": true,
+                      "tooltip": true,
+                      "viz": false
+                    }
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
-            "x": 0,
+            "h": 8,
+            "w": 8,
+            "x": 8,
             "y": 0
           },
-          "id": 4,
+          "id": 20,
           "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
+            "legend": {
               "calcs": [
-                "lastNotNull"
+                "lastNotNull",
+                "max"
               ],
-              "fields": "",
-              "values": false
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
             },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "multi",
+              "sort": "none"
+            }
           },
-          "pluginVersion": "10.4.1",
+          "pluginVersion": "8.4.5",
           "targets": [
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "editorMode": "code",
-              "expr": "round(sum(increase(sbc_inbound_uncaught_error_total{cluster=\"$cluster\"}[24h])))",
-              "legendFormat": "__auto",
-              "range": true,
+              "exemplar": true,
+              "expr": "ceil(sum(increase(controller_runtime_reconcile_total{cluster=\"$cluster\", job=\"$Service\"}[$__rate_interval])) by (job,controller,result))",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "{{`{{`}}job{{`}}`}}- {{`{{`}}controller{{`}}`}} - {{`{{`}}result{{`}}`}}",
               "refId": "A"
             }
           ],
-          "title": "Sbc-inbound Errors 24h",
-          "type": "stat"
+          "title": "Reconciling Count (in 1m)",
+          "type": "timeseries"
+        },
+        {
+          "cards": {},
+          "color": {
+            "cardColor": "#b4ff00",
+            "colorScale": "sqrt",
+            "colorScheme": "interpolateBlues",
+            "exponent": 0.5,
+            "mode": "spectrum"
+          },
+          "dataFormat": "timeseries",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 0
+          },
+          "heatmap": {},
+          "hideZeroBuckets": true,
+          "highlightCards": true,
+          "id": 14,
+          "legend": {
+            "show": true
+          },
+          "options": {
+            "calculate": true,
+            "calculation": {
+              "xBuckets": {
+                "mode": "size",
+                "value": "1min"
+              }
+            },
+            "cellGap": 2,
+            "cellValues": {},
+            "color": {
+              "exponent": 0.5,
+              "fill": "#b4ff00",
+              "mode": "scheme",
+              "reverse": false,
+              "scale": "exponential",
+              "scheme": "Blues",
+              "steps": 128
+            },
+            "exemplars": {
+              "color": "rgba(255,0,255,0.7)"
+            },
+            "filterValues": {
+              "le": 1e-09
+            },
+            "legend": {
+              "show": true
+            },
+            "rowsFrame": {
+              "layout": "auto"
+            },
+            "showValue": "never",
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "showColorScale": false,
+              "yHistogram": false
+            },
+            "yAxis": {
+              "axisPlacement": "left",
+              "decimals": 0,
+              "reverse": false,
+              "unit": "s"
+            }
+          },
+          "pluginVersion": "11.0.0",
+          "reverseYBuckets": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "exemplar": true,
+              "expr": "sum(rate(controller_runtime_reconcile_time_seconds_bucket{cluster=\"$cluster\", job=~\"$Service\"}[$__rate_interval])) by (job,le,controller)",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "title": "Reconciling Latency Over Time (in 1m)",
+          "tooltip": {
+            "show": true,
+            "showHistogram": false
+          },
+          "type": "heatmap",
+          "xAxis": {
+            "show": true
+          },
+          "xBucketSize": "1min",
+          "yAxis": {
+            "decimals": 0,
+            "format": "s",
+            "logBase": 1,
+            "show": true,
+            "splitFactor": 1
+          },
+          "yBucketBound": "auto"
+        },
+        {
+          "collapsed": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 8
+          },
+          "id": 26,
+          "panels": [],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "refId": "A"
+            }
+          ],
+          "title": "Ray Operator",
+          "type": "row"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "fixedColor": "#f2495c",
-                "mode": "fixed"
+                "mode": "palette-classic"
               },
               "custom": {
                 "axisBorderShow": false,
@@ -192,12 +585,12 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 9,
-            "x": 12,
-            "y": 0
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 9
           },
-          "id": 2,
+          "id": 22,
           "options": {
             "legend": {
               "calcs": [],
@@ -206,6 +599,7 @@ data:
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -216,621 +610,14 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "editorMode": "code",
-              "expr": "round(sum(increase(sbc_inbound_uncaught_error_total{cluster=\"$cluster\"}[24h])))",
-              "legendFormat": "Uncaught Errors",
-              "range": true,
+              "exemplar": true,
+              "expr": "rate(ray_operator_clusters_created_total{cluster=\"$cluster\", service=\"$Service\"}[30m])",
+              "interval": "",
+              "legendFormat": "",
               "refId": "A"
             }
           ],
-          "title": "Uncaught Errors",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "decimals": 0,
-              "mappings": [],
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 6
-          },
-          "id": 6,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "10.4.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum(increase(sbc_inbound_calls_progress_sp{cluster=\"$cluster\"}[1m])) by (service_provider_sid)",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "SBC Inbound SP - Calls/min Rate",
-          "transformations": [
-            {
-              "id": "calculateField",
-              "options": {
-                "mode": "reduceRow",
-                "reduce": {
-                  "include": [
-                    "sbc-inbound-5854688f4b-2jtzs",
-                    "sbc-inbound-5854688f4b-prbzb"
-                  ],
-                  "reducer": "sum"
-                }
-              }
-            }
-          ],
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 9,
-            "x": 12,
-            "y": 6
-          },
-          "id": 7,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "10.4.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "disableTextWrap": false,
-              "editorMode": "code",
-              "expr": "sum(increase(sbc_inbound_error_calls_progress_sp{cluster=\"$cluster\"}[1m])) by (service_provider_sid)",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A",
-              "useBackend": false
-            }
-          ],
-          "title": "Errors by SP - Call/min Rate",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "description": "",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "decimals": 0,
-              "mappings": [],
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 14
-          },
-          "id": 10,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "10.4.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum(increase(sbc_inbound_calls_progress_account{cluster=\"$cluster\"}[1m])) by (account_sid)",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "SBC Inbound Account - Calls/min Ratet",
-          "transformations": [
-            {
-              "id": "calculateField",
-              "options": {
-                "mode": "reduceRow",
-                "reduce": {
-                  "include": [
-                    "sbc-inbound-5854688f4b-2jtzs",
-                    "sbc-inbound-5854688f4b-prbzb"
-                  ],
-                  "reducer": "sum"
-                }
-              }
-            }
-          ],
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "continuous-GrYlRd"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "bars",
-                "fillOpacity": 90,
-                "gradientMode": "scheme",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 9,
-            "x": 12,
-            "y": 14
-          },
-          "id": 8,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "hidden",
-              "placement": "right",
-              "showLegend": false
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "10.4.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum(increase(sbc_inbound_error_calls_progress_account{cluster=\"$cluster\"}[1m])) by (account_sid)",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Errors by Account - Call/min Rate",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic-by-name"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "decimals": 0,
-              "mappings": [],
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 22
-          },
-          "id": 11,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "10.4.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum(increase(sbc_inbound_calls_progress_app{cluster=\"$cluster\"}[1m])) by (application_sid)",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "SBC Inbound Applications - Calls/min Rate",
-          "transformations": [
-            {
-              "id": "calculateField",
-              "options": {
-                "mode": "reduceRow",
-                "reduce": {
-                  "include": [
-                    "sbc-inbound-5854688f4b-2jtzs",
-                    "sbc-inbound-5854688f4b-prbzb"
-                  ],
-                  "reducer": "sum"
-                }
-              }
-            }
-          ],
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "continuous-GrYlRd"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "bars",
-                "fillOpacity": 90,
-                "gradientMode": "scheme",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 9,
-            "x": 12,
-            "y": 22
-          },
-          "id": 9,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "hidden",
-              "placement": "right",
-              "showLegend": false
-            },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "10.4.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum(increase(sbc_inbound_error_calls_progress_app{cluster=\"$cluster\"}[1m])) by (application_sid)",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Errors by App - Calls/min Rate",
+          "title": "Cluster Created Total",
           "type": "timeseries"
         },
         {
@@ -859,7 +646,7 @@ data:
                   "viz": false
                 },
                 "insertNulls": false,
-                "lineInterpolation": "stepBefore",
+                "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
@@ -894,11 +681,11 @@ data:
           },
           "gridPos": {
             "h": 8,
-            "w": 12,
-            "x": 5,
-            "y": 30
+            "w": 8,
+            "x": 8,
+            "y": 9
           },
-          "id": 12,
+          "id": 23,
           "options": {
             "legend": {
               "calcs": [],
@@ -907,34 +694,126 @@ data:
               "showLegend": true
             },
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "editorMode": "code",
-              "expr": "sum(rate(sbc_inbound_calls_no_application{cluster=\"$cluster\"}[5m])) by (service_provider_sid, account_sid)",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
+              "exemplar": true,
+              "expr": "rate(ray_operator_clusters_successful_total{cluster=\"$cluster\", service=\"$Service\"}[30m])",
+              "interval": "",
+              "legendFormat": "",
               "refId": "A"
             }
           ],
-          "title": "Calls without Application",
+          "title": "Cluster Created Successful Total",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 9
+          },
+          "id": 24,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "exemplar": true,
+              "expr": "rate(ray_operator_clusters_failed_total{cluster=\"$cluster\", service=\"$Service\"}[30m])",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "title": "Cluster Created Failure Total",
           "type": "timeseries"
         }
       ],
-      "refresh": "{{ index .Values "products" "vg" "dashboards" "vg-sbc-inbound" "refreshInterval" | default "5m" }}",
+      "refresh": "{{ index .Values "products" "kuberay" "dashboards" "controller-runtime-controllers" "refreshInterval" | default "5m" }}",
       "schemaVersion": 39,
-      "tags": [
-        "vg-service"
-      ],
+      "tags": [],
       "templating": {
         "list": [
           {
@@ -949,7 +828,6 @@ data:
             "name": "datasource",
             "options": [],
             "query": "prometheus",
-            "queryValue": "",
             "refresh": 1,
             "regex": "",
             "skipUrlSync": false,
@@ -964,7 +842,7 @@ data:
               "type": "prometheus",
               "uid": "$datasource"
             },
-            "definition": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+            "definition": "label_values(up{job=\"kube-state-metrics\"},cluster)",
             "hide": {{ if .Values.grafana.sidecar.dashboards.multicluster.global.enabled }}0{{ else }}2{{ end }},
             "includeAll": false,
             "label": "Cluster",
@@ -972,30 +850,136 @@ data:
             "name": "cluster",
             "options": [],
             "query": {
-              "query": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
-              "refId": "Metrics-cluster-Variable-Query"
+              "qryType": 1,
+              "query": "label_values(up{job=\"kube-state-metrics\"},cluster)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 2,
             "regex": "",
             "skipUrlSync": false,
             "sort": 1,
-            "tagValuesQuery": "",
-            "tags": [],
-            "tagsQuery": "",
-            "type": "query",
-            "useTags": false
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(controller_runtime_active_workers{cluster=\"$cluster\"},namespace)",
+            "hide": 0,
+            "includeAll": false,
+            "label": "Namespace",
+            "multi": false,
+            "name": "Namespace",
+            "options": [],
+            "query": {
+              "qryType": 1,
+              "query": "label_values(controller_runtime_active_workers{cluster=\"$cluster\"},namespace)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(controller_runtime_active_workers{cluster=\"$cluster\", namespace=\"$Namespace\"},service)",
+            "hide": 0,
+            "includeAll": false,
+            "label": "Service",
+            "multi": false,
+            "name": "Service",
+            "options": [],
+            "query": {
+              "qryType": 1,
+              "query": "label_values(controller_runtime_active_workers{cluster=\"$cluster\", namespace=\"$Namespace\"},service)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(controller_runtime_active_workers{cluster=\"$cluster\", namespace=\"$Namespace\", service=\"$Service\"},pod)",
+            "hide": 0,
+            "includeAll": false,
+            "label": "Pod",
+            "multi": false,
+            "name": "Pod",
+            "options": [],
+            "query": {
+              "qryType": 1,
+              "query": "label_values(controller_runtime_active_workers{cluster=\"$cluster\", namespace=\"$Namespace\", service=\"$Service\"},pod)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(controller_runtime_active_workers{cluster=\"$cluster\", namespace=\"$Namespace\", service=\"$Service\", pod=\"$Pod\"},controller)",
+            "hide": 0,
+            "includeAll": false,
+            "label": "Controller",
+            "multi": false,
+            "name": "Controller",
+            "options": [],
+            "query": {
+              "qryType": 1,
+              "query": "label_values(controller_runtime_active_workers{cluster=\"$cluster\", namespace=\"$Namespace\", service=\"$Service\", pod=\"$Pod\"},controller)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
           }
         ]
       },
       "time": {
-        "from": "{{ index .Values "products" "vg" "dashboards" "vg-sbc-inbound" "timeFrom" | default "now-3h" }}",
+        "from": "{{ index .Values "products" "kuberay" "dashboards" "controller-runtime-controllers" "timeFrom" | default "now-3h" }}",
         "to": "now"
       },
+      "timeRangeUpdatedDuringEditOrView": false,
       "timepicker": {},
       "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
-      "title": "VG / SBC Inbound",
-      "uid": "-E5ZAGu4z",
-      "version": 5,
+      "title": "KubeRay / Controller Runtime Controllers",
+      "uid": "8R0IpFeYffb86DR3MBnLR4OU0nGERSkd",
+      "version": 8,
       "weekStart": ""
     }
 {{- end }}

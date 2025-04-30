@@ -1,5 +1,22 @@
 # Release Notes
 
+### 1.27.0
+**Released** April 30th, 2025
+
+#### Changes
+- Updated  `VG / Overview v2` dashboard.
+- Updated `AI / Service Handover` dashboard.
+- Introduced `AI / Service Collaboration` dashboard.
+- Updated `AI / Agents Overview` dashboard.
+- Introduced Service-HTTP alerts.7
+- Updated several Insights-related dashboards.
+
+### 1.26.0
+**Released** March 11th, 2025
+
+#### Changes
+- Added Kubernetes v1.32 support.
+
 ### 1.25.1
 **Released** January 8th, 2025
 

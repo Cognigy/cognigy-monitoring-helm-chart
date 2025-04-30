@@ -125,4 +125,41 @@ spec:
           description: "service-handover 5xx HTTP requests rate for is {{`{{`}} $value }} requests/min\n LABELS = {{`{{`}} $labels }}"
   {{- end }}
 
+  {{- if (.Values.rules.ai.serviceHttp.enabled ) }}
+  - name: cognigy.alert.service-http
+    rules:
+      - alert: ServiceHttpRequestLatencyHigh
+        expr: >
+          histogram_quantile( {{ $.Values.rules.ai.serviceHttp.requestLatencyHighQuantile }},
+            sum(increase(cognigy_service_http_external_http_requests_latency_ms_bucket[1m])) by (le, orgId, projectId))/1000 >
+            {{ $.Values.rules.ai.serviceHttp.requestLatencyHighThreshold }}
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: service-HTTP requests latency is high for orgId {{`{{`}} $labels.orgId  }} projectId {{`{{`}} $labels.projectId  }}
+          description: "Service-HTTP requests latency is higher than {{`{{`}} $value }} sec\n LABELS = {{`{{`}} $labels }}"
+  {{- end }}
+
+  {{- if (.Values.rules.ai.serviceCollaboration.enabled ) }}
+  # Service Collaboration
+  - name: cognigy.alert.service-collaboration
+    rules:
+    - alert: UncaughtErrorsServiceCollaboration
+      expr: sum(increase(cognigy_collaboration_uncaught_error_total[5m])) + sum(increase(cognigy_collaboration_unhandled_rejection_total[5m])) > {{ $.Values.rules.ai.serviceCollaboration.unhandledErrorThreshold }}
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: service-collaboration had uncaught errors on (instance {{`{{`}} $labels.instance }})
+        description: "service-collaboration had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    - alert: ServiceCollaborationRequestLatencyHigh
+      expr: histogram_quantile(0.99, sum by (le) (increase(cognigy_collaboration_create_thread_execution_time_bucket[5m])+increase(cognigy_collaboration_index_threads_execution_time_bucket[5m])+increase(cognigy_collaboration_join_activity_execution_time_bucket[5m])+increase(cognigy_collaboration_join_cursor_tracking_execution_time_bucket[5m])+increase(cognigy_collaboration_leave_activity_execution_time_bucket[5m])+increase(cognigy_collaboration_leave_cursor_tracking_execution_time_bucket[5m])+increase(cognigy_collaboration_subscribe_to_threads_execution_time_bucket[5m])+increase(cognigy_collaboration_unsubscribe_from_threads_execution_time_bucket[5m])+increase(cognigy_collaboration_update_activity_execution_time_bucket[5m])+increase(cognigy_collaboration_update_cursor_tracking_execution_time_bucket[5m])+increase(cognigy_collaboration_create_thread_message_execution_time_bucket[5m])+increase(cognigy_collaboration_delete_thread_execution_time_bucket[5m])+increase(cognigy_collaboration_delete_thread_message_execution_time_bucket[5m])+increase(cognigy_collaboration_read_thread_execution_time_bucket[5m])+increase(cognigy_collaboration_update_thread_execution_time_bucket[5m])+increase(cognigy_collaboration_update_thread_message_execution_time_bucket[5m]))) > {{ $.Values.rules.ai.serviceCollaboration.requestLatencyHighThreshold }}
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: collaboration request latency is higher than 500ms sec (instance {{`{{`}} $labels.instance }})
+        description: "collaboration request latency is {{`{{`}} $value }} sec over last 5 minutes\n LABELS = {{`{{`}} $labels }}"
+  {{- end }}
 {{- end -}}
