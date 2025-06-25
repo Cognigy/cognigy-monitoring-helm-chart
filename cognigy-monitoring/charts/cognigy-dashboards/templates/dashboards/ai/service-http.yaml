@@ -64,6 +64,79 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "HTTP Status Code",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "fieldMinMax": true,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 14,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": true,
+            "text": {},
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "count by (statusCode) (rate(cognigy_service_http_external_http_requests_latency_ms_count{cluster=\"$cluster\"}[$__rate_interval]))",
+              "instant": false,
+              "interval": "",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "HTTP StatusCode",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
           "description": "HTTP Requests sent per Minute",
           "fieldConfig": {
             "defaults": {
@@ -123,14 +196,16 @@ data:
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 0
+            "y": 9
           },
           "id": 2,
           "options": {
             "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
+              "calcs": [
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
               "showLegend": true
             },
             "tooltip": {
@@ -147,9 +222,9 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(increase(cognigy_http_requests_total{cluster=\"$cluster\"}[1m]))",
+              "expr": "sum(increase(cognigy_http_requests_total{cluster=\"$cluster\"}[1m])) by (statusCode)",
               "interval": "",
-              "legendFormat": "",
+              "legendFormat": "{{`{{`}}statusCode{{`}}`}}",
               "range": true,
               "refId": "A"
             }

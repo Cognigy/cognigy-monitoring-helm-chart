@@ -1,4 +1,10 @@
 # Release Notes
+### 1.28.0
+**Released** June 25th, 2025
+
+#### Changes
+- Updated  `AI / Service HTTP` dashboard.
+- Introduced `ServiceHandoverRPCCallFailureRateHigh`, `ServiceHandoverSendMessageToProviderErrorRateHigh`, `ServiceHandoverAbortHandoverErrorRateHigh` and `ServiceHandoverEventRPCErrorRateHigh` alerts.
 
 ### 1.27.0
 **Released** April 30th, 2025

@@ -123,6 +123,67 @@ spec:
         annotations:
           summary: service-handover 5xx HTTP requests rate for provider {{`{{`}} $labels.route }} is high
           description: "service-handover 5xx HTTP requests rate for is {{`{{`}} $value }} requests/min\n LABELS = {{`{{`}} $labels }}"
+ 
+      - alert: ServiceHandoverRPCCallFailureRateHigh
+        expr: |
+          (
+            sum by (providerId, organisationId, projectId) (increase(cognigy_ai_handover_request_handover_rpc_calls_error_count[{{ $.Values.rules.ai.serviceHandover.requestHandoverRPCCallFailureRate.evaluationWindow }}]))
+          /
+            clamp_min(sum by (providerId, organisationId, projectId) (increase(cognigy_ai_handover_request_handover_rpc_calls_total[{{ $.Values.rules.ai.serviceHandover.requestHandoverRPCCallFailureRate.evaluationWindow }}])), 1)
+          ) * 100 > {{ $.Values.rules.ai.serviceHandover.requestHandoverRPCCallFailureRate.threshold }}
+        for: 5m
+        labels:
+          severity: warning
+          group: service-handover-custom-alert-rules
+        annotations:
+          summary: 'Provider {{ "{{" }} $labels.providerId {{ "}}" }} RPC failure rate is high ({{ "{{" }} $value | printf "%.0f" {{ "}}" }}%)'
+          description: 'Provider: {{ "{{" }} $labels.providerId {{ "}}" }}, Org: {{ "{{" }} $labels.organisationId {{ "}}" }}, Proj: {{ "{{" }} $labels.projectId {{ "}}" }} - Current failure rate: {{ "{{" }} $value | printf "%.2f" {{ "}}" }}% (threshold: {{ $.Values.rules.ai.serviceHandover.requestHandoverRPCCallFailureRate.threshold }}%)'
+
+      - alert: ServiceHandoverSendMessageToProviderErrorRateHigh
+        expr: |
+          (
+            sum by (providerId, organisationId, projectId) (increase(cognigy_ai_handover_send_message_to_provider_rpc_error_count[{{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRate.evaluationWindow }}]))
+          /
+            clamp_min(sum by (providerId, organisationId, projectId) (increase(cognigy_ai_handover_send_message_to_provider_rpc_calls_total[{{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRate.evaluationWindow }}])), 1)
+          ) * 100 > {{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRate.threshold }}
+        for: 5m
+        labels:
+          severity: warning
+          group: service-handover-custom-alert-rules
+        annotations:
+          summary: 'Provider {{ "{{" }} $labels.providerId {{ "}}" }} SendMessageToProvider RPC error rate is high ({{ "{{" }} $value | printf "%.0f" {{ "}}" }}%)'
+          description: 'Provider: {{ "{{" }} $labels.providerId {{ "}}" }}, Org: {{ "{{" }} $labels.organisationId {{ "}}" }}, Proj: {{ "{{" }} $labels.projectId {{ "}}" }} - Current error rate: {{ "{{" }} $value | printf "%.2f" {{ "}}" }}% (threshold: {{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRate.threshold }}%)'
+
+      - alert: ServiceHandoverAbortHandoverErrorRateHigh
+        expr: |
+          (
+            sum by (providerId, organisationId, projectId) (increase(cognigy_ai_handover_abort_handover_rpc_calls_error_count[{{ $.Values.rules.ai.serviceHandover.abortHandoverErrorRate.evaluationWindow }}]))
+          /
+            clamp_min(sum by (providerId, organisationId, projectId) (increase(cognigy_ai_handover_abort_handover_rpc_calls_total[{{ $.Values.rules.ai.serviceHandover.abortHandoverErrorRate.evaluationWindow }}])), 1)
+          ) * 100 > {{ $.Values.rules.ai.serviceHandover.abortHandoverErrorRate.threshold }}
+        for: 5m
+        labels:
+          severity: warning
+          group: service-handover-custom-alert-rules
+        annotations:
+          summary: 'Provider {{ "{{" }} $labels.providerId {{ "}}" }} AbortHandover RPC error rate is high ({{ "{{" }} $value | printf "%.0f" {{ "}}" }}%)'
+          description: 'Provider: {{ "{{" }} $labels.providerId {{ "}}" }}, Org: {{ "{{" }} $labels.organisationId {{ "}}" }}, Proj: {{ "{{" }} $labels.projectId {{ "}}" }} - Current error rate: {{ "{{" }} $value | printf "%.2f" {{ "}}" }}% (threshold: {{ $.Values.rules.ai.serviceHandover.abortHandoverErrorRate.threshold }}%)'
+
+      - alert: ServiceHandoverEventRPCErrorRateHigh
+        expr: |
+          (
+            sum by (providerId, organisationId, projectId) (increase(cognigy_ai_handover_rpc_event_error_count[{{ $.Values.rules.ai.serviceHandover.eventRpcErrorRate.evaluationWindow }}]))
+          /
+            clamp_min(sum by (providerId, organisationId, projectId) (increase(cognigy_ai_handover_rpc_event_rpc_calls[{{ $.Values.rules.ai.serviceHandover.eventRpcErrorRate.evaluationWindow }}])), 1)
+          ) * 100 > {{ $.Values.rules.ai.serviceHandover.eventRpcErrorRate.threshold }}
+        for: 5m
+        labels:
+          severity: warning
+          group: service-handover-custom-alert-rules
+        annotations:
+          summary: 'Provider {{ "{{" }} $labels.providerId {{ "}}" }} Event RPC error rate is high ({{ "{{" }} $value | printf "%.0f" {{ "}}" }}%)'
+          description: 'Provider: {{ "{{" }} $labels.providerId {{ "}}" }}, Org: {{ "{{" }} $labels.organisationId {{ "}}" }}, Proj: {{ "{{" }} $labels.projectId {{ "}}" }} - Current error rate: {{ "{{" }} $value | printf "%.2f" {{ "}}" }}% (threshold: {{ $.Values.rules.ai.serviceHandover.eventRpcErrorRate.threshold }}%)'
+
   {{- end }}
 
   {{- if (.Values.rules.ai.serviceHttp.enabled ) }}

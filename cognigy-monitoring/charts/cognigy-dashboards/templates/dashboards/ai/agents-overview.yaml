@@ -3401,6 +3401,111 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "HTTP Status Code Events rate per minute",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 24,
+            "x": 0,
+            "y": 162
+          },
+          "id": 93,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(cognigy_service_http_external_http_requests_latency_ms_count{cluster=\"$cluster\",projectId=~\"$projectId\"}[1m])) by (projectId, orgId, statusCode)",
+              "legendFormat": "Org: {{`{{`}}orgId{{`}}`}} | Project: {{`{{`}}projectId{{`}}`}} | StatusCode: {{`{{`}}statusCode{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "HTTP Status Code Events/min Rate",
+          "transformations": [
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "(.*)service-nlp-classifier-train-(.*)",
+                "renamePattern": "$1$2"
+              }
+            }
+          ],
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
           "description": "Percentile graphs of HTTP Requests Latency made by HTTP Request nodes",
           "fieldConfig": {
             "defaults": {
@@ -3485,9 +3590,9 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "histogram_quantile(0.90, sum(increase(cognigy_service_http_external_http_requests_latency_ms_bucket{cluster=\"$cluster\", projectId=~\"$projectId\"}[1m])) by (le, organisationId, projectId))",
+              "expr": "histogram_quantile(0.90, sum(increase(cognigy_service_http_external_http_requests_latency_ms_bucket{cluster=\"$cluster\", projectId=~\"$projectId\"}[1m])) by (le, orgId, projectId))",
               "interval": "",
-              "legendFormat": "Org: {{`{{`}}organisationId{{`}}`}} | Project: {{`{{`}}projectId{{`}}`}}",
+              "legendFormat": "Org: {{`{{`}}orgId{{`}}`}} | Project: {{`{{`}}projectId{{`}}`}}",
               "range": true,
               "refId": "A"
             }
