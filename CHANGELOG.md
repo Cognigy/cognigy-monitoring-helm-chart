@@ -1,6 +1,6 @@
 # Release Notes
 ### 1.28.1
-**Released** June 01st, 2025
+**Released** July 01st, 2025
 
 #### Changes
 - Updated several service-hanover related alerts.
