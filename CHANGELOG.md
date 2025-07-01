@@ -1,4 +1,11 @@
 # Release Notes
+### 1.28.1
+**Released** June 01st, 2025
+
+#### Changes
+- Updated several service-hanover related alerts.
+- Introduced `ServiceHandoverContainerRestartWarning` and `ServiceHandoverCriticalSendMessageToProviderErrorRateHigh` alerts.
+
 ### 1.28.0
 **Released** June 25th, 2025
 
