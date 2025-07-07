@@ -1,4 +1,11 @@
 # Release Notes
+### 1.28.2
+**Released** July 07th, 2025
+
+#### Changes
+- Updated several service-hanover related alerts.
+- Deleted `ServiceHandoverAbortHandoverErrorRateHigh` alert.
+
 ### 1.28.1
 **Released** July 01st, 2025
 
