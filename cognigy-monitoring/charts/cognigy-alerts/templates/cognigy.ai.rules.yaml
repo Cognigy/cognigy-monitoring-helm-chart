@@ -121,21 +121,21 @@ spec:
         annotations:
           summary: Message processing time is higher than {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeThreshold }} sec for {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeQuantile }}% of messages on (instance {{`{{`}} $labels.instance }})
           description: "Message processing time is {{`{{`}} $value }} sec for {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeQuantile }}% of messages for last 15 minutes\n LABELS = {{`{{`}} $labels }}"
-    {{- if (.Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.enabled ) }}
-    - alert: ServiceEndpointOOMKilled
-      expr: |-
-        (sum by (container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container=~"^service-endpoint"})) >
-        {{ .Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.threshold }}
-        UNLESS ((sum by (container, cluster) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container=~"^service-endpoint"})) -
-        (sum by (container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container=~"^service-endpoint"}
-         offset {{ .Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.offset }})) == 0)
-      annotations:
-        summary: Container service-endpoint OOMKilled {{`{{`}} $value {{`}}`}} times
-        description: "Container service-endpoint OOMKilled {{`{{`}} $value }} times \n LABELS = {{`{{`}} $labels }}"
-      for: {{ .Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.timeout }}
-      labels:
-        severity: {{ .Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.severity }}
-    {{- end }}
+      {{- if (.Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.enabled ) }}
+      - alert: ServiceEndpointOOMKilled
+        expr: |-
+          (sum by (container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container=~"^service-endpoint"})) >
+          {{ .Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.threshold }}
+          UNLESS ((sum by (container, cluster) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container=~"^service-endpoint"})) -
+          (sum by (container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container=~"^service-endpoint"}
+          offset {{ .Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.offset }})) == 0)
+        annotations:
+          summary: Container service-endpoint OOMKilled {{`{{`}} $value {{`}}`}} times
+          description: "Container service-endpoint OOMKilled {{`{{`}} $value }} times \n LABELS = {{`{{`}} $labels }}"
+        for: {{ .Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.timeout }}
+        labels:
+          severity: {{ .Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.severity }}
+      {{- end }}
   {{- end }}
 
   {{- if (.Values.rules.ai.serviceHandover.enabled ) }}
