@@ -1,13 +1,13 @@
 {{- /*
-Generated from json dashboard 'dashboards/insights/insights-collector.json'.
-Do not change in-place! In order to change this file first modify the json dashboard 'dashboards/insights/insights-collector.json'
+Generated from json dashboard 'dashboards/ai/service-testing.json'.
+Do not change in-place! In order to change this file first modify the json dashboard 'dashboards/ai/service-testing.json'
 and then run the 'scripts/convert-dashboard/convert-dashboard.py' script.
 */ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and 
-    (index .Values "products" "insights" "enabled")
-    (index .Values "products" "insights" "dashboards" "insights-collector" "enabled")
-    (index .Values "products" "insights" "dashboards" "insights-collector" "yamlVersion")
+    (index .Values "products" "ai" "enabled")
+    (index .Values "products" "ai" "dashboards" "service-testing" "enabled")
+    (index .Values "products" "ai" "dashboards" "service-testing" "yamlVersion")
     (not .Values.forceDeployJsonDashboards)
     (semverCompare ">=1.14.0-0" $kubeTargetVersion)
     (semverCompare "<9.9.9-9" $kubeTargetVersion)
@@ -17,7 +17,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   namespace: {{ template "cognigy-dashboards.namespace" . }}
-  name: {{ printf "%s-%s" (include "cognigy-dashboards.fullname" $) "insights-collector" | trunc 63 | trimSuffix "-" }}
+  name: {{ printf "%s-%s" (include "cognigy-dashboards.fullname" $) "service-testing" | trunc 63 | trimSuffix "-" }}
   {{- with $.Values.grafana.sidecar.dashboards.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -29,7 +29,7 @@ metadata:
     app: {{ template "cognigy-dashboards.name" $ }}-grafana
     {{- include "cognigy-dashboards.labels" $ | nindent 4 }}
 data:
-  insights-collector.json: |-
+  service-testing.json: |-
     {
       "annotations": {
         "list": [
@@ -56,7 +56,7 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 32,
+      "id": 93,
       "links": [],
       "panels": [
         {
@@ -67,93 +67,6 @@ data:
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                }
-              },
-              "mappings": []
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 7,
-            "x": 0,
-            "y": 0
-          },
-          "id": 62,
-          "options": {
-            "displayLabels": [
-              "name"
-            ],
-            "legend": {
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "pieType": "pie",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "11.0.0",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum(cognigy_ai_version{cluster=\"$cluster\", container=\"service-collector\"}) by (version)",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Cognigy AI Version",
-          "type": "piechart"
-        },
-        {
-          "collapsed": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 8
-          },
-          "id": 58,
-          "panels": [],
-          "title": "Service Collector",
-          "type": "row"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "description": "Shows whether the service is healthy based on connectivity to dependencies. Displays 1 if healthy and 0 if not.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
                 "mode": "thresholds"
               },
               "mappings": [],
@@ -161,8 +74,11 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
                   }
                 ]
               }
@@ -170,12 +86,12 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 9,
-            "w": 5,
+            "h": 7,
+            "w": 4,
             "x": 0,
-            "y": 9
+            "y": 0
           },
-          "id": 54,
+          "id": 2,
           "options": {
             "minVizHeight": 75,
             "minVizWidth": 75,
@@ -191,7 +107,7 @@ data:
             "showThresholdMarkers": true,
             "sizing": "auto"
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -199,8 +115,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(cognigy_service_healthy{cluster=\"$cluster\", container=\"service-collector\"}) by (container)",
-              "instant": false,
+              "expr": "sum(cognigy_service_healthy{cluster=\"$cluster\", container=\"service-testing\"}) by (container)",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
@@ -214,7 +129,6 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "Availability of RebbitMQ, Redis, MongoDb",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -225,8 +139,11 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
                   }
                 ]
               }
@@ -234,12 +151,12 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 9,
-            "w": 12,
-            "x": 5,
-            "y": 9
+            "h": 7,
+            "w": 9,
+            "x": 4,
+            "y": 0
           },
-          "id": 55,
+          "id": 3,
           "options": {
             "minVizHeight": 75,
             "minVizWidth": 75,
@@ -255,7 +172,7 @@ data:
             "showThresholdMarkers": true,
             "sizing": "auto"
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -263,8 +180,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(cognigy_dependency_rabbitmq_available{cluster=\"$cluster\", container=\"service-collector\"}) by (container)",
-              "instant": false,
+              "expr": "sum(cognigy_dependency_rabbitmq_available{cluster=\"$cluster\", container=\"service-testing\"}) by (container)",
               "legendFormat": "RabbitMQ",
               "range": true,
               "refId": "A"
@@ -275,9 +191,8 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(cognigy_dependency_redis_available{cluster=\"$cluster\", container=\"service-collector\"}) by (container)",
+              "expr": "sum(cognigy_dependency_redis_available{cluster=\"$cluster\", container=\"service-testing\"}) by (container)",
               "hide": false,
-              "instant": false,
               "legendFormat": "Redis",
               "range": true,
               "refId": "B"
@@ -288,10 +203,9 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(cognigy_dependency_mongodb_available{cluster=\"$cluster\", container=\"service-collector\"}) by (container)",
+              "expr": "sum(cognigy_dependency_mongodb_available{cluster=\"$cluster\", container=\"service-testing\"}) by (container)",
               "hide": false,
-              "instant": false,
-              "legendFormat": "MongoDb",
+              "legendFormat": "Mongodb",
               "range": true,
               "refId": "C"
             }
@@ -300,11 +214,28 @@ data:
           "type": "gauge"
         },
         {
+          "collapsed": false,
           "datasource": {
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "Shows total Insights, Liveagent, milestone, VG endpoints for that cluster",
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 7
+          },
+          "id": 9,
+          "panels": [],
+          "title": "Creation Metrics",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Total Count of simulations Created per project",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -322,25 +253,17 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 9,
+            "h": 11,
             "w": 7,
-            "x": 17,
-            "y": 9
+            "x": 0,
+            "y": 8
           },
-          "id": 49,
+          "id": 13,
           "options": {
-            "displayLabels": [
-              "percent",
-              "value"
-            ],
             "legend": {
-              "displayMode": "table",
+              "displayMode": "list",
               "placement": "bottom",
-              "showLegend": true,
-              "values": [
-                "percent",
-                "value"
-              ]
+              "showLegend": true
             },
             "pieType": "pie",
             "reduceOptions": {
@@ -351,11 +274,12 @@ data:
               "values": false
             },
             "tooltip": {
-              "maxHeight": 600,
+              "hideZeros": false,
               "mode": "single",
-              "sort": "asc"
+              "sort": "none"
             }
           },
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -363,53 +287,13 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum by(method, route, status_code) (cognigy_collector_http_requests_total{cluster=\"$cluster\", route=\"/v1.0/liveagent/insights\"})",
-              "instant": false,
-              "legendFormat": "Liveagent",
+              "expr": "sum(cognigy_service_testing_simulations_created_total{cluster=\"$cluster\"}) by (projectId)",
+              "legendFormat": "__auto",
               "range": true,
               "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum by(method, route, status_code) (cognigy_collector_http_requests_total{cluster=\"$cluster\", route=\"/v1.0/insights/\"})",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Insights",
-              "range": true,
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum by(method, route, status_code) (cognigy_collector_http_requests_total{cluster=\"$cluster\", route=\"/v1.0/milestone/insights\"})",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Milestone",
-              "range": true,
-              "refId": "C"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum by(method, route, status_code) (cognigy_collector_http_requests_total{cluster=\"$cluster\", route=\"/v1.0/vg/insights\"})",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "VG",
-              "range": true,
-              "refId": "D"
             }
           ],
-          "title": "Total Endpoints",
+          "title": "Total simulations Created per project",
           "type": "piechart"
         },
         {
@@ -417,7 +301,7 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "Compare the rate of incoming analytics records against the rate of processed analytics records. This helps in understanding the processing rate compared to the incoming rate.",
+          "description": "Simulations Created in Total",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -430,6 +314,7 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -460,8 +345,11 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
                   }
                 ]
               }
@@ -470,26 +358,25 @@ data:
           },
           "gridPos": {
             "h": 11,
-            "w": 24,
-            "x": 0,
-            "y": 18
+            "w": 17,
+            "x": 7,
+            "y": 8
           },
-          "id": 2,
+          "id": 11,
           "options": {
             "legend": {
-              "calcs": [
-                "last"
-              ],
-              "displayMode": "table",
-              "placement": "right",
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
               "showLegend": true
             },
             "tooltip": {
-              "maxHeight": 600,
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -497,29 +384,13 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum by (container) (rate(cognigy_collector_incoming_analytics_records_total{cluster=\"$cluster\"}[1m]))",
-              "instant": false,
-              "interval": "10m",
-              "legendFormat": "Incoming Analytics Records",
+              "expr": "sum(cognigy_service_testing_simulations_created_total{cluster=\"$cluster\"})",
+              "legendFormat": "__auto",
               "range": true,
               "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum by (container) (rate(cognigy_collector_processed_analytics_records_total{cluster=\"$cluster\"}[1m]))",
-              "hide": false,
-              "instant": false,
-              "interval": "10m",
-              "legendFormat": "Processed Analytics Records",
-              "range": true,
-              "refId": "B"
             }
           ],
-          "title": "Incoming vs Processed Analytics Records",
+          "title": "Simulations Created Counter",
           "type": "timeseries"
         },
         {
@@ -527,7 +398,7 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "Total no. of Analytics, Liveagent, vg, goals v2 Records read by service-collector",
+          "description": "Count of Simulation runs",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -540,8 +411,9 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
-                "fillOpacity": 25,
+                "fillOpacity": 0,
                 "gradientMode": "none",
                 "hideFrom": {
                   "legend": false,
@@ -559,7 +431,7 @@ data:
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
-                  "mode": "normal"
+                  "mode": "none"
                 },
                 "thresholdsStyle": {
                   "mode": "off"
@@ -570,8 +442,11 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
                   }
                 ]
               }
@@ -580,27 +455,25 @@ data:
           },
           "gridPos": {
             "h": 10,
-            "w": 24,
+            "w": 12,
             "x": 0,
-            "y": 29
+            "y": 19
           },
-          "id": 46,
+          "id": 15,
           "options": {
             "legend": {
-              "calcs": [
-                "last"
-              ],
-              "displayMode": "table",
-              "placement": "right",
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
               "showLegend": true
             },
             "tooltip": {
-              "maxHeight": 600,
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "9.1.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -608,8 +481,928 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(cognigy_collector_incoming_analytics_records_total{cluster=\"$cluster\"})",
-              "legendFormat": "Analytics Records",
+              "expr": "sum(cognigy_service_testing_simulation_runs_total{cluster=\"$cluster\", container=\"service-testing\"})",
+              "legendFormat": "Simulation Runs",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Simulation Runs Counter",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Simulation Runs Failed Counter",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red"
+                  },
+                  {
+                    "color": "dark-red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 6,
+            "x": 12,
+            "y": 19
+          },
+          "id": 8,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "value_and_name",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(cognigy_service_testing_simulation_runs_total{cluster=\"$cluster\", simulationStatus=\"FAILED\"}) by (simulationStatus)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Simulation Runs Failed Counter",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Simulation Runs Success Counter",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "dark-red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 6,
+            "x": 18,
+            "y": 19
+          },
+          "id": 14,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "value_and_name",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(cognigy_service_testing_simulation_runs_total{cluster=\"$cluster\", simulationStatus=\"SUCCESS\"}) by (simulationStatus)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Simulation Runs Success Counter",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Count of Simulation Batches Created by simulationBatchstatus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 29
+          },
+          "id": 10,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(cognigy_service_testing_simulation_batches_total{cluster=\"$cluster\"}) by (simulationBatchstatus)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Simulation Batches Created Counter by Status",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Count of Persona Generations",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 29
+          },
+          "id": 12,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(cognigy_service_testing_persona_generations_total{cluster=\"$cluster\"}) by (status)",
+              "instant": false,
+              "interval": "",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Persona Generation Counter",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 39
+          },
+          "id": 4,
+          "panels": [],
+          "title": "Incoming Requests",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "This chart shows the total number of incoming API requests for the service.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 40
+          },
+          "id": 5,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(cognigy_service_testing_api_requests_total{cluster=\"$cluster\", container=\"service-testing\"})",
+              "legendFormat": "Total Requests",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Total Incoming Requests Counter",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Total Incoming Requests by Method ",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 40
+          },
+          "id": 6,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(cognigy_service_testing_api_requests_total{cluster=\"$cluster\", container=\"service-testing\"}) by (method)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Total Incoming Requests by Method Counter",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Time Taken by Incoming Requests",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 16,
+            "x": 0,
+            "y": 50
+          },
+          "id": 1,
+          "options": {
+            "calculate": true,
+            "cellGap": 1,
+            "color": {
+              "exponent": 0.5,
+              "fill": "dark-orange",
+              "mode": "scheme",
+              "reverse": true,
+              "scale": "exponential",
+              "scheme": "Oranges",
+              "steps": 64
+            },
+            "exemplars": {
+              "color": "rgba(255,0,255,0.7)"
+            },
+            "filterValues": {
+              "le": 1e-09
+            },
+            "legend": {
+              "show": true
+            },
+            "rowsFrame": {
+              "layout": "auto"
+            },
+            "tooltip": {
+              "mode": "single",
+              "showColorScale": false,
+              "yHistogram": false
+            },
+            "yAxis": {
+              "axisPlacement": "left",
+              "max": "60",
+              "reverse": false,
+              "unit": "s"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by(le) (increase(cognigy_service_testing_api_request_duration_seconds_bucket{cluster=\"$cluster\", container=\"service-testing\"}[1m]))",
+              "format": "heatmap",
+              "legendFormat": "{{`{{`}}le{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Time Taken by Incoming Requests",
+          "type": "heatmap"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Count of 4xx and 5xx responses per minute",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 8,
+            "x": 16,
+            "y": 50
+          },
+          "id": 7,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(cognigy_service_testing_api_requests_total{cluster=\"$cluster\", statusCode=~\"4..|5..\"}) by (statusCode)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Error Rate Counter",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "This chart shows the average response time for API requests, grouped by baseUrl.\n\n- The average is calculated by dividing the total time spent serving requests by the total number of requests for each base URL, over the selected time range.\n- Use this chart to identify which API endpoints are slower on average and may need optimization.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 16,
+            "x": 0,
+            "y": 60
+          },
+          "id": 16,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(cognigy_service_testing_api_request_duration_seconds_sum{cluster=\"$cluster\", container=\"service-testing\"}[5m])) by (baseUrl)\n/\nsum(rate(cognigy_service_testing_api_request_duration_seconds_count{cluster=\"$cluster\", container=\"service-testing\"}[5m])) by (baseUrl)",
+              "format": "heatmap",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Average API Response Time by Base URL",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "This chart displays the response time percentiles (P50, P90, P95, P99) for API requests.\n- P50 (Median): 50% of requests are faster than this value (typical user experience).\n- P90: 90% of requests are faster than this value (shows \"tail\" latency).\n- P95: 95% of requests are faster than this value (captures more outliers).\n- P99: 99% of requests are faster than this value (shows rare, slowest requests).\n",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 16,
+            "x": 0,
+            "y": 70
+          },
+          "id": 17,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(\n  0.99,\n  sum(increase(cognigy_service_testing_api_request_duration_seconds_bucket{cluster=\"$cluster\"}[5m])) by (le)\n)",
+              "format": "time_series",
+              "legendFormat": "99th",
               "range": true,
               "refId": "A"
             },
@@ -619,9 +1412,10 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(cognigy_collector_incoming_liveagentescalations_records_total{cluster=\"$cluster\"})",
+              "expr": "histogram_quantile(\n  0.95,\n  sum(increase(cognigy_service_testing_api_request_duration_seconds_bucket{cluster=\"$cluster\"}[5m])) by (le)\n)",
+              "format": "time_series",
               "hide": false,
-              "legendFormat": "Liveagent Escalations",
+              "legendFormat": "95th",
               "range": true,
               "refId": "B"
             },
@@ -631,9 +1425,10 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(cognigy_collector_incoming_voicegatewayevents_records_total{cluster=\"$cluster\"})",
+              "expr": "histogram_quantile(\n  0.90,\n  sum(increase(cognigy_service_testing_api_request_duration_seconds_bucket{cluster=\"$cluster\"}[5m])) by (le)\n)",
+              "format": "time_series",
               "hide": false,
-              "legendFormat": "Voice Gateway events",
+              "legendFormat": "90th",
               "range": true,
               "refId": "C"
             },
@@ -643,14 +1438,15 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(cognigy_collector_incoming_goals_v2_records_total{cluster=\"$cluster\"})",
+              "expr": "histogram_quantile(\n  0.50,\n  sum(increase(cognigy_service_testing_api_request_duration_seconds_bucket{cluster=\"$cluster\"}[5m])) by (le)\n)",
+              "format": "time_series",
               "hide": false,
-              "legendFormat": "Goals v2",
+              "legendFormat": "50th",
               "range": true,
               "refId": "D"
             }
           ],
-          "title": "Total Incoming Records",
+          "title": "API Response Time Percentiles",
           "type": "timeseries"
         },
         {
@@ -658,641 +1454,31 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "Time Taken by Simulation Runs",
           "fieldConfig": {
             "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
               "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
                 "hideFrom": {
                   "legend": false,
                   "tooltip": false,
                   "viz": false
                 },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
                 }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 9,
-            "w": 24,
-            "x": 0,
-            "y": 39
-          },
-          "id": 45,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum by (kind)(rate(nodejs_gc_duration_seconds_sum{cluster=\"$cluster\", container=\"service-collector\"}[5m])) / sum by (kind)(rate(nodejs_gc_duration_seconds_count{cluster=\"$cluster\", container=\"service-collector\"}[5m]))",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Garbage collector activity  service-collector",
-          "type": "timeseries"
-        },
-        {
-          "collapsed": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 48
-          },
-          "id": 59,
-          "panels": [],
-          "title": "Incoming requests",
-          "type": "row"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "description": "Displays the HTTP Requests over time by status code, route",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 12,
-            "w": 24,
-            "x": 0,
-            "y": 49
-          },
-          "id": 56,
-          "options": {
-            "legend": {
-              "calcs": [
-                "last"
-              ],
-              "displayMode": "table",
-              "placement": "right",
-              "showLegend": true
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum by (status_code, route) (cognigy_collector_http_requests_total{cluster=\"$cluster\", route=~\"/v1.0/insights/|/v1.0/liveagent/insights|/v1.0/vg/insights|/v1.0/milestone/insights\"})",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "HTTP requests by Status Code",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "description": "",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
               }
             },
             "overrides": []
           },
           "gridPos": {
             "h": 10,
-            "w": 12,
+            "w": 16,
             "x": 0,
-            "y": 61
+            "y": 80
           },
-          "id": 48,
+          "id": 18,
           "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum by(method, route, status_code) (cognigy_collector_http_requests_total{cluster=\"$cluster\",route=\"/v1.0/insights/\"})",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Insights Endpoints",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 10,
-            "w": 12,
-            "x": 12,
-            "y": 61
-          },
-          "id": 53,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum by(method, route, status_code) (cognigy_collector_http_requests_total{cluster=\"$cluster\",route=\"/v1.0/liveagent/insights\"})",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Liveagent Endpoints",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 10,
-            "w": 12,
-            "x": 0,
-            "y": 71
-          },
-          "id": 50,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum by(method, route, status_code) (cognigy_collector_http_requests_total{cluster=\"$cluster\",route=\"/v1.0/milestone/insights\"})",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Milestone Endpoints",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 10,
-            "w": 12,
-            "x": 12,
-            "y": 71
-          },
-          "id": 51,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum by(method, route, status_code) (cognigy_collector_http_requests_total{cluster=\"$cluster\",route=\"/v1.0/vg/insights\"})",
-              "instant": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Voice Gateway Endpoints",
-          "type": "timeseries"
-        },
-        {
-          "collapsed": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 81
-          },
-          "id": 61,
-          "panels": [],
-          "title": "Time taken to store records",
-          "type": "row"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "description": "Time taken to store analytics records",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "scaleDistribution": {
-                  "type": "linear"
-                }
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 82
-          },
-          "id": 57,
-          "options": {
-            "calculate": false,
+            "calculate": true,
             "cellGap": 1,
             "color": {
               "exponent": 0.5,
@@ -1301,7 +1487,7 @@ data:
               "reverse": true,
               "scale": "exponential",
               "scheme": "Oranges",
-              "steps": 128
+              "steps": 64
             },
             "exemplars": {
               "color": "rgba(255,0,255,0.7)"
@@ -1310,24 +1496,24 @@ data:
               "le": 1e-09
             },
             "legend": {
-              "show": false
+              "show": true
             },
             "rowsFrame": {
               "layout": "auto"
             },
             "tooltip": {
-              "maxHeight": 600,
               "mode": "single",
               "showColorScale": false,
               "yHistogram": false
             },
             "yAxis": {
               "axisPlacement": "left",
+              "max": "60",
               "reverse": false,
-              "unit": "ms"
+              "unit": "s"
             }
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -1335,103 +1521,21 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum by(le) (increase(cognigy_collector_store_analytics_records_time_bucket{cluster=\"$cluster\", container=\"service-collector\"}[1m]))",
+              "expr": "sum by(le) (increase(cognigy_service_testing_simulation_run_duration_seconds_bucket{cluster=\"$cluster\", container=\"service-testing\"}[1m]))",
               "format": "heatmap",
-              "instant": false,
+              "hide": false,
               "legendFormat": "{{`{{`}}le{{`}}`}}",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "Analytics Records Store Time",
-          "type": "heatmap"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "description": "Time taken to store conversation records",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "scaleDistribution": {
-                  "type": "linear"
-                }
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 82
-          },
-          "id": 60,
-          "options": {
-            "calculate": false,
-            "cellGap": 1,
-            "color": {
-              "exponent": 0.5,
-              "fill": "dark-orange",
-              "mode": "scheme",
-              "reverse": true,
-              "scale": "exponential",
-              "scheme": "Oranges",
-              "steps": 128
-            },
-            "exemplars": {
-              "color": "rgba(255,0,255,0.7)"
-            },
-            "filterValues": {
-              "le": 1e-09
-            },
-            "legend": {
-              "show": false
-            },
-            "rowsFrame": {
-              "layout": "auto"
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "showColorScale": false,
-              "yHistogram": false
-            },
-            "yAxis": {
-              "axisPlacement": "left",
-              "reverse": false,
-              "unit": "ms"
-            }
-          },
-          "pluginVersion": "11.0.0",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "expr": "sum by(le) (increase(cognigy_collector_store_conversations_records_time_bucket{cluster=\"$cluster\", container=\"service-collector\"}[1m]))",
-              "format": "heatmap",
-              "instant": false,
-              "legendFormat": "{{`{{`}}le{{`}}`}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Conversation Records Store Time",
+          "title": "Time Taken by Simulation Runs",
           "type": "heatmap"
         }
       ],
-      "refresh": "{{ index .Values "products" "insights" "dashboards" "insights-collector" "refreshInterval" | default "5m" }}",
-      "schemaVersion": 39,
+      "preload": false,
+      "refresh": "{{ index .Values "products" "ai" "dashboards" "service-testing" "refreshInterval" | default "5m" }}",
+      "schemaVersion": 41,
       "tags": [],
       "templating": {
         "list": [
@@ -1486,15 +1590,13 @@ data:
         ]
       },
       "time": {
-        "from": "{{ index .Values "products" "insights" "dashboards" "insights-collector" "timeFrom" | default "now-3h" }}",
+        "from": "{{ index .Values "products" "ai" "dashboards" "service-testing" "timeFrom" | default "now-3h" }}",
         "to": "now"
       },
-      "timeRangeUpdatedDuringEditOrView": false,
       "timepicker": {},
       "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
-      "title": "IN / Service Collector",
-      "uid": "fdsmucw87zls0a",
-      "version": 32,
-      "weekStart": ""
+      "title": "AI / Service Testing",
+      "uid": "ffc1cab6-2268-4ca4-ac45-94dbb975f4b0",
+      "version": 1
     }
 {{- end }}

@@ -28,12 +28,85 @@
   "links": [],
   "panels": [
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 7,
+        "x": 0,
+        "y": 0
+      },
+      "id": 62,
+      "options": {
+        "displayLabels": [
+          "name"
+        ],
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "sum(cognigy_ai_version{cluster=\"$cluster\", container=\"service-collector\"}) by (version)",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Cognigy AI Version",
+      "type": "piechart"
+    },
+    {
       "collapsed": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 8
       },
       "id": 58,
       "panels": [],
@@ -68,7 +141,7 @@
         "h": 9,
         "w": 5,
         "x": 0,
-        "y": 1
+        "y": 9
       },
       "id": 54,
       "options": {
@@ -132,7 +205,7 @@
         "h": 9,
         "w": 12,
         "x": 5,
-        "y": 1
+        "y": 9
       },
       "id": 55,
       "options": {
@@ -220,7 +293,7 @@
         "h": 9,
         "w": 7,
         "x": 17,
-        "y": 1
+        "y": 9
       },
       "id": 49,
       "options": {
@@ -324,16 +397,27 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "fillOpacity": 80,
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
             "lineWidth": 1,
+            "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
             },
             "thresholdsStyle": {
               "mode": "off"
@@ -356,30 +440,23 @@
         "h": 11,
         "w": 24,
         "x": 0,
-        "y": 10
+        "y": 18
       },
       "id": 2,
       "options": {
-        "barRadius": 0,
-        "barWidth": 0.97,
-        "fullHighlight": false,
-        "groupWidth": 0.7,
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
-        "orientation": "auto",
-        "showValue": "auto",
-        "stacking": "none",
         "tooltip": {
           "maxHeight": 600,
           "mode": "single",
           "sort": "none"
-        },
-        "xTickLabelRotation": 0,
-        "xTickLabelSpacing": 0
+        }
       },
       "targets": [
         {
@@ -388,7 +465,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum by (container) (rate(cognigy_collector_incoming_analytics_records_total{cluster=\"$cluster\"}[1m])*60)",
+          "expr": "sum by (container) (rate(cognigy_collector_incoming_analytics_records_total{cluster=\"$cluster\"}[1m]))",
           "instant": false,
           "interval": "10m",
           "legendFormat": "Incoming Analytics Records",
@@ -401,7 +478,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum by (container) (rate(cognigy_collector_processed_analytics_records_total{cluster=\"$cluster\"}[1m])*60)",
+          "expr": "sum by (container) (rate(cognigy_collector_processed_analytics_records_total{cluster=\"$cluster\"}[1m]))",
           "hide": false,
           "instant": false,
           "interval": "10m",
@@ -411,7 +488,7 @@
         }
       ],
       "title": "Incoming vs Processed Analytics Records",
-      "type": "barchart"
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -473,7 +550,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 29
       },
       "id": 46,
       "options": {
@@ -499,7 +576,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(rate(cognigy_collector_incoming_analytics_records_total{cluster=\"$cluster\"}[1m])*60)",
+          "expr": "sum(cognigy_collector_incoming_analytics_records_total{cluster=\"$cluster\"})",
           "legendFormat": "Analytics Records",
           "range": true,
           "refId": "A"
@@ -510,7 +587,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(rate(cognigy_collector_incoming_liveagentescalations_records_total{cluster=\"$cluster\"}[1m])*60)",
+          "expr": "sum(cognigy_collector_incoming_liveagentescalations_records_total{cluster=\"$cluster\"})",
           "hide": false,
           "legendFormat": "Liveagent Escalations",
           "range": true,
@@ -522,7 +599,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(rate(cognigy_collector_incoming_voicegatewayevents_records_total{cluster=\"$cluster\"}[1m])*60)",
+          "expr": "sum(cognigy_collector_incoming_voicegatewayevents_records_total{cluster=\"$cluster\"})",
           "hide": false,
           "legendFormat": "Voice Gateway events",
           "range": true,
@@ -534,7 +611,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(rate(cognigy_collector_incoming_goals_v2_records_total{cluster=\"$cluster\"}[1m])*60)",
+          "expr": "sum(cognigy_collector_incoming_goals_v2_records_total{cluster=\"$cluster\"})",
           "hide": false,
           "legendFormat": "Goals v2",
           "range": true,
@@ -607,7 +684,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 39
       },
       "id": 45,
       "options": {
@@ -642,11 +719,15 @@
     },
     {
       "collapsed": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 40
+        "y": 48
       },
       "id": 59,
       "panels": [],
@@ -717,17 +798,16 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 41
+        "y": 49
       },
       "id": 56,
       "options": {
         "legend": {
           "calcs": [
-            "last",
-            "sum"
+            "last"
           ],
           "displayMode": "table",
-          "placement": "bottom",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -743,7 +823,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "round(sum by (status_code, route) (rate(cognigy_collector_http_requests_total{cluster=\"$cluster\", route=~\"/v1.0/insights/|/v1.0/liveagent/insights|/v1.0/vg/insights|/v1.0/milestone/insights\"}[10m])*600))",
+          "expr": "sum by (status_code, route) (cognigy_collector_http_requests_total{cluster=\"$cluster\", route=~\"/v1.0/insights/|/v1.0/liveagent/insights|/v1.0/vg/insights|/v1.0/milestone/insights\"})",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -817,7 +897,7 @@
         "h": 10,
         "w": 12,
         "x": 0,
-        "y": 53
+        "y": 61
       },
       "id": 48,
       "options": {
@@ -840,7 +920,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "round(sum by(method, route, status_code) (rate(cognigy_collector_http_requests_total{cluster=\"$cluster\",route=\"/v1.0/insights/\"}[10m])*600))",
+          "expr": "sum by(method, route, status_code) (cognigy_collector_http_requests_total{cluster=\"$cluster\",route=\"/v1.0/insights/\"})",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -909,7 +989,7 @@
         "h": 10,
         "w": 12,
         "x": 12,
-        "y": 53
+        "y": 61
       },
       "id": 53,
       "options": {
@@ -932,7 +1012,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "round(sum by(method, route, status_code) (rate(cognigy_collector_http_requests_total{cluster=\"$cluster\",route=\"/v1.0/liveagent/insights\"}[10m])*600))",
+          "expr": "sum by(method, route, status_code) (cognigy_collector_http_requests_total{cluster=\"$cluster\",route=\"/v1.0/liveagent/insights\"})",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -1005,7 +1085,7 @@
         "h": 10,
         "w": 12,
         "x": 0,
-        "y": 63
+        "y": 71
       },
       "id": 50,
       "options": {
@@ -1028,7 +1108,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "round(sum by(method, route, status_code) (rate(cognigy_collector_http_requests_total{cluster=\"$cluster\",route=\"/v1.0/milestone/insights\"}[10m])*600))",
+          "expr": "sum by(method, route, status_code) (cognigy_collector_http_requests_total{cluster=\"$cluster\",route=\"/v1.0/milestone/insights\"})",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -1101,7 +1181,7 @@
         "h": 10,
         "w": 12,
         "x": 12,
-        "y": 63
+        "y": 71
       },
       "id": 51,
       "options": {
@@ -1124,7 +1204,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "round(sum by(method, route, status_code) (rate(cognigy_collector_http_requests_total{cluster=\"$cluster\",route=\"/v1.0/vg/insights\"}[10m])*600))",
+          "expr": "sum by(method, route, status_code) (cognigy_collector_http_requests_total{cluster=\"$cluster\",route=\"/v1.0/vg/insights\"})",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -1136,11 +1216,15 @@
     },
     {
       "collapsed": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 73
+        "y": 81
       },
       "id": 61,
       "panels": [],
@@ -1172,7 +1256,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 74
+        "y": 82
       },
       "id": 57,
       "options": {
@@ -1255,7 +1339,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 74
+        "y": 82
       },
       "id": 60,
       "options": {
@@ -1378,6 +1462,6 @@
   "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
   "title": "IN / Service Collector",
   "uid": "fdsmucw87zls0a",
-  "version": 31,
+  "version": 32,
   "weekStart": ""
 }

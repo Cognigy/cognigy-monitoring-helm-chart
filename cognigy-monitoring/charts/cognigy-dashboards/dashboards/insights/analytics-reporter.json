@@ -29,7 +29,7 @@
   "liveNow": false,
   "panels": [
     {
-      "collapsed": false,
+      "collapsed": true,
       "datasource": {
         "type": "prometheus",
         "uid": "$datasource"
@@ -41,10 +41,7 @@
         "y": 0
       },
       "id": 32,
-      "panels": [],
-      "title": "Analytics Reporter",
-      "type": "row"
-    },
+      "panels": [
     {
       "datasource": {
         "type": "prometheus",
@@ -270,7 +267,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum by (le) (rate(cognigy_analytics_reporter_get_sessions_by_filter_time{cluster=\"$cluster\"}[1m]))",
+          "expr": "sum by (le) (rate(cognigy_analytics_reporter_get_sessions_by_filter_time_bucket{cluster=\"$cluster\"}[10m]))",
           "format": "heatmap",
           "legendFormat": "{{le}}",
           "range": true,
@@ -308,7 +305,7 @@
       },
       "id": 11,
       "options": {
-        "calculate": false,
+        "calculate": true,
         "cellGap": 1,
         "color": {
           "exponent": 0.5,
@@ -351,7 +348,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum by (le) (increase(cognigy_analytics_reporter_index_goals_time{cluster=\"$cluster\"}[1m]))",
+          "expr": "sum by (le) (increase(cognigy_analytics_reporter_index_goals_time_bucket{cluster=\"$cluster\"}[10m]))",
           "format": "heatmap",
           "hide": false,
           "legendFormat": "{{le}}",
@@ -445,9 +442,13 @@
       ],
       "title": "Read Conversation Time",
       "type": "heatmap"
+    }
+  ],
+      "title": "Analytics Reporter",
+      "type": "row"
     },
     {
-      "collapsed": false,
+      "collapsed": true,
       "datasource": {
         "type": "prometheus",
         "uid": "$datasource"
@@ -456,13 +457,10 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 1
       },
       "id": 21,
-      "panels": [],
-      "title": "Errors",
-      "type": "row"
-    },
+      "panels": [
     {
       "datasource": {
         "type": "prometheus",
@@ -521,7 +519,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "round(sum(increase(cognigy_analytics_reporter_uncaught_error_total{cluster=\"$cluster\"}[24h])))",
+          "expr": "sum(cognigy_analytics_reporter_uncaught_error_total{cluster=\"$cluster\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -650,6 +648,10 @@
       ],
       "title": "Errors",
       "type": "stat"
+    }
+      ],
+      "title": "Errors",
+      "type": "row"
     },
     {
       "collapsed": true,
@@ -661,7 +663,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 33
+        "y": 2
       },
       "id": 19,
       "panels": [
@@ -982,7 +984,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 34
+        "y": 3
       },
       "id": 23,
       "panels": [
@@ -1003,10 +1005,6 @@
                   {
                     "color": "green",
                     "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
                   }
                 ]
               },
@@ -1018,7 +1016,7 @@
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 72
+            "y": 4
           },
           "id": 6,
           "options": {
@@ -1028,7 +1026,7 @@
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
-                "lastNotNull"
+                "sum"
               ],
               "fields": "",
               "values": false
@@ -1087,7 +1085,7 @@
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 72
+            "y": 4
           },
           "id": 16,
           "options": {
@@ -1097,7 +1095,7 @@
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
-                "lastNotNull"
+                "sum"
               ],
               "fields": "",
               "values": false
@@ -1155,7 +1153,7 @@
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 81
+            "y": 13
           },
           "id": 12,
           "options": {
@@ -1165,7 +1163,7 @@
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
-                "lastNotNull"
+                "sum"
               ],
               "fields": "",
               "values": false
@@ -1215,7 +1213,7 @@
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 81
+            "y": 13
           },
           "id": 7,
           "options": {
@@ -1272,10 +1270,10 @@
           ],
           "title": "Step Report Generation Time",
           "type": "heatmap"
-        }
-      ],
-      "title": "Step report",
-      "type": "row"
+    }
+  ],
+  "title": "Step report",
+  "type": "row"
     }
   ],
   "refresh": "5s",
@@ -1342,6 +1340,6 @@
   "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
   "title": "IN / Analytics Reporter",
   "uid": "cPj4OMb4k",
-  "version": 17,
+  "version": 18,
   "weekStart": ""
 }

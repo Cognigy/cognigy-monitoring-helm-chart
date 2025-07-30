@@ -111,6 +111,8 @@ rules:
     tooManyLocks:
       enabled: true
       threshold: 0.2
+      ignoredLockTypes:
+        - "AccessShareLock"
     pgReplicationLag:
       enabled: true
       warnThreshold: 15
@@ -148,9 +150,17 @@ rules:
   # Cognigy.AI alert rules
   ai:
     enabled: true
+    cpuThrottlingAIServiceHigh:
+      enabled: true
+      severity: warning
+      timeout: 15m
     conversationVolume:
       enabled: true
       threshold: 1000
+    conversationVolumeDynamic:
+      enabled: true
+      percentageThreshold: 30
+      baselineDays: 7
     nlpMatcher:
       enabled: true
     functionExecution:
@@ -200,7 +210,12 @@ rules:
       # Baseline for Message processing Time (sec) to avoid false positives of EndpointMessageProcessingTimeIncreasing alert,
       # increases above messageProcessingTimeIncreasingThreshold and with the baseline below messageProcessingTimeBaseline are ignored
       messageProcessingTimeBaseline: 10
-
+      serviceEndpointOOMKilled:
+        enabled: true
+        severity: warning
+        timeout: 5m
+        threshold: 0
+        offset: 3h
     serviceCollaboration:
       enabled: true
       unhandledErrorThreshold: 5
@@ -243,6 +258,14 @@ rules:
       analyticsDataErrors:
         enabled: true
         threshold: 5
+    cpuThrottlingVGServiceHigh:
+      enabled: true
+      severity: warning
+      timeout: 1m
+    kubeVgPodNotReady:
+      enabled: true
+      severity: critical
+      timeout: 5m
   la:
     enabled: false
     HighHttpErrorRate:

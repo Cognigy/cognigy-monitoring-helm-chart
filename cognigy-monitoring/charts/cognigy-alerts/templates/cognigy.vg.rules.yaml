@@ -20,7 +20,39 @@ spec:
         annotations:
           summary: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} has restarted
           description: "Pod {{`{{`}} $labels.container }} restarted on {{`{{`}} $labels.instance }}). \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
-
+      {{- if (.Values.rules.vg.cpuThrottlingVGServiceHigh.enabled ) }}
+      - alert: CPUThrottlingVGServiceHigh
+        annotations:
+          description: '{{`{{`}} $value | humanizePercentage {{`}}`}} throttling of CPU in namespace {{`{{`}} $labels.namespace {{`}}`}} for container {{`{{`}} $labels.container {{`}}`}} in pod {{`{{`}} $labels.pod {{`}}`}}.'
+          runbook_url: {{ .Values.runbookUrl }}alert-name-cputhrottlinghigh
+          summary: Processes experience elevated CPU throttling.
+        expr: |-
+          sum(increase(container_cpu_cfs_throttled_periods_total{container!="metrics", pod=~"feature-server.*|sbc-sip.*|sbc-rtp.*"}[5m])) by (container, pod, namespace)
+            /
+          sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace)
+            > ( 25 / 100 )
+        for: {{ .Values.rules.vg.cpuThrottlingVGServiceHigh.timeout }}
+        labels:
+          severity: {{ .Values.rules.vg.cpuThrottlingVGServiceHigh.severity }}
+      {{- end }}
+      {{- if (.Values.rules.vg.kubeVgPodNotReady.enabled ) }}
+      - alert: KubeVGPodNotReady
+        annotations:
+          description: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} for selected services has been in a non-ready state for more than 5 minutes.
+          runbook_url: {{ .Values.runbookUrl }}alert-name-kubepodnotready-selected
+          summary: Pod for sbc-sip, sbc-rtp, feature-server, sbc-inbound, sbc-outbound pod has been in a non-ready state for more than 5 minutes.
+        expr: |
+          sum by (namespace, pod) (
+            max by(namespace, pod) (
+              kube_pod_status_phase{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}", phase=~"Pending|Unknown"}
+            ) * on(namespace, pod) group_left(owner_kind) topk by(namespace, pod) (
+              1, max by(namespace, pod) (kube_pod_owner{pod=~"^sbc-inbound.*|^sbc-outbound.*|^sbc-sip.*|^sbc-rtp.*|^feature-server.*"})
+            )
+          ) > 0
+        for: {{ .Values.rules.vg.kubeVgPodNotReady.timeout }}
+        labels:
+          severity: {{ .Values.rules.vg.kubeVgPodNotReady.severity }}
+      {{- end }}
     # feature-server rules
     {{- if (.Values.rules.vg.featureServer.enabled ) }}
     - name: cognigy.vg.alert.feature-server

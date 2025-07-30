@@ -185,7 +185,7 @@
       "type": "gauge"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "datasource": {
         "type": "prometheus",
         "uid": "$datasource"
@@ -197,7 +197,10 @@
         "y": 6
       },
       "id": 32,
-      "panels": [
+      "panels": [],
+      "title": "Total number of incoming find requests for each report",
+      "type": "row"
+    },
         {
           "datasource": {
             "type": "prometheus",
@@ -231,7 +234,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 17
+            "y": 7
           },
           "id": 30,
           "options": {
@@ -297,7 +300,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 17
+            "y": 7
           },
           "id": 33,
           "options": {
@@ -397,7 +400,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 25
+            "y": 15
           },
           "id": 28,
           "options": {
@@ -494,7 +497,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 25
+            "y": 15
           },
           "id": 22,
           "options": {
@@ -590,7 +593,7 @@
             "h": 8,
             "w": 12,
             "x": 7,
-            "y": 33
+            "y": 23
           },
           "id": 20,
           "options": {
@@ -621,13 +624,9 @@
           ],
           "title": "Incoming Find Requests by Method",
           "type": "timeseries"
-        }
-      ],
-      "title": "Total number of incoming find requests for each report",
-      "type": "row"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "datasource": {
         "type": "prometheus",
         "uid": "$datasource"
@@ -636,10 +635,13 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 31
       },
       "id": 12,
-      "panels": [
+      "panels": [],
+      "title": "The amount of time it took to finish odata pipeline",
+      "type": "row"
+    },
         {
           "datasource": {
             "type": "prometheus",
@@ -673,7 +675,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 18
+            "y": 32
           },
           "id": 8,
           "options": {
@@ -801,7 +803,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 18
+            "y": 32
           },
           "id": 6,
           "options": {
@@ -839,7 +841,7 @@
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "Counts the total number of incoming requests status for each report",
+          "description": "Counts the total number of completed requests status for each report",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -896,16 +898,18 @@
           },
           "gridPos": {
             "h": 8,
-            "w": 14,
-            "x": 5,
-            "y": 26
+            "w": 12,
+            "x": 0,
+            "y": 40
           },
           "id": 34,
           "options": {
             "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
+              "calcs": [
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "right",
               "showLegend": true
             },
             "tooltip": {
@@ -914,6 +918,7 @@
               "sort": "none"
             }
           },
+          "pluginVersion": "11.0.0",
           "targets": [
             {
               "datasource": {
@@ -921,7 +926,7 @@
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(rate(cognigy_analytics_odata_incoming_requests_status_counter{cluster=\"$cluster\"}[1m])*60)",
+              "expr": "sum(cognigy_analytics_odata_completed_requests_status_counter{cluster=\"$cluster\"}) by (statusCode)",
               "instant": false,
               "interval": "",
               "legendFormat": "__auto",
@@ -929,12 +934,108 @@
               "refId": "A"
             }
           ],
-          "title": "incoming requests status for each report",
+          "title": "Completed requests status for each report",
           "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "Counts the total number of incoming requests",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 40
+      },
+      "id": 37,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "sum(cognigy_analytics_odata_incoming_requests_counter{cluster=\"$cluster\"})",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Req",
+          "range": true,
+          "refId": "A"
         }
       ],
-      "title": "The amount of time it took to finish odata pipeline",
-      "type": "row"
+      "title": "incoming requests Counter",
+      "type": "timeseries"
     }
   ],
   "refresh": "5m",
@@ -1000,6 +1101,6 @@
   "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
   "title": "IN / Analytics Odata",
   "uid": "VIvAF0aVz",
-  "version": 10,
+  "version": 11,
   "weekStart": ""
 }

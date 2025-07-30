@@ -56,16 +56,25 @@ spec:
 
       {{- if (.Values.rules.postgresql.tooManyLocks.enabled ) }}
       - alert: PostgresqlTooManyLocksAcquired
+        {{- if (.Values.rules.postgresql.tooManyLocks.ignoredLockTypes ) }}
+        expr: (sum by(pod)(pg_locks_count{mode!~"{{ join "|" .Values.rules.postgresql.tooManyLocks.ignoredLockTypes | lower }}"}))/(avg by (pod) (pg_settings_max_locks_per_transaction * pg_settings_max_connections))
+              > {{ $.Values.rules.postgresql.tooManyLocks.threshold }}
+        {{- else }}
         expr: (sum by(pod)(pg_locks_count))/(avg by (pod) (pg_settings_max_locks_per_transaction * pg_settings_max_connections))
               > {{ $.Values.rules.postgresql.tooManyLocks.threshold }}
+        {{- end }}
         for: 5m
         labels:
           severity: warning
         annotations:
           summary: Postgresql too many locks acquired (instance {{`{{`}} $labels.pod }})
-          description: "Too many locks acquired on the database
-          \n  VALUE = {{`{{`}} $value }}\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}
+        {{- if (.Values.rules.postgresql.tooManyLocks.ignoredLockTypes ) }}
+          description: "Too many locks acquired on the database (excluding {{ join ", " .Values.rules.postgresql.tooManyLocks.ignoredLockTypes }} lock types)\n  VALUE = {{`{{`}} $value }}\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}
           If this alert happens frequently, increase the postgres setting max_locks_per_transaction"
+        {{- else }}
+          description: "Too many locks acquired on the database\n  VALUE = {{`{{`}} $value }}\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}
+          If this alert happens frequently, increase the postgres setting max_locks_per_transaction"
+        {{- end }}
       {{- end }}
 
       {{- if (.Values.rules.postgresql.pgReplicationLag.enabled ) }}

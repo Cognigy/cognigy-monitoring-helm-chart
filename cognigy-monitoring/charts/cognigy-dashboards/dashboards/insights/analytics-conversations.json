@@ -30,7 +30,11 @@
   "liveNow": false,
   "panels": [
     {
-      "collapsed": true,
+      "collapsed": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -38,7 +42,10 @@
         "y": 0
       },
       "id": 14,
-      "panels": [
+      "panels": [],
+      "title": "Analtics Conversations",
+      "type": "row"
+    },
         {
           "datasource": {
             "type": "prometheus",
@@ -270,7 +277,7 @@
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "Count of stored conversations records over time",
+          "description": "Count of stored conversations records per minute",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -429,7 +436,7 @@
           "options": {
             "legend": {
               "calcs": [
-                "last"
+                "lastNotNull"
               ],
               "displayMode": "list",
               "placement": "bottom",
@@ -449,7 +456,7 @@
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(rate(cognigy_analytics_conversations_deleted_conversations_records_total{cluster=\"$cluster\"}[1m])*60)",
+              "expr": "sum(cognigy_analytics_conversations_deleted_conversations_records_total{cluster=\"$cluster\"})",
               "legendFormat": "Deleted Conversations",
               "range": true,
               "refId": "A"
@@ -514,7 +521,7 @@
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "round(sum(increase(cognigy_analytics_conversations_format_error_conversations_total{cluster=\"$cluster\"}[24h])))",
+              "expr": "round(sum(cognigy_analytics_conversations_format_error_conversations_total{cluster=\"$cluster\"}))",
               "legendFormat": "Format Conversations",
               "range": true,
               "refId": "A"
@@ -525,7 +532,7 @@
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "round(sum(increase(cognigy_analytics_conversations_insert_error_conversations_total{cluster=\"$cluster\"}[24h])))",
+              "expr": "round(sum(cognigy_analytics_conversations_insert_error_conversations_total{cluster=\"$cluster\"}))",
               "hide": false,
               "legendFormat": "Insert Conversations",
               "range": true,
@@ -537,7 +544,7 @@
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "round(sum(increase(cognigy_analytics_conversations_generate_transcripts_report_error_total{cluster=\"$cluster\"}[24h])))",
+              "expr": "round(sum(cognigy_analytics_conversations_generate_transcripts_report_error_total{cluster=\"$cluster\"}))",
               "hide": false,
               "legendFormat": "Generate Transcript Report",
               "range": true,
@@ -549,7 +556,7 @@
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "round(sum(increase(cognigy_analytics_conversations_generate_messages_report_error_total{cluster=\"$cluster\"}[24h])))",
+              "expr": "round(sum(cognigy_analytics_conversations_generate_messages_report_error_total{cluster=\"$cluster\"}))",
               "hide": false,
               "legendFormat": "Generate Messages Report",
               "range": true,
@@ -558,21 +565,24 @@
           ],
           "title": "Errors",
           "type": "stat"
-        }
-      ],
-      "title": "Analtics Conversations",
-      "type": "row"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 1
+        "y": 39
       },
       "id": 15,
-      "panels": [
+      "panels": [],
+      "title": "Time taken",
+      "type": "row"
+    },
         {
           "datasource": {
             "type": "prometheus",
@@ -598,7 +608,7 @@
             "h": 12,
             "w": 24,
             "x": 0,
-            "y": 2
+            "y": 40
           },
           "id": 13,
           "options": {
@@ -681,7 +691,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 14
+            "y": 52
           },
           "id": 5,
           "options": {
@@ -763,7 +773,7 @@
             "h": 10,
             "w": 24,
             "x": 0,
-            "y": 24
+            "y": 62
           },
           "id": 16,
           "options": {
@@ -846,7 +856,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 34
+            "y": 72
           },
           "id": 4,
           "options": {
@@ -904,10 +914,6 @@
           "title": "Time to Generate Transcript Report",
           "type": "heatmap"
         }
-      ],
-      "title": "Time taken",
-      "type": "row"
-    }
   ],
   "refresh": "5m",
   "schemaVersion": 39,
@@ -973,6 +979,6 @@
   "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
   "title": "IN / Analytics Conversations",
   "uid": "MFkZ2qhVk",
-  "version": 9,
+  "version": 10,
   "weekStart": ""
 }

@@ -8,9 +8,27 @@ metadata:
     {{- include "cognigy-monitors.labels" . | nindent 4 }}
 spec:
   groups:
-  {{- if (.Values.rules.ai.conversationVolume.enabled ) }}
+  {{- if (.Values.rules.ai.cpuThrottlingAIServiceHigh.enabled ) }}
+  - name: cognigy.ai.alert.general
+    rules:
+    - alert: CPUThrottlingAIServiceHigh
+      annotations:
+        description: '{{`{{`}} $value | humanizePercentage {{`}}`}} throttling of CPU in namespace {{`{{`}} $labels.namespace {{`}}`}} for container {{`{{`}} $labels.container {{`}}`}} in pod {{`{{`}} $labels.pod {{`}}`}}.'
+        runbook_url: {{ .Values.runbookUrl }}alert-name-cputhrottlinghigh
+        summary: Processes experience elevated CPU throttling.
+      expr: |-
+        sum(increase(container_cpu_cfs_throttled_periods_total{container=~"^service-endpoint|service-ai"}[5m])) by (container, pod, namespace)
+          /
+        sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace)
+          > ( 25 / 100 )
+      for: {{ .Values.rules.ai.cpuThrottlingAIServiceHigh.timeout }}
+      labels:
+        severity: {{ .Values.rules.ai.cpuThrottlingAIServiceHigh.severity }}
+  {{- end }}
+  {{- if or (.Values.rules.ai.conversationVolume.enabled ) (.Values.rules.ai.conversationVolumeDynamic.enabled ) }}
   - name: cognigy.alert.conversation-volume
     rules:
+      {{- if (.Values.rules.ai.conversationVolume.enabled ) }}
       - alert: highConversationVolume
         expr: sum(increase(cognigy_endpoint_raw_messages_count[1m])) >
           {{$.Values.rules.ai.conversationVolume.threshold }}
@@ -20,6 +38,20 @@ spec:
         annotations:
           summary: Messages/min rate is high (instance {{`{{`}} $labels.instance }})
           description: "Messages/min rate has crossed {{$.Values.rules.ai.conversationVolume.threshold }} threshold: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+      {{- if (.Values.rules.ai.conversationVolumeDynamic.enabled ) }}
+      - alert: highConversationVolumeDynamic
+        expr: >
+          sum(increase(cognigy_endpoint_raw_messages_count[1m])) > 
+          (1 + {{$.Values.rules.ai.conversationVolumeDynamic.percentageThreshold}}/100) * 
+          quantile_over_time(0.95, sum(increase(cognigy_endpoint_raw_messages_count[1m]))[{{$.Values.rules.ai.conversationVolumeDynamic.baselineDays}}d:1m])
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Messages/min rate is {{$.Values.rules.ai.conversationVolumeDynamic.percentageThreshold}}% higher than peak levels (instance {{`{{`}} $labels.instance }})
+          description: "Current messages/min rate ({{`{{`}} $value | printf \"%.0f\" }}) is {{$.Values.rules.ai.conversationVolumeDynamic.percentageThreshold}}% higher than the 95th percentile of the past {{$.Values.rules.ai.conversationVolumeDynamic.baselineDays}} days\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
   {{- end }}
 
   {{- if (.Values.rules.ai.nlpMatcher.enabled ) }}
@@ -89,6 +121,21 @@ spec:
         annotations:
           summary: Message processing time is higher than {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeThreshold }} sec for {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeQuantile }}% of messages on (instance {{`{{`}} $labels.instance }})
           description: "Message processing time is {{`{{`}} $value }} sec for {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeQuantile }}% of messages for last 15 minutes\n LABELS = {{`{{`}} $labels }}"
+    {{- if (.Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.enabled ) }}
+    - alert: ServiceEndpointOOMKilled
+      expr: |-
+        (sum by (container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container=~"^service-endpoint"})) >
+        {{ .Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.threshold }}
+        UNLESS ((sum by (container, cluster) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container=~"^service-endpoint"})) -
+        (sum by (container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container=~"^service-endpoint"}
+         offset {{ .Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.offset }})) == 0)
+      annotations:
+        summary: Container service-endpoint OOMKilled {{`{{`}} $value {{`}}`}} times
+        description: "Container service-endpoint OOMKilled {{`{{`}} $value }} times \n LABELS = {{`{{`}} $labels }}"
+      for: {{ .Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.timeout }}
+      labels:
+        severity: {{ .Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.severity }}
+    {{- end }}
   {{- end }}
 
   {{- if (.Values.rules.ai.serviceHandover.enabled ) }}

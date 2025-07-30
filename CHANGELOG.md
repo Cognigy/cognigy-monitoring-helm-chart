@@ -1,4 +1,18 @@
 # Release Notes
+
+### 1.29.0 
+**Released** July 28th, 2025
+
+#### Changes
+- Added `AI / Product Metrics` dashboard.
+- Added `AI / Service Testing` dashboard.
+- Added additional metrics to `AI / Service Endpoint` dashboard.
+- Added support for Kubernetes v1.33.
+- Added new alerts for Cognigy.AI and VG.
+
+#### Bugfixes
+- Fixed panels of `AI / Service Collaboration` dashboard.
+
 ### 1.28.2
 **Released** July 07th, 2025
 
