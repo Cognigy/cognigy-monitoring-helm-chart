@@ -1,5 +1,15 @@
 # Release Notes
 
+### 1.30.0
+**Released** August 22nd, 2025
+
+#### Changes
+- Added `AI / RPC Execution Analysis` dashboard.
+- Added `VG / Overview V3` dashboard.
+- Updated `AI / Product Metrics` dashboard.
+- Improved logic for `ContainerOOMKilled` and `PodRestarts` alerts.
+- Separated `ContainerOOMKilled` alert into `ContainerSingleOOMKilled` and `ContainerMultiOOMKilled` alerts.
+
 ### 1.29.0 
 **Released** July 28th, 2025
 

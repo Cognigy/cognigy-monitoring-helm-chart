@@ -8,19 +8,6 @@ metadata:
     {{- include "cognigy-monitors.labels" . | nindent 4 }}
 spec:
   groups:
-    # General rules
-    - name: cognigy.runtime.alert.general
-      rules:
-      - alert: PodRestarts
-        expr: (kube_pod_container_status_restarts_total{container=~"service-ai|service-app-session-manager|service-collaboration|service-execution|service-function-execution|service-function-scheduler|service-http|service-nlp-.*|service-parser|service-profiles|service-session-state-manager"} -  kube_pod_container_status_restarts_total{container=~"service-ai|service-app-session-manager|service-execution|service-function-execution|service-function-scheduler|service-http|service-nlp-.*|service-parser|service-profiles|service-session-state-manager"} offset 5m) > 0
-        for: 0m
-        labels:
-          severity: warning
-          group: runtime-custom-alert-rules
-        annotations:
-          summary: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} has restarted
-          description: "Pod {{`{{`}} $labels.container }} restarted on {{`{{`}} $labels.instance }}). \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
-
     # Service AI
     {{- if (.Values.rules.runtime.serviceAI.enabled ) }}
     - name: cognigy.runtime.alert.ai

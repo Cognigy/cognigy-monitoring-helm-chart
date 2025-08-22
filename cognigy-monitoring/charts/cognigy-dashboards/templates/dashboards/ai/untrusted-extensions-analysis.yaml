@@ -1,13 +1,13 @@
 {{- /*
-Generated from json dashboard 'dashboards/ai/product-metrics.json'.
-Do not change in-place! In order to change this file first modify the json dashboard 'dashboards/ai/product-metrics.json'
+Generated from json dashboard 'dashboards/ai/untrusted-extensions-analysis.json'.
+Do not change in-place! In order to change this file first modify the json dashboard 'dashboards/ai/untrusted-extensions-analysis.json'
 and then run the 'scripts/convert-dashboard/convert-dashboard.py' script.
 */ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and 
     (index .Values "products" "ai" "enabled")
-    (index .Values "products" "ai" "dashboards" "product-metrics" "enabled")
-    (index .Values "products" "ai" "dashboards" "product-metrics" "yamlVersion")
+    (index .Values "products" "ai" "dashboards" "untrusted-extensions-analysis" "enabled")
+    (index .Values "products" "ai" "dashboards" "untrusted-extensions-analysis" "yamlVersion")
     (not .Values.forceDeployJsonDashboards)
     (semverCompare ">=1.14.0-0" $kubeTargetVersion)
     (semverCompare "<9.9.9-9" $kubeTargetVersion)
@@ -17,7 +17,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   namespace: {{ template "cognigy-dashboards.namespace" . }}
-  name: {{ printf "%s-%s" (include "cognigy-dashboards.fullname" $) "product-metrics" | trunc 63 | trimSuffix "-" }}
+  name: {{ printf "%s-%s" (include "cognigy-dashboards.fullname" $) "untrusted-extensions-analysis" | trunc 63 | trimSuffix "-" }}
   {{- with $.Values.grafana.sidecar.dashboards.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -29,7 +29,7 @@ metadata:
     app: {{ template "cognigy-dashboards.name" $ }}-grafana
     {{- include "cognigy-dashboards.labels" $ | nindent 4 }}
 data:
-  product-metrics.json: |-
+  untrusted-extensions-analysis.json: |-
     {
       "annotations": {
         "list": [
@@ -50,7 +50,7 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 99,
+      "id": 145,
       "links": [],
       "panels": [
         {
@@ -58,6 +58,7 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "Cache Miss Rate - Percentage of extension cache lookups that resulted in misses",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -70,8 +71,9 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
-                "fillOpacity": 0,
+                "fillOpacity": 6,
                 "gradientMode": "none",
                 "hideFrom": {
                   "legend": false,
@@ -80,7 +82,10 @@ data:
                 },
                 "insertNulls": false,
                 "lineInterpolation": "linear",
-                "lineWidth": 1,
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
@@ -95,20 +100,23 @@ data:
                   "mode": "off"
                 }
               },
+              "decimals": 1,
               "mappings": [],
+              "max": 1.1,
+              "min": 0,
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
                     "value": 80
                   }
                 ]
-              }
+              },
+              "unit": "percentunit"
             },
             "overrides": []
           },
@@ -128,7 +136,6 @@ data:
             },
             "tooltip": {
               "hideZeros": false,
-              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -140,19 +147,14 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "disableTextWrap": false,
-              "editorMode": "builder",
-              "expr": "sum by(path) (increase(cognigy_total_api_requests{cluster=\"$cluster\"}[1d]))",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "__auto",
+              "editorMode": "code",
+              "expr": "sum(rate(cognigy_extension_execution_cache_time_ms_count{cache_result=\"miss\",cluster=\"$cluster\"}[$__rate_interval])) / \nsum(rate(cognigy_extension_execution_cache_time_ms_count{cache_result=~\"hit|miss\",cluster=\"$cluster\"}[$__rate_interval]))",
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
               "range": true,
-              "refId": "A",
-              "useBackend": false
+              "refId": "A"
             }
           ],
-          "title": "API Requests",
+          "title": "Cache miss ratio",
           "type": "timeseries"
         },
         {
@@ -160,57 +162,27 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "Average Extension Size by Category - Mean size of small/medium/large extensions in MB",
           "fieldConfig": {
             "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
               "mappings": [],
               "thresholds": {
-                "mode": "absolute",
+                "mode": "percentage",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
+                  },
+                  {
+                    "color": "orange",
+                    "value": 70
                   },
                   {
                     "color": "red",
-                    "value": 80
+                    "value": 85
                   }
                 ]
-              }
+              },
+              "unit": "decmbytes"
             },
             "overrides": []
           },
@@ -220,20 +192,21 @@ data:
             "x": 12,
             "y": 0
           },
-          "id": 12,
+          "id": 11,
           "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
             },
-            "tooltip": {
-              "hideZeros": false,
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
           },
           "pluginVersion": "12.0.2",
           "targets": [
@@ -242,145 +215,22 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "disableTextWrap": false,
-              "editorMode": "builder",
-              "expr": "sum by(projectId) (cognigy_resources_snapshot_creation_counter{cluster=\"$cluster\"})",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "",
-              "range": true,
-              "refId": "A",
-              "useBackend": false
-            }
-          ],
-          "title": "Snapshot Creation Counter",
-          "type": "timeseries"
-        },
-        {
-          "collapsed": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 8
-          },
-          "id": 8,
-          "panels": [],
-          "title": "Endpoints",
-          "type": "row"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 9
-          },
-          "id": 9,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "12.0.2",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "disableTextWrap": false,
-              "editorMode": "builder",
-              "expr": "sum by(channelType) (cognigy_resources_endpoint_channel_type_counter{cluster=\"$cluster\"})",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
+              "editorMode": "code",
+              "expr": "avg(cognigy_extension_individual_size_mb{cluster=\"$cluster\"}) by (extension_category)",
               "legendFormat": "__auto",
               "range": true,
-              "refId": "A",
-              "useBackend": false
+              "refId": "A"
             }
           ],
-          "title": "Creation Count",
-          "type": "timeseries"
+          "title": "Average size by category",
+          "type": "gauge"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "Average NFS Access Time - Mean time spent on cache misses in milliseconds",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -393,6 +243,7 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -403,6 +254,9 @@ data:
                 },
                 "insertNulls": false,
                 "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
                 "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
@@ -423,23 +277,23 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
                     "value": 80
                   }
                 ]
-              }
+              },
+              "unit": "dtdurationms"
             },
             "overrides": []
           },
           "gridPos": {
             "h": 8,
             "w": 12,
-            "x": 12,
-            "y": 9
+            "x": 0,
+            "y": 8
           },
           "id": 2,
           "options": {
@@ -451,7 +305,6 @@ data:
             },
             "tooltip": {
               "hideZeros": false,
-              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -463,19 +316,14 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "disableTextWrap": false,
-              "editorMode": "builder",
-              "expr": "sum by(browser, city, country) (cognigy_endpoint_webchat3_client_info{cluster=\"$cluster\"})",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "__auto",
+              "editorMode": "code",
+              "expr": "rate(cognigy_extension_execution_cache_time_ms_sum{cache_result=\"miss\", cluster=\"$cluster\"}[$__rate_interval]) / rate(cognigy_extension_execution_cache_time_ms_count{cache_result=\"miss\", cluster=\"$cluster\"}[$__rate_interval])",
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
               "range": true,
-              "refId": "A",
-              "useBackend": false
+              "refId": "A"
             }
           ],
-          "title": "Webchat 3 Client Info [In Development]",
+          "title": "Average NFS Access Time - Cache Miss",
           "type": "timeseries"
         },
         {
@@ -483,6 +331,7 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "Average Cache Access Time - Mean time spent on cache hits in milliseconds",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -495,6 +344,7 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -505,6 +355,9 @@ data:
                 },
                 "insertNulls": false,
                 "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
                 "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
@@ -525,117 +378,15 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
                     "value": 80
                   }
                 ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 17
-          },
-          "id": 10,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "12.0.2",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
               },
-              "disableTextWrap": false,
-              "editorMode": "builder",
-              "expr": "sum by(projectId) (cognigy_resources_endpoint_real_time_translation_enabled_counter{cluster=\"$cluster\"})",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "",
-              "range": true,
-              "refId": "A",
-              "useBackend": false
-            }
-          ],
-          "title": "Realtime Translation Enabled Counter",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
+              "unit": "dtdurationms"
             },
             "overrides": []
           },
@@ -643,9 +394,9 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 17
+            "y": 8
           },
-          "id": 11,
+          "id": 15,
           "options": {
             "legend": {
               "calcs": [],
@@ -655,7 +406,6 @@ data:
             },
             "tooltip": {
               "hideZeros": false,
-              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -667,104 +417,87 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "disableTextWrap": false,
-              "editorMode": "builder",
-              "expr": "sum by(projectId) (cognigy_resources_endpoint_real_time_translation_disabled_counter{cluster=\"$cluster\"})",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "",
+              "editorMode": "code",
+              "expr": "rate(cognigy_extension_execution_cache_time_ms_sum{cache_result=\"hit\",cluster=\"$cluster\"}[$__rate_interval]) / rate(cognigy_extension_execution_cache_time_ms_count{cache_result=\"hit\",cluster=\"$cluster\"}[$__rate_interval])",
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
               "range": true,
-              "refId": "A",
-              "useBackend": false
+              "refId": "A"
             }
           ],
-          "title": "Realtime Translation Disabled Counter",
+          "title": "Average Cache Access Time - Cache Hit",
           "type": "timeseries"
         },
         {
-          "collapsed": false,
           "datasource": {
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "Percentile Load Time (Cached) - 95%, 99% of cached extensions load within this time",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "dtdurationms"
+            },
+            "overrides": []
+          },
           "gridPos": {
-            "h": 1,
-            "w": 24,
+            "h": 8,
+            "w": 12,
             "x": 0,
-            "y": 25
+            "y": 16
           },
           "id": 3,
-          "panels": [],
-          "title": "AI Agents",
-          "type": "row"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 26
-          },
-          "id": 4,
           "options": {
             "legend": {
               "calcs": [],
@@ -774,7 +507,6 @@ data:
             },
             "tooltip": {
               "hideZeros": false,
-              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -786,19 +518,27 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "disableTextWrap": false,
-              "editorMode": "builder",
-              "expr": "sum by(organisationId) (cognigy_ai_agent_created_count{cluster=\"$cluster\"})",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "",
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, rate(cognigy_extension_load_time_ms_bucket{path_type=\"cached\",cluster=\"$cluster\"}[$__rate_interval]))",
+              "legendFormat": "95",
               "range": true,
-              "refId": "A",
-              "useBackend": false
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.99, rate(cognigy_extension_load_time_ms_bucket{path_type=\"cached\", cluster=\"$cluster\"}[$__rate_interval]))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "99",
+              "range": true,
+              "refId": "B"
             }
           ],
-          "title": "Creation Count",
+          "title": "Cached Extension Load Time (ms)",
           "type": "timeseries"
         },
         {
@@ -806,6 +546,7 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "95th Percentile Load Time (Cached) - 95% of cached extensions load within this time",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -818,8 +559,9 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
-                "fillOpacity": 0,
+                "fillOpacity": 6,
                 "gradientMode": "none",
                 "hideFrom": {
                   "legend": false,
@@ -828,7 +570,10 @@ data:
                 },
                 "insertNulls": false,
                 "lineInterpolation": "linear",
-                "lineWidth": 1,
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
@@ -848,15 +593,15 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
                     "value": 80
                   }
                 ]
-              }
+              },
+              "unit": "dtdurationms"
             },
             "overrides": []
           },
@@ -864,9 +609,9 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 26
+            "y": 16
           },
-          "id": 5,
+          "id": 16,
           "options": {
             "legend": {
               "calcs": [],
@@ -876,7 +621,6 @@ data:
             },
             "tooltip": {
               "hideZeros": false,
-              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -888,19 +632,14 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "disableTextWrap": false,
-              "editorMode": "builder",
-              "expr": "sum by(projectId) (cognigy_ai_agent_updated_count{cluster=\"$cluster\"})",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "",
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, rate(cognigy_extension_load_time_ms_bucket{path_type=\"cached\",cluster=\"$cluster\"}[$__rate_interval]))",
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
               "range": true,
-              "refId": "A",
-              "useBackend": false
+              "refId": "A"
             }
           ],
-          "title": "Update Count",
+          "title": "P95 Cached Extension Load Time (ms) per pod",
           "type": "timeseries"
         },
         {
@@ -908,6 +647,7 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "Percentile Load Time (Uncached) - 95% , 99% of uncached extensions load within this time",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -920,8 +660,123 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
-                "fillOpacity": 0,
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "dtdurationms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 24
+          },
+          "id": 17,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, rate(cognigy_extension_load_time_ms_bucket{path_type=\"original\",cluster=\"$cluster\"}[$__rate_interval]))",
+              "legendFormat": "95",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.99, rate(cognigy_extension_load_time_ms_bucket{path_type=\"original\",cluster=\"$cluster\"}[$__rate_interval]))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "99",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Uncached Extension Load Time (ms)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "95th Percentile Load Time (Uncached) - 95% of uncached extensions load within this time",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 6,
                 "gradientMode": "none",
                 "hideFrom": {
                   "legend": false,
@@ -930,6 +785,110 @@ data:
                 },
                 "insertNulls": false,
                 "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "dtdurationms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 24
+          },
+          "id": 18,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, rate(cognigy_extension_load_time_ms_bucket{path_type=\"original\",cluster=\"$cluster\"}[$__rate_interval]))",
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "P95 Uncached Extension Load Time (ms) per pod",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "P95 Extension Processing Time by Organization - 95% of extensions process within this time",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 4,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
                 "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
@@ -950,23 +909,23 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
                     "value": 80
                   }
                 ]
-              }
+              },
+              "unit": "dtdurationms"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 8,
-            "w": 12,
+            "h": 9,
+            "w": 24,
             "x": 0,
-            "y": 34
+            "y": 32
           },
           "id": 6,
           "options": {
@@ -978,7 +937,6 @@ data:
             },
             "tooltip": {
               "hideZeros": false,
-              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -990,19 +948,14 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "disableTextWrap": false,
-              "editorMode": "builder",
-              "expr": "sum by(projectId) (cognigy_ai_agent_deleted_count{cluster=\"$cluster\"})",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "",
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum(rate(cognigy_execution_extension_processing_time_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (organisationId, le))",
+              "legendFormat": "__auto",
               "range": true,
-              "refId": "A",
-              "useBackend": false
+              "refId": "A"
             }
           ],
-          "title": "Delete Count",
+          "title": "95th percentile processing time by organization",
           "type": "timeseries"
         },
         {
@@ -1010,6 +963,7 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "Average Extension Processing Time by Project - Mean execution time per project in cluster",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1022,8 +976,9 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
-                "fillOpacity": 0,
+                "fillOpacity": 5,
                 "gradientMode": "none",
                 "hideFrom": {
                   "legend": false,
@@ -1032,6 +987,9 @@ data:
                 },
                 "insertNulls": false,
                 "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
                 "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
@@ -1052,23 +1010,23 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
                     "value": 80
                   }
                 ]
-              }
+              },
+              "unit": "dtdurationms"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 34
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 41
           },
           "id": 7,
           "options": {
@@ -1080,7 +1038,6 @@ data:
             },
             "tooltip": {
               "hideZeros": false,
-              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -1092,24 +1049,420 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "disableTextWrap": false,
-              "editorMode": "builder",
-              "expr": "sum by(withConfiguration) (cognigy_ai_agent_hire_from_marketplace_count{cluster=\"$cluster\"})",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": false,
-              "legendFormat": "",
+              "editorMode": "code",
+              "expr": "sum(rate(cognigy_execution_extension_processing_time_sum{cluster=\"$cluster\"}[$__rate_interval])) by (projectId) / sum(rate(cognigy_execution_extension_processing_time_count{cluster=\"$cluster\"}[$__rate_interval])) by (projectId)",
+              "legendFormat": "__auto",
               "range": true,
-              "refId": "A",
-              "useBackend": false
+              "refId": "A"
             }
           ],
-          "title": "Hired From Market Count",
+          "title": "Processing time by project",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Extension Cache Addition Rate",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 7,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 50
+          },
+          "id": 9,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "rate(cognigy_extension_cache_operations_total{operation=\"extension_added\",cluster=\"$cluster\"}[$__rate_interval])",
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Cache operations - extension_added",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Extension Measurement Rate - Extensions being measured for cache operations per second",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 8,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 50
+          },
+          "id": 10,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "rate(cognigy_extension_cache_operations_total{operation=\"extension_measured\",cluster=\"$cluster\"}[$__rate_interval])",
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Cache operations - extension_measured",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Cache Cleanup Rate - Cache cleanup operations per second due to size limits",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 7,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 58
+          },
+          "id": 12,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "rate(cognigy_extension_cache_operations_total{operation=\"cleanup\",cluster=\"$cluster\"}[$__rate_interval])",
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Cache operations - cleanup",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 58
+          },
+          "id": 14,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "hidden",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "rate(cognigy_execution_uncaught_error_total{cluster=\"$cluster\"}[$__rate_interval])",
+              "legendFormat": "{{`{{`}}pod{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Uncaught Error rate",
           "type": "timeseries"
         }
       ],
-      "refresh": "{{ index .Values "products" "ai" "dashboards" "product-metrics" "refreshInterval" | default "5m" }}",
-      "schemaVersion": 39,
+      "preload": false,
+      "refresh": "{{ index .Values "products" "ai" "dashboards" "untrusted-extensions-analysis" "refreshInterval" | default "5m" }}",
+      "schemaVersion": 41,
       "tags": [],
       "templating": {
         "list": [
@@ -1118,17 +1471,13 @@ data:
               "text": "",
               "value": ""
             },
-            "hide": 0,
-            "includeAll": false,
+            "description": "",
             "label": "Data Source",
-            "multi": false,
             "name": "datasource",
             "options": [],
             "query": "prometheus",
-            "queryValue": "",
             "refresh": 1,
             "regex": "",
-            "skipUrlSync": false,
             "type": "datasource"
           },
           {
@@ -1140,15 +1489,15 @@ data:
               "type": "prometheus",
               "uid": "$datasource"
             },
-            "definition": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+            "definition": "label_values(up{job=\"kube-state-metrics\"},$cluster)",
             "hide": {{ if .Values.grafana.sidecar.dashboards.multicluster.global.enabled }}0{{ else }}2{{ end }},
-            "includeAll": false,
             "label": "Cluster",
             "name": "cluster",
             "options": [],
             "query": {
-              "query": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
-              "refId": "Metrics-cluster-Variable-Query"
+              "qryType": 1,
+              "query": "label_values(up{job=\"kube-state-metrics\"},$cluster)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 2,
             "regex": "",
@@ -1158,15 +1507,13 @@ data:
         ]
       },
       "time": {
-        "from": "{{ index .Values "products" "ai" "dashboards" "product-metrics" "timeFrom" | default "now-3h" }}",
+        "from": "{{ index .Values "products" "ai" "dashboards" "untrusted-extensions-analysis" "timeFrom" | default "now-3h" }}",
         "to": "now"
       },
-      "timeRangeUpdatedDuringEditOrView": false,
       "timepicker": {},
       "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
-      "title": "AI / Product Metrics",
-      "uid": "3dc43bc9-b4c9-4c29-af3a-3ec46c9eb259",
-      "version": 2,
-      "weekStart": ""
+      "title": "AI / Untrusted Extensions Performance Analysis",
+      "uid": "UNTRUSTED_EXTENSIONS_PERFORMANCE_ANALYSIS",
+      "version": 18
     }
 {{- end }}
