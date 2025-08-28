@@ -57,7 +57,6 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 53,
       "links": [],
       "liveNow": false,
       "panels": [
@@ -74,14 +73,16 @@ data:
               },
               "custom": {
                 "align": "left",
-                "displayMode": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
                 "filterable": false,
                 "inspect": true
               },
               "decimals": 0,
               "mappings": [],
               "min": 2,
-              "noValue": "0",
+              "noValue": "-",
               "thresholds": {
                 "mode": "percentage",
                 "steps": [
@@ -116,7 +117,9 @@ data:
           "id": 33,
           "interval": "1h",
           "options": {
+            "cellHeight": "sm",
             "footer": {
+              "countRows": false,
               "enablePagination": false,
               "fields": [
                 "Value #A (mean)",
@@ -138,7 +141,7 @@ data:
               }
             ]
           },
-          "pluginVersion": "9.2.3",
+          "pluginVersion": "11.0.0",
           "targets": [
             {
               "datasource": {
@@ -152,10 +155,27 @@ data:
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "avg by (cluster, git_version, cloud, region, version) (cognigy_vg_version{cloud=~\"$cloud\", cluster=~\"$cluster\"})",
+              "format": "table",
+              "hide": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "B"
             }
           ],
           "title": "Cognigy Products Versions",
           "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
             {
               "id": "groupBy",
               "options": {
@@ -166,12 +186,10 @@ data:
                     ]
                   },
                   "Value #A": {
-                    "aggregations": [],
-                    "operation": "aggregate"
+                    "aggregations": []
                   },
                   "Value #B": {
-                    "aggregations": [],
-                    "operation": "aggregate"
+                    "aggregations": []
                   },
                   "Value #C": {
                     "aggregations": [
@@ -204,6 +222,12 @@ data:
                       "last"
                     ],
                     "operation": "aggregate"
+                  },
+                  "version": {
+                    "aggregations": [
+                      "last"
+                    ],
+                    "operation": "aggregate"
                   }
                 }
               }
@@ -223,6 +247,7 @@ data:
                   "Value #B (mean)": true,
                   "Value (mean)": false
                 },
+                "includeByName": {},
                 "indexByName": {
                   "Value (mean)": 4,
                   "cloud": 1,
@@ -236,13 +261,17 @@ data:
                   "Value #C (mean)": "Storage",
                   "Value (last)": "releaseVersion",
                   "Value (mean)": "releaseVersion",
+                  "cloud": "Cloud",
+                  "cloud 1": "Cloud",
                   "cluster": "Cluster",
                   "git_version (last)": "k8s Version",
                   "git_version (last) 1": "Data Plane Version",
                   "git_version (last) 2": "Control Plane Version",
                   "git_version (lastNotNull)": "",
+                  "region": "Region",
                   "region (last)": "Region",
-                  "releaseVersion (last)": "Cognigy.AI Version"
+                  "releaseVersion (last)": "Cognigy.AI Version",
+                  "version (last)": "Cognigy.VG Version"
                 }
               }
             }
@@ -262,6 +291,12 @@ data:
               },
               "custom": {
                 "fillOpacity": 70,
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
                 "lineWidth": 0,
                 "spanNulls": false
               },
@@ -283,8 +318,8 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 17,
-            "w": 24,
+            "h": 83,
+            "w": 12,
             "x": 0,
             "y": 13
           },
@@ -302,6 +337,7 @@ data:
             "rowHeight": 0.83,
             "showValue": "never",
             "tooltip": {
+              "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
@@ -319,12 +355,113 @@ data:
               "format": "time_series",
               "instant": false,
               "interval": "",
-              "legendFormat": "{{`{{`}}cluster{{`}}`}}: {{`{{`}}releaseVersion{{`}}`}}",
+              "legendFormat": "{{`{{`}}cluster{{`}}`}}: AI v{{`{{`}}releaseVersion{{`}}`}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by (cluster, cloud, version) (cognigy_vg_version{cloud=~\"$cloud\", cluster=~\"$cluster\"})",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{`{{`}}cluster{{`}}`}}: VG v{{`{{`}}version{{`}}`}}",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Cognigy Product Upgrades",
+          "type": "state-timeline"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Timeline of data plane (kubelet) upgrades of Kubernetes clusters",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "fillOpacity": 70,
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineWidth": 0,
+                "spanNulls": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 83,
+            "w": 12,
+            "x": 12,
+            "y": 13
+          },
+          "id": 32,
+          "interval": "1h",
+          "maxDataPoints": 300,
+          "options": {
+            "alignValue": "right",
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "mergeValues": true,
+            "rowHeight": 0.83,
+            "showValue": "never",
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "9.2.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "avg by (cluster, git_version) (kubernetes_build_info{cloud=~\"$cloud\", cluster=~\"$cluster\", job=\"kubelet\"})",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{`{{`}}cluster{{`}}`}}: {{`{{`}}git_version{{`}}`}}",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "Cognigy Product Upgrades",
+          "title": "Kubernetes Upgrades",
           "type": "state-timeline"
         },
         {
@@ -340,7 +477,9 @@ data:
               },
               "custom": {
                 "align": "left",
-                "displayMode": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
                 "filterable": false,
                 "inspect": true
               },
@@ -377,12 +516,14 @@ data:
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 30
+            "y": 96
           },
           "id": 29,
           "interval": "1h",
           "options": {
+            "cellHeight": "sm",
             "footer": {
+              "countRows": false,
               "enablePagination": false,
               "fields": [
                 "Value #A (mean)",
@@ -404,7 +545,7 @@ data:
               }
             ]
           },
-          "pluginVersion": "9.2.3",
+          "pluginVersion": "11.0.0",
           "targets": [
             {
               "datasource": {
@@ -484,6 +625,7 @@ data:
                   "Value #B (mean)": true,
                   "Value (mean)": true
                 },
+                "includeByName": {},
                 "indexByName": {
                   "Value (mean)": 4,
                   "cloud": 1,
@@ -495,7 +637,9 @@ data:
                   "Value #A (mean)": "Data Plane Version",
                   "Value #B (mean)": "Control Plane Version",
                   "Value #C (mean)": "Storage",
+                  "cloud": "Cloud",
                   "cluster": "Cluster",
+                  "git_version (first)": "K8s version",
                   "git_version (last)": "k8s Version",
                   "git_version (last) 1": "Data Plane Version",
                   "git_version (last) 2": "Control Plane Version",
@@ -506,88 +650,10 @@ data:
             }
           ],
           "type": "table"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "description": "Timeline of data plane (kubelet) upgrades of Kubernetes clusters",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "fillOpacity": 70,
-                "lineWidth": 0,
-                "spanNulls": false
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 1
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 17,
-            "w": 24,
-            "x": 0,
-            "y": 43
-          },
-          "id": 32,
-          "interval": "1h",
-          "maxDataPoints": 300,
-          "options": {
-            "alignValue": "right",
-            "legend": {
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": false
-            },
-            "mergeValues": true,
-            "rowHeight": 0.83,
-            "showValue": "never",
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "9.2.3",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "avg by (cluster, git_version) (kubernetes_build_info{cloud=~\"$cloud\", cluster=~\"$cluster\", job=\"kubelet\"})",
-              "format": "time_series",
-              "instant": false,
-              "interval": "",
-              "legendFormat": "{{`{{`}}cluster{{`}}`}}: {{`{{`}}git_version{{`}}`}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Kubernetes Upgrades",
-          "type": "state-timeline"
         }
       ],
       "refresh": "{{ index .Values "products" "services" "dashboards" "cluster-upgrades" "refreshInterval" | default "5m" }}",
-      "schemaVersion": 37,
+      "schemaVersion": 39,
       "style": "dark",
       "tags": [
         "cost",
@@ -626,6 +692,7 @@ data:
             "definition": "label_values(kube_node_status_capacity{}, cloud)",
             "hide": 0,
             "includeAll": true,
+            "label": "Cloud",
             "multi": true,
             "name": "cloud",
             "options": [],
@@ -640,7 +707,6 @@ data:
             "type": "query"
           },
           {
-            "allValue": null,
             "current": {
               "text": "",
               "value": ""
@@ -662,6 +728,7 @@ data:
             },
             "refresh": 2,
             "regex": "",
+            "skipUrlSync": false,
             "sort": 1,
             "tagValuesQuery": "",
             "tags": [],
@@ -787,6 +854,7 @@ data:
         "from": "{{ index .Values "products" "services" "dashboards" "cluster-upgrades" "timeFrom" | default "now-3h" }}",
         "to": "now"
       },
+      "timeRangeUpdatedDuringEditOrView": false,
       "timepicker": {
         "refresh_intervals": [
           "5s",
@@ -815,7 +883,7 @@ data:
       "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
       "title": "Services / Cluster Upgrades",
       "uid": "qa34tSdgaUnr",
-      "version": 13,
+      "version": 14,
       "weekStart": "monday"
     }
 {{- end }}
