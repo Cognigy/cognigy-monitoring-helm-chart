@@ -145,8 +145,8 @@ spec:
 
     {{- if (.Values.rules.kubernetes.podManyRestarts.enabled ) }}
     - alert: PodManyRestarts
-      expr: (increase(kube_pod_container_status_restarts_total[60m]) > {{.Values.rules.kubernetes.podManyRestarts.restartsPerHour}})
-            or (kube_pod_container_status_restarts_total > {{.Values.rules.kubernetes.podManyRestarts.restartsTotal}})
+      expr: (increase(kube_pod_container_status_restarts_total{container!~"{{ .Values.rules.kubernetes.podManyRestarts.containerBlacklist }}"}[60m]) > {{.Values.rules.kubernetes.podManyRestarts.restartsPerHour}})
+            or (kube_pod_container_status_restarts_total{container!~"{{ .Values.rules.kubernetes.podManyRestarts.containerBlacklist }}"} > {{.Values.rules.kubernetes.podManyRestarts.restartsTotal}})
       annotations:
         summary: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} restarts too often.
         description: "Pod {{`{{`}} $labels.pod }} restarts \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
@@ -157,11 +157,11 @@ spec:
     {{- end }}
 
     {{- if (.Values.rules.kubernetes.containerOOMKilled.enabled ) }}
-    - alert: ContainerOOMKilled
+    - alert: ContainerSingleOOMKilled
       expr: |-
-        (sum by (container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container!~"^cube-.*|^service-.*"})) > 1
-        UNLESS ((sum by (container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container!~"^cube-.*|^service-.*"})) -
-        (sum by (container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container!~"^cube-.*|^service-.*"}
+        (sum by (container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container!~"{{ .Values.rules.kubernetes.containerOOMKilled.containerSingleOOMBlacklist }}"})) > 1
+        UNLESS ((sum by (container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container!~"{{ .Values.rules.kubernetes.containerOOMKilled.containerSingleOOMBlacklist }}"})) -
+        (sum by (container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container!~"{{ .Values.rules.kubernetes.containerOOMKilled.containerSingleOOMBlacklist }}"}
          offset {{ .Values.rules.kubernetes.containerOOMKilled.offset }})) == 0)
       annotations:
         summary: Container /{{`{{`}} $labels.container {{`}}`}} OOMKilled {{`{{`}} $value {{`}}`}} times
@@ -170,12 +170,12 @@ spec:
       labels:
         severity: {{ .Values.rules.kubernetes.containerOOMKilled.severity }}
 
-    - alert: ContainerOOMKilled
+    - alert: ContainerMultiOOMKilled
       expr: |-
-        (sum by (container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container=~"^cube-.*|^service-.*"})) >
+        (sum by (container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container=~"{{ .Values.rules.kubernetes.containerOOMKilled.containerMultiOOMWhitelist }}"})) >
         {{ .Values.rules.kubernetes.containerOOMKilled.threshold }}
-        UNLESS ((sum by (container, cluster) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container=~"^cube-.*|^service-.*"})) -
-        (sum by (container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container=~"^cube-.*|^service-.*"}
+        UNLESS ((sum by (container, cluster) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container=~"{{ .Values.rules.kubernetes.containerOOMKilled.containerMultiOOMWhitelist }}"})) -
+        (sum by (container) (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", container=~"{{ .Values.rules.kubernetes.containerOOMKilled.containerMultiOOMWhitelist }}"}
          offset {{ .Values.rules.kubernetes.containerOOMKilled.offset }})) == 0)
       annotations:
         summary: Container /{{`{{`}} $labels.container {{`}}`}} OOMKilled {{`{{`}} $value {{`}}`}} times

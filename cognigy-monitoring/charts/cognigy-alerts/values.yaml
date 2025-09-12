@@ -27,13 +27,17 @@ rules:
     podManyRestarts:
       enabled: true
       severity: warning
+      containerBlacklist: "^falco.*"
       timeout: 5m
       restartsPerHour: 3
       restartsTotal: 20
     containerOOMKilled:
       enabled: true
       severity: warning
+      containerSingleOOMBlacklist: "^cube-.*|^service-.*|^falco.*"
+      containerMultiOOMWhitelist: "^cube-.*|^service-.*"
       timeout: 5m
+      # threshold for ContainerMultiOOMKilled alert
       threshold: 3
       offset: 3h
     cpuThrottlingBackendServiceHigh:
@@ -219,7 +223,7 @@ rules:
     serviceCollaboration:
       enabled: true
       unhandledErrorThreshold: 5
-      requestLatencyHighThreshold: 500
+      requestLatencyHighThreshold: 750
 
   # Cognigy.AI runtime services rules
   runtime:

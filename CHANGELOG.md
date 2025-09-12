@@ -1,5 +1,30 @@
 # Release Notes
 
+### 1.30.2
+**Released** September 12th, 2025
+
+#### Bugfixes
+- Fixed Service-HTTP panels and alerts.
+- Fixed `VGPodRestarts` alert.
+- Fixed `service-collaboration` latency threshold.
+
+### 1.30.1
+**Released** August 28th, 2025
+
+#### Changes
+- Updated `Services / Cluster Upgrades` dashboard.
+- Use a dashboard-specific variable to get the cluster list in multiple dashboards.
+
+### 1.30.0
+**Released** August 22nd, 2025
+
+#### Changes
+- Added `AI / RPC Execution Analysis` dashboard.
+- Added `VG / Overview V3` dashboard.
+- Updated `AI / Product Metrics` dashboard.
+- Improved logic for `ContainerOOMKilled` and `PodRestarts` alerts.
+- Separated `ContainerOOMKilled` alert into `ContainerSingleOOMKilled` and `ContainerMultiOOMKilled` alerts.
+
 ### 1.29.0 
 **Released** July 28th, 2025
 

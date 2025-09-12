@@ -250,13 +250,13 @@ spec:
       - alert: ServiceHttpRequestLatencyHigh
         expr: >
           histogram_quantile( {{ $.Values.rules.ai.serviceHttp.requestLatencyHighQuantile }},
-            sum(increase(cognigy_service_http_external_http_requests_latency_ms_bucket[1m])) by (le, orgId, projectId))/1000 >
+            sum(increase(cognigy_http_requests_latency_bucket[1m])) by (le, organisationId, projectId))/1000 >
             {{ $.Values.rules.ai.serviceHttp.requestLatencyHighThreshold }}
         for: 5m
         labels:
           severity: warning
         annotations:
-          summary: service-HTTP requests latency is high for orgId {{`{{`}} $labels.orgId  }} projectId {{`{{`}} $labels.projectId  }}
+          summary: service-HTTP requests latency is high for organisationId {{`{{`}} $labels.organisationId  }} projectId {{`{{`}} $labels.projectId  }}
           description: "Service-HTTP requests latency is higher than {{`{{`}} $value }} sec\n LABELS = {{`{{`}} $labels }}"
   {{- end }}
 
