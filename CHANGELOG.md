@@ -1,5 +1,13 @@
 # Release Notes
 
+### 1.30.3
+**Released** October 24th, 2025
+
+#### Bugfixes
+- Fixed `AI / Service Collaboration` panels and alerts.
+- Split `Service-Handover` alerts configuration
+- Parametrized `CPUThrottlingBackendServiceHigh` alert.
+
 ### 1.30.2
 **Released** September 12th, 2025
 

@@ -81,7 +81,7 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "Tracks the count of all requests in service-collaboration",
+          "description": "Total number of AMQP messages processed across all consumer instances in Service-Collaboration (messages processed in total)",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -179,7 +179,7 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "Number of messages that were processed by the service-collaboration microservice",
+          "description": "Rate of AMQP message processing errors per second across all collaboration service instances (messages failed per second)",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -276,6 +276,7 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "Average AMQP message processing time in milliseconds, grouped by message type/kind (Average time to process each message type)",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1623,7 +1624,7 @@ data:
                 "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
-                "axisLabel": "milisedonds",
+                "axisLabel": "milliseconds",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
                 "barWidthFactor": 0.6,
@@ -1748,6 +1749,304 @@ data:
             }
           ],
           "title": "Request Processing Time",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Shows the 95th percentile duration of each individual collaboration operation in service-collaborations socket api for detailed performance analysis per operation type (Captures real performance issues without being too noisy)",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "milliseconds",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 86
+          },
+          "id": 55,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (increase(cognigy_collaboration_create_thread_execution_time_bucket{cluster=\"$cluster\"}[$__rate_interval])))",
+              "instant": false,
+              "legendFormat": "create_thread",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (increase(cognigy_collaboration_index_threads_execution_time_bucket{cluster=\"$cluster\"}[$__rate_interval])))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "index_threads",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (increase(cognigy_collaboration_join_activity_execution_time_bucket{cluster=\"$cluster\"}[$__rate_interval])))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "join_activity",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (increase(cognigy_collaboration_join_cursor_tracking_execution_time_bucket{cluster=\"$cluster\"}[$__rate_interval])))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "join_cursor_tracking",
+              "range": true,
+              "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (increase(cognigy_collaboration_leave_activity_execution_time_bucket{cluster=\"$cluster\"}[$__rate_interval])))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "leave_activity",
+              "range": true,
+              "refId": "E"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (increase(cognigy_collaboration_leave_cursor_tracking_execution_time_bucket{cluster=\"$cluster\"}[$__rate_interval])))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "leave_cursor_tracking",
+              "range": true,
+              "refId": "F"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (increase(cognigy_collaboration_subscribe_to_threads_execution_time_bucket{cluster=\"$cluster\"}[$__rate_interval])))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "subscribe_to_threads",
+              "range": true,
+              "refId": "G"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (increase(cognigy_collaboration_unsubscribe_from_threads_execution_time_bucket{cluster=\"$cluster\"}[$__rate_interval])))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "unsubscribe_from_threads",
+              "range": true,
+              "refId": "H"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (increase(cognigy_collaboration_update_activity_execution_time_bucket{cluster=\"$cluster\"}[$__rate_interval])))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "update_activity",
+              "range": true,
+              "refId": "I"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (increase(cognigy_collaboration_update_cursor_tracking_execution_time_bucket{cluster=\"$cluster\"}[$__rate_interval])))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "update_cursor_tracking",
+              "range": true,
+              "refId": "J"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (increase(cognigy_collaboration_create_thread_message_execution_time_bucket{cluster=\"$cluster\"}[$__rate_interval])))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "create_thread_message",
+              "range": true,
+              "refId": "K"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (increase(cognigy_collaboration_delete_thread_execution_time_bucket{cluster=\"$cluster\"}[$__rate_interval])))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "delete_thread",
+              "range": true,
+              "refId": "L"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (increase(cognigy_collaboration_delete_thread_message_execution_time_bucket{cluster=\"$cluster\"}[$__rate_interval])))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "delete_thread_message",
+              "range": true,
+              "refId": "M"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (increase(cognigy_collaboration_read_thread_execution_time_bucket{cluster=\"$cluster\"}[$__rate_interval])))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "read_thread",
+              "range": true,
+              "refId": "N"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (increase(cognigy_collaboration_update_thread_execution_time_bucket{cluster=\"$cluster\"}[$__rate_interval])))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "update_thread",
+              "range": true,
+              "refId": "O"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (increase(cognigy_collaboration_update_thread_message_execution_time_bucket{cluster=\"$cluster\"}[$__rate_interval])))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "update_thread_message",
+              "range": true,
+              "refId": "P"
+            }
+          ],
+          "title": "Request Processing Time by Operation (95th Percentile)",
           "type": "timeseries"
         },
         {

@@ -43,6 +43,8 @@ rules:
     cpuThrottlingBackendServiceHigh:
       enabled: true
       severity: warning
+      # Backend services Pods monitored for CPU throttling
+      monitoredPods: "mongodb.*|redis.*|rabbitmq.*|traefik.*|nginx.*|.*postgres.*|mysql.*|qdrant.*"
       timeout: 15m
     hpaMaxReplicasReached:
       enabled: true
@@ -179,27 +181,37 @@ rules:
       requestLatencyHighThreshold: 15
     serviceHandover:
       enabled: true
-      # threshold on number of service handover errors per 5 min
-      threshold: 2
-      requestLatencyHighQuantile: 0.95
-      # threshold (seconds) for high requests latency to external providers
-      requestLatencyHighThreshold: 2
-      # threshold for 5xx errors to external providers per minute
-      requestErrorThreshold: 2
+      errorsHigh:
+        enabled: true
+        # threshold on number of service handover errors per 5 min
+        threshold: 2
+      requestLatencyHigh:
+        enabled: true
+        quantile: 0.95
+        # threshold (seconds) for high requests latency to external providers
+        threshold: 2
+      request5xxErrorRate:
+        enabled: true
+        # threshold for 5xx errors to external providers per minute
+        threshold: 2
+      rPCCallFailureRateHigh:
+        enabled: true
       # threshold for request_handover_rpc_calls_error
-      requestHandoverRPCCallFailureRate:
         evaluationWindow: 5m
         threshold: 30
         numberOfErrors: 20
-      sendMessageToProviderErrorRate:
+      sendMessageToProviderErrorRateHigh:
+        enabled: true
         evaluationWindow: 5m
         threshold: 50
         criticalThreshold: 75
-      eventRpcErrorRate:
+      eventRPCErrorRateHigh:
+        enabled: true
         evaluationWindow: 5m
         threshold: 10
         numberOfErrors: 20
-      containerRestart:
+      containerRestartWarning:
+        enabled: true
         evaluationWindow: 5m
         threshold: 0
 
@@ -223,7 +235,8 @@ rules:
     serviceCollaboration:
       enabled: true
       unhandledErrorThreshold: 5
-      requestLatencyHighThreshold: 750
+      # temporarily making this very high until we have made the queries efficient
+      requestLatencyHighThreshold: 5000
 
   # Cognigy.AI runtime services rules
   runtime:
