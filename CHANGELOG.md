@@ -1,5 +1,23 @@
 # Release Notes
 
+### 1.31.0 💥
+**Released** November 18th, 2025
+
+**IMPORTANT**: This release updates all the dependency charts to the latest versions. Check the [upgrade documentation](upgrade/upgrade-1.31.md) before updating to this version!
+
+#### Changes
+- Updated dependency charts to the latest version.
+- Introduced following new dashboards-
+    - `AI / LLM Providers - OAuth2 Token Management`
+    - `AI / Node Config Fallback`
+    - `VG / Drachtio Server Monitoring v2`
+    - `VG / Health v1`
+- Deprecated the following dashboards-
+    - `VG / Overview v2`
+    - `VG / Drachtio Server`
+    - `VG / VG Overview`
+- Minor updates in some other alerts and dashboards.
+
 ### 1.30.3
 **Released** October 24th, 2025
 

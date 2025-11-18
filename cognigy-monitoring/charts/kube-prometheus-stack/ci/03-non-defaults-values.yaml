@@ -19,6 +19,8 @@ prometheusOperator:
         operator: NotIn
         values:
         - "true"
+  extraArgs:
+    - --labels="cluster=talos-cluster"
 
 alertmanager:
   alertmanagerSpec:
@@ -77,6 +79,12 @@ kubeProxy:
     selector:
       matchLabels:
         k8s-app: kube-proxy
+
+grafana:
+  sidecar:
+    datasources:
+      alertmanager:
+        name: 0
 
 nodeExporter:
   enabled: true

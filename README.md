@@ -46,6 +46,10 @@ helm upgrade -n monitoring monitoring-stack oci://cognigy.azurecr.io/helm/cognig
 
 This update includes breaking changes. Check [here](upgrade/upgrade-1.23.md) for detail instruction.
 
+### From 1.30.x to 1.31.x
+
+This update requires additional steps. Check [here](upgrade/upgrade-1.31.md) for detail instruction.
+
 ## Upgrading from legacy Monitoring Stack
 To upgrade from our legacy Monitoring stack, check [upgrade from legacy stack](upgrade-from-legacy.md) guide.
 

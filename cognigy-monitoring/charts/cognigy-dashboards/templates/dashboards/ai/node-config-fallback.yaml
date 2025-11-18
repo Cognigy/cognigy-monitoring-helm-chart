@@ -1,0 +1,2515 @@
+{{- /*
+Generated from json dashboard 'dashboards/ai/node-config-fallback.json'.
+Do not change in-place! In order to change this file first modify the json dashboard 'dashboards/ai/node-config-fallback.json'
+and then run the 'scripts/convert-dashboard/convert-dashboard.py' script.
+*/ -}}
+{{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
+{{- if and 
+    (index .Values "products" "ai" "enabled")
+    (index .Values "products" "ai" "dashboards" "node-config-fallback" "enabled")
+    (index .Values "products" "ai" "dashboards" "node-config-fallback" "yamlVersion")
+    (not .Values.forceDeployJsonDashboards)
+    (semverCompare ">=1.14.0-0" $kubeTargetVersion)
+    (semverCompare "<9.9.9-9" $kubeTargetVersion)
+     
+}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ template "cognigy-dashboards.namespace" . }}
+  name: {{ printf "%s-%s" (include "cognigy-dashboards.fullname" $) "node-config-fallback" | trunc 63 | trimSuffix "-" }}
+  {{- with $.Values.grafana.sidecar.dashboards.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- if $.Values.grafana.sidecar.dashboards.label }}
+    {{ $.Values.grafana.sidecar.dashboards.label }}: {{ ternary $.Values.grafana.sidecar.dashboards.labelValue "1" (not (empty $.Values.grafana.sidecar.dashboards.labelValue)) | quote }}
+    {{- end }}
+    app: {{ template "cognigy-dashboards.name" $ }}-grafana
+    {{- include "cognigy-dashboards.labels" $ | nindent 4 }}
+data:
+  node-config-fallback.json: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "datasource",
+              "uid": "grafana"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "target": {
+              "limit": 100,
+              "matchAny": false,
+              "tags": [],
+              "type": "dashboard"
+            },
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": 114,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "collapsed": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 7,
+          "panels": [],
+          "title": "indexChartNodes",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "normal"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 12,
+            "x": 0,
+            "y": 1
+          },
+          "id": 6,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_index_chart_nodes_latency_count{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__rate_interval]))",
+              "instant": false,
+              "legendFormat": "Node Config Fallback enabled",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_index_chart_nodes_latency_count{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__rate_interval]))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Node Config Fallback disabled",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "indexChartNodes calls",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 1
+          },
+          "id": 24,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_index_chart_nodes_latency_count{cluster=\"$cluster\"}[$__range]))",
+              "instant": true,
+              "legendFormat": "Node Config Fallback enabled",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "indexChartNodes calls",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "quota of indexChartNodes RPC calls with \"Node Config Fallback\" enabled",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 1
+          },
+          "id": 9,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_index_chart_nodes_latency_count{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[1h])) / sum(increase(cognigy_resources_node_config_fallback_index_chart_nodes_latency_count{cluster=\"$cluster\"}[1h]))",
+              "instant": true,
+              "legendFormat": "Node Config Fallback enabled",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "indexChartNodes adoption rate",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 5
+          },
+          "id": 11,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.80, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__rate_interval])) by (le))",
+              "instant": false,
+              "legendFormat": "80th",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.90, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__rate_interval])) by (le))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "90th",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__rate_interval])) by (le))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "95th",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.99, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__rate_interval])) by (le))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "99th",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "title": "indexChartNodes in-process latency using NCF",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 5
+          },
+          "id": 12,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.80, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__rate_interval])) by (le))",
+              "instant": false,
+              "legendFormat": "80th",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.90, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__rate_interval])) by (le))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "90th",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__rate_interval])) by (le))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "95th",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.99, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__rate_interval])) by (le))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "99th",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "title": "indexChartNodes in-process latency without NCF",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 12,
+            "x": 0,
+            "y": 11
+          },
+          "id": 15,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.80, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le))",
+              "instant": true,
+              "legendFormat": "80th",
+              "range": false,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.90, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "90th",
+              "range": false,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.95, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "95th",
+              "range": false,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.99, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "99th",
+              "range": false,
+              "refId": "D"
+            }
+          ],
+          "title": "indexChartNodes in-process latency using NCF",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 12,
+            "x": 12,
+            "y": 11
+          },
+          "id": 16,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.80, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "instant": true,
+              "legendFormat": "80th",
+              "range": false,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.90, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "90th",
+              "range": false,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.95, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "95th",
+              "range": false,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.99, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "99th",
+              "range": false,
+              "refId": "D"
+            }
+          ],
+          "title": "indexChartNodes in-process latency without NCF",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 24,
+            "x": 0,
+            "y": 14
+          },
+          "id": 20,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.80, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le)) - histogram_quantile(0.80, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "instant": true,
+              "legendFormat": "80th",
+              "range": false,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.90, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le)) - histogram_quantile(0.90, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "90th",
+              "range": false,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.95, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le)) - histogram_quantile(0.95, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "95th",
+              "range": false,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.99, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le)) - histogram_quantile(0.99, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "99th",
+              "range": false,
+              "refId": "D"
+            }
+          ],
+          "title": "indexChartNodes absolute latency offset",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 24,
+            "x": 0,
+            "y": 17
+          },
+          "id": 21,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.80, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le)) / histogram_quantile(0.80, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "instant": true,
+              "legendFormat": "80th",
+              "range": false,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.90, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le)) / histogram_quantile(0.90, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "90th",
+              "range": false,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.95, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le)) / histogram_quantile(0.95, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "95th",
+              "range": false,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.99, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le)) / histogram_quantile(0.99, sum(rate(cognigy_resources_node_config_fallback_index_chart_nodes_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "99th",
+              "range": false,
+              "refId": "D"
+            }
+          ],
+          "title": "indexChartNodes relative latency offset",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 20
+          },
+          "id": 17,
+          "title": "readChartNode",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "normal"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 12,
+            "x": 0,
+            "y": 21
+          },
+          "id": 8,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_read_chart_node_latency_count{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__rate_interval]))",
+              "instant": false,
+              "legendFormat": "Node Config Fallback enabled",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_read_chart_node_latency_count{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__rate_interval]))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Node Config Fallback disabled",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "readChartNode calls",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 21
+          },
+          "id": 25,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_read_chart_node_latency_count{cluster=\"$cluster\"}[$__range]))",
+              "instant": true,
+              "legendFormat": "Node Config Fallback enabled",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "readChartNode calls",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "quota of readChartNode RPC calls with \"Node Config Fallback\" enabled",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 21
+          },
+          "id": 10,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_read_chart_node_latency_count{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) / sum(increase(cognigy_resources_node_config_fallback_read_chart_node_latency_count{cluster=\"$cluster\",}[$__range]))",
+              "instant": false,
+              "legendFormat": "Node Config Fallback enabled",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "readChartNode adoption rate",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 25
+          },
+          "id": 13,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.80, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__rate_interval])) by (le))",
+              "instant": false,
+              "legendFormat": "80th",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.90, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__rate_interval])) by (le))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "90th",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__rate_interval])) by (le))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "95th",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.99, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__rate_interval])) by (le))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "99th",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "title": "readChartNode in-process latency using NCF",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 25
+          },
+          "id": 14,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.80, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__rate_interval])) by (le))",
+              "instant": false,
+              "legendFormat": "80th",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.90, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__rate_interval])) by (le))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "90th",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__rate_interval])) by (le))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "95th",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.99, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__rate_interval])) by (le))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "99th",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "title": "readChartNode in-process latency without NCF",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 12,
+            "x": 0,
+            "y": 31
+          },
+          "id": 18,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.80, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le))",
+              "instant": true,
+              "legendFormat": "80th",
+              "range": false,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.90, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "90th",
+              "range": false,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.95, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "95th",
+              "range": false,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.99, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "99th",
+              "range": false,
+              "refId": "D"
+            }
+          ],
+          "title": "readChartNode in-process latency using NCF",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 12,
+            "x": 12,
+            "y": 31
+          },
+          "id": 19,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.80, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "instant": true,
+              "legendFormat": "80th",
+              "range": false,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.90, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "90th",
+              "range": false,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.95, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "95th",
+              "range": false,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.99, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "99th",
+              "range": false,
+              "refId": "D"
+            }
+          ],
+          "title": "readChartNode in-process latency without NCF",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 24,
+            "x": 0,
+            "y": 34
+          },
+          "id": 22,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.80, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le)) - histogram_quantile(0.80, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "instant": true,
+              "legendFormat": "80th",
+              "range": false,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.90, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le)) - histogram_quantile(0.90, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "90th",
+              "range": false,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.95, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le)) - histogram_quantile(0.95, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "95th",
+              "range": false,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.99, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le)) - histogram_quantile(0.99, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "99th",
+              "range": false,
+              "refId": "D"
+            }
+          ],
+          "title": "readChartNode absolute latency offset",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 24,
+            "x": 0,
+            "y": 37
+          },
+          "id": 23,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.80, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le)) / histogram_quantile(0.80, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "instant": true,
+              "legendFormat": "80th",
+              "range": false,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.90, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le)) / histogram_quantile(0.90, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "90th",
+              "range": false,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.95, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le)) / histogram_quantile(0.95, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "95th",
+              "range": false,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "histogram_quantile(0.99, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"true\"}[$__range])) by (le)) / histogram_quantile(0.99, sum(rate(cognigy_resources_node_config_fallback_read_chart_node_latency_bucket{cluster=\"$cluster\",nodeConfigFallbackEnabled=\"false\"}[$__range])) by (le))",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "99th",
+              "range": false,
+              "refId": "D"
+            }
+          ],
+          "title": "readChartNode relative latency offset",
+          "type": "stat"
+        },
+        {
+          "collapsed": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 40
+          },
+          "id": 5,
+          "panels": [],
+          "title": "Node Config Processing",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Amount of processed Node Configs per timeframe, as total and ",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 100,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "normal"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 41
+          },
+          "id": 1,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"valid\"}[$__rate_interval]))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "valid",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"converted\"}[$__rate_interval]))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "adjusted",
+              "range": true,
+              "refId": "C"
+            }
+          ],
+          "title": "Processed Node Configs",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 41
+          },
+          "id": 4,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\"}[$__range]))",
+              "format": "time_series",
+              "instant": true,
+              "legendFormat": "total",
+              "range": false,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"valid\"}[$__range]))",
+              "format": "time_series",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "valid",
+              "range": false,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"converted\"}[$__range]))",
+              "format": "time_series",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "adjusted",
+              "range": false,
+              "refId": "C"
+            }
+          ],
+          "title": "Node Configs processed",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 100,
+                "gradientMode": "opacity",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 49
+          },
+          "id": 2,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"converted\"}[1h])) / sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\"}[1h]))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "ratio of converted node configs",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Ratio of adjusted Node Configs over Time",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 49
+          },
+          "id": 3,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"converted\"}[$__range])) / sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\"}[$__range]))",
+              "format": "time_series",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "ratio of converted node configs",
+              "range": false,
+              "refId": "B"
+            }
+          ],
+          "title": "Node Configs adjusted during processing",
+          "type": "gauge"
+        }
+      ],
+      "refresh": "{{ index .Values "products" "ai" "dashboards" "node-config-fallback" "refreshInterval" | default "5m" }}",
+      "schemaVersion": 39,
+      "tags": [
+        "cognigy",
+        "cognigy.ai"
+      ],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "hide": 0,
+            "includeAll": false,
+            "label": "Data Source",
+            "multi": false,
+            "name": "datasource",
+            "options": [],
+            "query": "prometheus",
+            "queryValue": "",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "type": "datasource"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+            "hide": {{ if .Values.grafana.sidecar.dashboards.multicluster.global.enabled }}0{{ else }}2{{ end }},
+            "includeAll": false,
+            "label": "Cluster",
+            "multi": false,
+            "name": "cluster",
+            "options": [],
+            "query": {
+              "query": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+              "refId": "Metrics-cluster-Variable-Query"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          }
+        ]
+      },
+      "time": {
+        "from": "{{ index .Values "products" "ai" "dashboards" "node-config-fallback" "timeFrom" | default "now-3h" }}",
+        "to": "now"
+      },
+      "timeRangeUpdatedDuringEditOrView": false,
+      "timepicker": {},
+      "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
+      "title": "AI / Node Config Fallback",
+      "uid": "ncf",
+      "version": 10,
+      "weekStart": ""
+    }
+{{- end }}

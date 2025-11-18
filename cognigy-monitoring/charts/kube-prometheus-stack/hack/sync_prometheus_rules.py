@@ -28,50 +28,56 @@ def change_style(style, representer):
 
 
 refs = {
-    # https://github.com/prometheus-operator/kube-prometheus
-    'ref.kube-prometheus': '65922b9fd8c3869c06686b44f5f3aa9f96560666',
-    # https://github.com/kubernetes-monitoring/kubernetes-mixin
-    'ref.kubernetes-mixin': 'de834e9a291b49396125768f041e2078763f48b5',
-    # https://github.com/etcd-io/etcd
-    'ref.etcd': 'bb701b9265f31d61db5906325e0a7e2abf7d3627',
+    # renovate: git-refs=https://github.com/prometheus-operator/kube-prometheus branch=main
+    'ref.kube-prometheus': '4f12dbe97c416a6da51559036e1c8d1d909a89c6',
+    # renovate: git-refs=https://github.com/kubernetes-monitoring/kubernetes-mixin branch=master
+    'ref.kubernetes-mixin': '3d08bcc8d1d179ce115191a05708778255bb52c1',
+    # renovate: git-refs=https://github.com/etcd-io/etcd branch=main
+    'ref.etcd': 'c6804c8d8c63a1a7f1c004428ca762aa80e0b83d',
 }
 
 # Source files list
 charts = [
     {
-        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/%s/manifests/alertmanager-prometheusRule.yaml' % (refs['ref.kube-prometheus'],),
+        'git': 'https://github.com/prometheus-operator/kube-prometheus.git',
+        'branch': refs['ref.kube-prometheus'],
+        'source': 'main.libsonnet',
+        'cwd': '',
         'destination': '../templates/prometheus/rules-1.14',
-        'min_kubernetes': '1.14.0-0'
-    },
-    {
-        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/%s/manifests/kubePrometheus-prometheusRule.yaml'% (refs['ref.kube-prometheus'],),
-        'destination': '../templates/prometheus/rules-1.14',
-        'min_kubernetes': '1.14.0-0'
-    },
-    {
-        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/%s/manifests/kubernetesControlPlane-prometheusRule.yaml'% (refs['ref.kube-prometheus'],),
-        'destination': '../templates/prometheus/rules-1.14',
-        'min_kubernetes': '1.14.0-0'
-    },
-    {
-        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/%s/manifests/kubeStateMetrics-prometheusRule.yaml'% (refs['ref.kube-prometheus'],),
-        'destination': '../templates/prometheus/rules-1.14',
-        'min_kubernetes': '1.14.0-0'
-    },
-    {
-        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/%s/manifests/nodeExporter-prometheusRule.yaml'% (refs['ref.kube-prometheus'],),
-        'destination': '../templates/prometheus/rules-1.14',
-        'min_kubernetes': '1.14.0-0'
-    },
-    {
-        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/%s/manifests/prometheus-prometheusRule.yaml'% (refs['ref.kube-prometheus'],),
-        'destination': '../templates/prometheus/rules-1.14',
-        'min_kubernetes': '1.14.0-0'
-    },
-    {
-        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/%s/manifests/prometheusOperator-prometheusRule.yaml'% (refs['ref.kube-prometheus'],),
-        'destination': '../templates/prometheus/rules-1.14',
-        'min_kubernetes': '1.14.0-0'
+        'min_kubernetes': '1.14.0-0',
+        'mixin': """
+        local kp =
+          (import 'jsonnet/kube-prometheus/main.libsonnet') + {
+            values+:: {
+              nodeExporter+: {
+                mixin+: {
+                  _config+: {
+                    fsSelector: '$.Values.defaultRules.node.fsSelector',
+                  },
+                },
+              },
+              common+: {
+                namespace: 'monitoring',
+              },
+              kubernetesControlPlane+: {
+                kubeProxy: true,
+              },
+            },
+            grafana: {},
+          };
+
+        {
+          groups: std.flattenArrays([
+            kp[component][resource].spec.groups
+            for component in std.objectFields(kp)
+            for resource in std.filter(
+              function(resource)
+                kp[component][resource].kind == 'PrometheusRule',
+              std.objectFields(kp[component])
+            )
+          ]),
+        }
+        """
     },
     {
         'git': 'https://github.com/kubernetes-monitoring/kubernetes-mixin.git',
@@ -80,12 +86,18 @@ charts = [
         'cwd': 'rules',
         'destination': '../templates/prometheus/rules-1.14',
         'min_kubernetes': '1.14.0-0',
-        'is_mixin': True,
-        'mixin_vars': {'_config': {
-            'clusterLabel': 'cluster',
-            'windowsExporterSelector': 'job="windows-exporter"',
-            'kubeStateMetricsSelector': 'job="kube-state-metrics"',
-        }}
+        'mixin': """
+        local kp =
+            { prometheusAlerts+:: {}, prometheusRules+:: {}} +
+            (import "windows.libsonnet") +
+            {'_config': {
+                'clusterLabel': 'cluster',
+                'windowsExporterSelector': 'job="windows-exporter"',
+                'kubeStateMetricsSelector': 'job="kube-state-metrics"',
+            }};
+
+        kp.prometheusAlerts + kp.prometheusRules
+        """
     },
     {
         'git': 'https://github.com/etcd-io/etcd.git',
@@ -94,8 +106,21 @@ charts = [
         'cwd': 'contrib/mixin',
         'destination': '../templates/prometheus/rules-1.14',
         'min_kubernetes': '1.14.0-0',
-        'is_mixin': True,
-        'mixin_vars': {'_config+': {}}
+        # Override the default etcd_instance_labels to get proper aggregation for etcd instances in k8s clusters (#2720)
+        # see https://github.com/etcd-io/etcd/blob/1c22e7b36bc5d8543f1646212f2960f9fe503b8c/contrib/mixin/config.libsonnet#L13
+        'mixin': """
+        local kp =
+            { prometheusAlerts+:: {}, prometheusRules+:: {}} +
+            (import "mixin.libsonnet") +
+            {'_config': {
+                'etcd_selector': 'job=~".*etcd.*"',
+                'etcd_instance_labels': 'instance, pod',
+                'scrape_interval_seconds': 30,
+                'clusterLabel': 'job',
+            }};
+
+        kp.prometheusAlerts + kp.prometheusRules
+        """
     },
 ]
 
@@ -105,8 +130,12 @@ condition_map = {
     'config-reloaders': ' .Values.defaultRules.rules.configReloaders',
     'etcd': ' .Values.kubeEtcd.enabled .Values.defaultRules.rules.etcd',
     'general.rules': ' .Values.defaultRules.rules.general',
+    'k8s.rules.container_cpu_limits': ' .Values.defaultRules.rules.k8sContainerCpuLimits',
+    'k8s.rules.container_cpu_requests': ' .Values.defaultRules.rules.k8sContainerCpuRequests',
     'k8s.rules.container_cpu_usage_seconds_total': ' .Values.defaultRules.rules.k8sContainerCpuUsageSecondsTotal',
     'k8s.rules.container_memory_cache': ' .Values.defaultRules.rules.k8sContainerMemoryCache',
+    'k8s.rules.container_memory_limits': ' .Values.defaultRules.rules.k8sContainerMemoryLimits',
+    'k8s.rules.container_memory_requests': ' .Values.defaultRules.rules.k8sContainerMemoryRequests',
     'k8s.rules.container_memory_rss': ' .Values.defaultRules.rules.k8sContainerMemoryRss',
     'k8s.rules.container_memory_swap': ' .Values.defaultRules.rules.k8sContainerMemorySwap',
     'k8s.rules.container_memory_working_set_bytes': ' .Values.defaultRules.rules.k8sContainerMemoryWorkingSetBytes',
@@ -173,19 +202,25 @@ replacement_map = {
         'replacement': 'job="{{ $kubeStateMetricsJob }}"',
         'init': '{{- $kubeStateMetricsJob := include "kube-prometheus-stack-kube-state-metrics.name" . }}'},
     'job="{{ $kubeStateMetricsJob }}"': {
-        'replacement': 'job="{{ $kubeStateMetricsJob }}", namespace=~"{{ $targetNamespace }}"',
+        'replacement': 'job="{{ $kubeStateMetricsJob }}", namespace{{ $namespaceOperator }}"{{ $targetNamespace }}"',
         'limitGroup': ['kubernetes-apps'],
-        'init': '{{- $targetNamespace := .Values.defaultRules.appNamespacesTarget }}'},
+        'init': '{{- $targetNamespace := .Values.defaultRules.appNamespacesTarget }}{{- $namespaceOperator := .Values.defaultRules.appNamespacesOperator | default "=~" }}'},
     'job="kubelet"': {
-        'replacement': 'job="kubelet", namespace=~"{{ $targetNamespace }}"',
+        'replacement': 'job="kubelet", namespace{{ $namespaceOperator }}"{{ $targetNamespace }}"',
         'limitGroup': ['kubernetes-storage'],
-        'init': '{{- $targetNamespace := .Values.defaultRules.appNamespacesTarget }}'},
+        'init': '{{- $targetNamespace := .Values.defaultRules.appNamespacesTarget }}{{- $namespaceOperator := .Values.defaultRules.appNamespacesOperator | default "=~" }}'},
     'runbook_url: https://runbooks.prometheus-operator.dev/runbooks/': {
         'replacement': 'runbook_url: {{ .Values.defaultRules.runbookUrl }}/',
         'init': ''},
     '(namespace,service)': {
         'replacement': '(namespace,service,cluster)',
-        'init': ''}
+        'init': ''},
+    '(namespace, job, handler': {
+        'replacement': '(cluster, namespace, job, handler',
+        'init': ''},
+    '$.Values.defaultRules.node.fsSelector': {
+        'replacement': '{{ $.Values.defaultRules.node.fsSelector }}',
+        'init': ''},
 }
 
 # standard header
@@ -332,7 +367,7 @@ def add_custom_labels(rules_str, group, indent=4, label_indent=2):
     # should only be added if there are .Values defaultRules.additionalRuleLabels defined
     rule_seperator = "\n" + " " * indent + "-.*"
     label_seperator = "\n" + " " * indent + "  labels:"
-    section_seperator = "\n" + " " * indent + "  \S"
+    section_seperator = "\n" + " " * indent + "  \\S"
     section_seperator_len = len(section_seperator)-1
     rules_positions = re.finditer(rule_seperator,rules_str)
 
@@ -508,7 +543,8 @@ def write_group_to_file(group, url, destination, min_kubernetes, max_kubernetes)
     lines += re.sub(
         r'\s(by|on) ?\(',
         r' \1 ({{ range $.Values.defaultRules.additionalAggregationLabels }}{{ . }},{{ end }}',
-        rules
+        rules,
+        flags=re.IGNORECASE
     )
 
     # footer
@@ -563,7 +599,7 @@ def main():
             subprocess.run(["git", "-C", checkout_dir, "fetch", "--depth", "1", "origin", branch, "--quiet"])
             subprocess.run(["git", "-c", "advice.detachedHead=false", "-C", checkout_dir, "checkout", "FETCH_HEAD", "--quiet"])
 
-            if chart.get('is_mixin'):
+            if chart.get('mixin'):
                 cwd = os.getcwd()
 
                 source_cwd = chart['cwd']
@@ -579,22 +615,12 @@ def main():
                     f.write(chart['content'])
                     f.close()
 
-                mixin_vars = json.dumps(chart['mixin_vars'])
-
                 print("Generating rules from %s" % mixin_file)
                 print("Change cwd to %s" % checkout_dir + '/' + source_cwd)
                 os.chdir(mixin_dir)
 
-                mixin = """
-                local kp =
-                    { prometheusAlerts+:: {}, prometheusRules+:: {}} +
-                    (import "%s") +
-                    %s;
+                alerts = json.loads(_jsonnet.evaluate_snippet(mixin_file, chart['mixin'], import_callback=jsonnet_import_callback))
 
-                kp.prometheusAlerts + kp.prometheusRules
-                """
-
-                alerts = json.loads(_jsonnet.evaluate_snippet(mixin_file, mixin % (mixin_file, mixin_vars), import_callback=jsonnet_import_callback))
                 os.chdir(cwd)
             else:
                 with open(checkout_dir + '/' + chart['source'], "r") as f:
@@ -610,7 +636,7 @@ def main():
                 print('Skipping the file, response code %s not equals 200' % response.status_code)
                 continue
             raw_text = response.text
-            if chart.get('is_mixin'):
+            if chart.get('mixin'):
                 alerts = json.loads(_jsonnet.evaluate_snippet(url, raw_text + '.prometheusAlerts'))
             else:
                 alerts = yaml.full_load(raw_text)
@@ -634,10 +660,17 @@ def sanitize_name(name):
 
 
 def jsonnet_import_callback(base, rel):
-    if "github.com" in base:
-        base = os.getcwd() + '/vendor/' + base[base.find('github.com'):]
-    elif "github.com" in rel:
+    # rel_base is the path relative to the current cwd.
+    # see https://github.com/prometheus-community/helm-charts/issues/5283
+    # for more details.
+    rel_base = base
+    if rel_base.startswith(os.getcwd()):
+        rel_base = base[len(os.getcwd()):]
+
+    if "github.com" in rel:
         base = os.getcwd() + '/vendor/'
+    elif "github.com" in rel_base:
+        base = os.getcwd() + '/vendor/' + rel_base[rel_base.find('github.com'):]
 
     if os.path.isfile(base + rel):
         return base + rel, open(base + rel).read().encode('utf-8')
