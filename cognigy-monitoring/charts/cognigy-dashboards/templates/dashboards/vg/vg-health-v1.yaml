@@ -958,16 +958,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "blue",
                     "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 50
-                  },
-                  {
-                    "color": "red",
-                    "value": 100
                   }
                 ]
               }
@@ -1454,16 +1446,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "blue",
                     "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 10
-                  },
-                  {
-                    "color": "red",
-                    "value": 50
                   }
                 ]
               },
@@ -1637,16 +1621,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "blue",
                     "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 50
-                  },
-                  {
-                    "color": "red",
-                    "value": 100
                   }
                 ]
               }
@@ -1723,16 +1699,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "blue",
                     "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 10
-                  },
-                  {
-                    "color": "red",
-                    "value": 50
                   }
                 ]
               },
@@ -1794,11 +1762,11 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "yellow",
                     "value": null
                   },
                   {
-                    "color": "yellow",
+                    "color": "orange",
                     "value": 5
                   },
                   {
@@ -1967,20 +1935,28 @@ data:
               "color": {
                 "mode": "thresholds"
               },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
               "decimals": 1,
-              "mappings": [],
-              "max": 200,
-              "min": 100,
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "yellow",
+                    "color": "green",
                     "value": null
                   },
                   {
+                    "color": "yellow",
+                    "value": 80
+                  },
+                  {
                     "color": "orange",
-                    "value": 125
+                    "value": 100
                   },
                   {
                     "color": "red",
@@ -1990,7 +1966,48 @@ data:
               },
               "unit": "percent"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CPU %"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "mode": "gradient",
+                      "type": "gauge",
+                      "valueDisplayMode": "text"
+                    }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 400
+                  },
+                  {
+                    "id": "max",
+                    "value": 200
+                  },
+                  {
+                    "id": "min",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Pod"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 350
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "h": 8,
@@ -2000,22 +2017,22 @@ data:
           },
           "id": 27,
           "options": {
-            "displayMode": "gradient",
-            "maxVizHeight": 300,
-            "minVizHeight": 20,
-            "minVizWidth": 8,
-            "namePlacement": "auto",
-            "orientation": "horizontal",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
               "fields": "",
-              "values": false
+              "reducer": [
+                "sum"
+              ],
+              "show": false
             },
-            "showUnfilled": false,
-            "sizing": "auto",
-            "valueMode": "color"
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "CPU %"
+              }
+            ]
           },
           "pluginVersion": "11.0.0",
           "targets": [
@@ -2025,14 +2042,29 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sort_desc(\n  sum(rate(container_cpu_usage_seconds_total{namespace=~\"voicegateway|cognigy-ai|monitoring\", cluster=\"$cluster\", pod!=\"\", pod!~\".*clean-up.*|.*audit-logs.*|.*update-api-ban.*|.*workload-restart.*\"}[5m])) by (pod) * 100\n) > 100",
-              "legendFormat": "{{`{{`}}pod{{`}}`}}",
-              "range": true,
+              "expr": "sort_desc(\n  (sum(rate(container_cpu_usage_seconds_total{namespace=~\"voicegateway|cognigy-ai|monitoring\", cluster=\"$cluster\", pod!=\"\", pod!~\".*clean-up.*|.*audit-logs.*|.*update-api-ban.*|.*workload-restart.*\"}[5m])) by (pod)\n  /\n  sum(cluster:namespace:pod_cpu:active:kube_pod_container_resource_limits{namespace=~\"voicegateway|cognigy-ai|monitoring\", cluster=\"$cluster\", pod!=\"\", pod!~\".*clean-up.*|.*audit-logs.*|.*update-api-ban.*|.*workload-restart.*\"}) by (pod)\n  ) * 100\n) > 100",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "__auto",
               "refId": "A"
             }
           ],
           "title": "\ud83d\udd25 High CPU Usage Pods (>100%)",
-          "type": "bargauge"
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                },
+                "renameByName": {
+                  "Value": "CPU %",
+                  "pod": "Pod"
+                }
+              }
+            }
+          ],
+          "type": "table"
         },
         {
           "datasource": {
@@ -2116,7 +2148,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"voicegateway\", cluster=\"$cluster\", pod!=\"\", pod!~\".*clean-up.*|.*audit-logs.*|.*update-api-ban.*|.*workload-restart.*\"}[5m])) by (pod) * 100",
+              "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\"voicegateway\", cluster=\"$cluster\", pod!=\"\", pod!~\".*clean-up.*|.*audit-logs.*|.*update-api-ban.*|.*workload-restart.*\"}[5m])) by (pod)\n/\nsum(cluster:namespace:pod_cpu:active:kube_pod_container_resource_limits{namespace=\"voicegateway\", cluster=\"$cluster\", pod!=\"\", pod!~\".*clean-up.*|.*audit-logs.*|.*update-api-ban.*|.*workload-restart.*\"}) by (pod)\n) * 100",
               "legendFormat": "{{`{{`}}pod{{`}}`}}",
               "range": true,
               "refId": "A"

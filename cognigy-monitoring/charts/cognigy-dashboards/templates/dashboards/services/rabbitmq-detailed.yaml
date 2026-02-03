@@ -1,0 +1,1149 @@
+{{- /*
+Generated from json dashboard 'dashboards/services/rabbitmq-detailed.json'.
+Do not change in-place! In order to change this file first modify the json dashboard 'dashboards/services/rabbitmq-detailed.json'
+and then run the 'scripts/convert-dashboard/convert-dashboard.py' script.
+*/ -}}
+{{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
+{{- if and 
+    (index .Values "products" "services" "enabled")
+    (index .Values "products" "services" "dashboards" "rabbitmq-detailed" "enabled")
+    (index .Values "products" "services" "dashboards" "rabbitmq-detailed" "yamlVersion")
+    (not .Values.forceDeployJsonDashboards)
+    (semverCompare ">=1.14.0-0" $kubeTargetVersion)
+    (semverCompare "<9.9.9-9" $kubeTargetVersion)
+     
+}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ template "cognigy-dashboards.namespace" . }}
+  name: {{ printf "%s-%s" (include "cognigy-dashboards.fullname" $) "rabbitmq-detailed" | trunc 63 | trimSuffix "-" }}
+  {{- with $.Values.grafana.sidecar.dashboards.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- if $.Values.grafana.sidecar.dashboards.label }}
+    {{ $.Values.grafana.sidecar.dashboards.label }}: {{ ternary $.Values.grafana.sidecar.dashboards.labelValue "1" (not (empty $.Values.grafana.sidecar.dashboards.labelValue)) | quote }}
+    {{- end }}
+    app: {{ template "cognigy-dashboards.name" $ }}-grafana
+    {{- include "cognigy-dashboards.labels" $ | nindent 4 }}
+data:
+  rabbitmq-detailed.json: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "grafana",
+              "uid": "-- Grafana --"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "description": "A dashboard that monitors RabbitMQ detailed metrics.",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": 49,
+      "links": [],
+      "panels": [
+        {
+          "collapsed": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 2,
+          "panels": [],
+          "title": "Overview",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red"
+                  },
+                  {
+                    "color": "green",
+                    "value": 0.1
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 8,
+            "x": 0,
+            "y": 1
+          },
+          "id": 3,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "count(\n  rabbitmq_detailed_queue_consumers{cluster=\"$cluster\", namespace=\"$namespace\", vhost=~\"$vhost\"}\n  * on(instance, job, endpoint, namespace, container) group_left(rabbitmq_cluster) \n  rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\", rabbitmq_cluster=~\"$rabbitmq_cluster\"}\n)",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 2,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "Queues",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 0.1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 8,
+            "x": 8,
+            "y": 1
+          },
+          "id": 4,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "count(\n  rabbitmq_detailed_queue_messages_ready{cluster=\"$cluster\", namespace=\"$namespace\", vhost=~\"$vhost\"}\n  * on(instance, job, endpoint, namespace, container) group_left(rabbitmq_cluster)\n  rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\", rabbitmq_cluster=~\"$rabbitmq_cluster\", namespace=\"$namespace\"} > 0\n  )\n",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "Queues with Messages Ready",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 8,
+            "x": 16,
+            "y": 1
+          },
+          "id": 5,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "count(\n  rabbitmq_detailed_queue_messages_unacked{cluster=\"$cluster\", namespace=\"$namespace\", vhost=~\"$vhost\"}\n  * on(instance, job, endpoint, namespace, container) group_left(rabbitmq_cluster) \n  rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\", rabbitmq_cluster=~\"$rabbitmq_cluster\", namespace=\"$namespace\"} > 0\n  )",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "Queues with Messages Unacked",
+          "type": "stat"
+        },
+        {
+          "collapsed": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 5
+          },
+          "id": 6,
+          "panels": [],
+          "title": "Virtual Host Overview",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 6
+          },
+          "id": 7,
+          "options": {
+            "legend": {
+              "calcs": [
+                "last"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (instance, vhost)(\n  rabbitmq_detailed_queue_messages_ready{cluster=\"$cluster\", namespace=\"$namespace\", vhost=~\"$vhost\"}\n  * on(instance, job)\n  group_left(rabbitmq_cluster, rabbitmq_node)\n  rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\", rabbitmq_cluster=~\"$rabbitmq_cluster\", namespace=\"$namespace\"}\n)",
+              "format": "time_series",
+              "hide": false,
+              "intervalFactor": 2,
+              "legendFormat": "Ready - {{`{{`}} vhost {{`}}`}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (instance, vhost)(\n  rabbitmq_detailed_queue_messages_unacked{cluster=\"$cluster\", namespace=\"$namespace\", vhost=~\"$vhost\"}\n  * on(instance, job)\n  group_left(rabbitmq_cluster, rabbitmq_node)\n  rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\", rabbitmq_cluster=~\"$rabbitmq_cluster\", namespace=\"$namespace\"}\n)",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "Unacked - {{`{{`}} vhost {{`}}`}}",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Virtual Host Ready & Unacked Messages",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 12
+          },
+          "id": 8,
+          "panels": [],
+          "title": "Queue Overview",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Time"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Time"
+                  },
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.align"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "rabbitmq_cluster"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.align"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "instance"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.align"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "rabbitmq_node"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.align"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "namespace"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  },
+                  {
+                    "id": "custom.align"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "queue"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Queue"
+                  },
+                  {
+                    "id": "custom.align"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "vhost"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Virtual Host"
+                  },
+                  {
+                    "id": "custom.align"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value #A"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Consumers"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  },
+                  {
+                    "id": "custom.align"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value #B"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Queue Length"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  },
+                  {
+                    "id": "custom.align"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 13
+          },
+          "id": 9,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "frameIndex": 0,
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Consumers"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (instance, vhost, queue) (\n  rabbitmq_detailed_queue_consumers{cluster=\"$cluster\", vhost=~\"$vhost\", namespace=\"$namespace\", queue=~\"$queue\", queue!~\"^amq\\\\.gen-.*|^rpc-callback-.*\"}\n  * on(instance, job, endpoint, namespace, container) \n  group_left(rabbitmq_cluster, rabbitmq_node) \n  rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\", rabbitmq_cluster=~\"$rabbitmq_cluster\", namespace=\"$namespace\"}\n)",
+              "format": "table",
+              "instant": true,
+              "intervalFactor": 2,
+              "legendFormat": "",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (instance, vhost, queue) (\n  rabbitmq_detailed_queue_messages{cluster=\"$cluster\", vhost=~\"$vhost\", namespace=\"$namespace\", queue=~\"$queue\", queue!~\"^amq\\\\.gen-.*|^rpc-callback-.*\"}\n  * on(instance, job, endpoint, namespace, container) \n  group_left(rabbitmq_cluster, rabbitmq_node) \n  rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\", rabbitmq_cluster=~\"$rabbitmq_cluster\", namespace=\"$namespace\"}\n)",
+              "format": "table",
+              "instant": true,
+              "intervalFactor": 2,
+              "legendFormat": "",
+              "refId": "B"
+            }
+          ],
+          "title": "Queue Length & Consumers",
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Messages ready to be delivered to consumers.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 21
+          },
+          "id": 10,
+          "options": {
+            "legend": {
+              "calcs": [
+                "last"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Last",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "hideZeros": true,
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (instance, vhost, queue)(\n  rabbitmq_detailed_queue_messages_ready{cluster=\"$cluster\", namespace=\"$namespace\", vhost=~\"$vhost\", queue=~\"$queue\", queue!~\"^amq\\\\.gen-.*|^rpc-callback-.*\"}\n  * on(instance, job)\n  group_left(rabbitmq_cluster, rabbitmq_node) \n  rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\", rabbitmq_cluster=~\"$rabbitmq_cluster\", namespace=\"$namespace\"}\n)",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{`{{`}} queue {{`}}`}} - {{`{{`}} vhost {{`}}`}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Queue Ready Messages",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Messages delivered to consumers but not yet acknowledged.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 29
+          },
+          "id": 11,
+          "options": {
+            "legend": {
+              "calcs": [
+                "last"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Last",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "hideZeros": true,
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (instance, vhost, queue)(\n  rabbitmq_detailed_queue_messages_unacked{cluster=\"$cluster\", namespace=\"$namespace\", vhost=~\"$vhost\", queue=~\"$queue\", queue!~\"^amq\\\\.gen-.*|^rpc-callback-.*\"}\n  * on(instance, job)\n  group_left(rabbitmq_cluster, rabbitmq_node) \n  rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\", rabbitmq_cluster=~\"$rabbitmq_cluster\", namespace=\"$namespace\"}\n)",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{`{{`}} queue {{`}}`}} - {{`{{`}} vhost {{`}}`}}",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Queue Unacked Messages",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Sum of ready and unacknowledged messages - total queue depth.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 37
+          },
+          "id": 12,
+          "options": {
+            "legend": {
+              "calcs": [
+                "last"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Last",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "hideZeros": true,
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (instance, vhost, queue)(\n  rabbitmq_detailed_queue_messages{cluster=\"$cluster\", namespace=\"$namespace\", vhost=~\"$vhost\", queue=~\"$queue\", queue!~\"^amq\\\\.gen-.*|^rpc-callback-.*\"}\n  * on(instance, job)\n  group_left(rabbitmq_cluster, rabbitmq_node)\n  rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\", rabbitmq_cluster=~\"$rabbitmq_cluster\", namespace=\"$namespace\"}\n)",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{`{{`}} queue {{`}}`}} - {{`{{`}} vhost {{`}}`}}",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Queue Total Messages",
+          "type": "timeseries"
+        }
+      ],
+      "preload": false,
+      "refresh": "{{ index .Values "products" "services" "dashboards" "rabbitmq-detailed" "refreshInterval" | default "5m" }}",
+      "schemaVersion": 41,
+      "tags": [
+        "rabbitmq",
+        "rabbitmq-detailed"
+      ],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "label": "Data Source",
+            "name": "datasource",
+            "options": [],
+            "query": "prometheus",
+            "refresh": 1,
+            "regex": "",
+            "type": "datasource"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\"},cluster)",
+            "hide": {{ if .Values.grafana.sidecar.dashboards.multicluster.global.enabled }}0{{ else }}2{{ end }},
+            "label": "Cluster",
+            "name": "cluster",
+            "options": [],
+            "query": {
+              "qryType": 1,
+              "query": "label_values(rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\"},cluster)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\"},namespace)",
+            "includeAll": false,
+            "label": "Namespace",
+            "name": "namespace",
+            "options": [],
+            "query": {
+              "qryType": 1,
+              "query": "label_values(rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\"},namespace)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\", namespace=\"$namespace\"},rabbitmq_cluster)",
+            "includeAll": true,
+            "label": "RabbitMQ Cluster",
+            "multi": true,
+            "name": "rabbitmq_cluster",
+            "options": [],
+            "query": {
+              "qryType": 1,
+              "query": "label_values(rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\", namespace=\"$namespace\"},rabbitmq_cluster)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "query_result(rabbitmq_detailed_queue_info{cluster=\"$cluster\"}  * on(instance, job, pod, namespace, container, endpoint) group_left(rabbitmq_cluster) rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\", rabbitmq_cluster=~\"$rabbitmq_cluster\"})",
+            "includeAll": true,
+            "label": "Virtual Host",
+            "multi": true,
+            "name": "vhost",
+            "options": [],
+            "query": {
+              "qryType": 3,
+              "query": "query_result(rabbitmq_detailed_queue_info{cluster=\"$cluster\"}  * on(instance, job, pod, namespace, container, endpoint) group_left(rabbitmq_cluster) rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\", rabbitmq_cluster=~\"$rabbitmq_cluster\"})",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 1,
+            "regex": "/vhost=\"(?<value>[^\"]+)\"/",
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "query_result(rabbitmq_detailed_queue_info{cluster=\"$cluster\", vhost=~\"$vhost\"}  * on(instance, job, pod, namespace, container, endpoint) group_left(rabbitmq_cluster) rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\", rabbitmq_cluster=~\"$rabbitmq_cluster\"})",
+            "includeAll": true,
+            "label": "Queue",
+            "multi": true,
+            "name": "queue",
+            "options": [],
+            "query": {
+              "qryType": 3,
+              "query": "query_result(rabbitmq_detailed_queue_info{cluster=\"$cluster\", vhost=~\"$vhost\"}  * on(instance, job, pod, namespace, container, endpoint) group_left(rabbitmq_cluster) rabbitmq_identity_info{rabbitmq_endpoint=\"detailed\", cluster=\"$cluster\", rabbitmq_cluster=~\"$rabbitmq_cluster\"})",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 2,
+            "regex": "/queue=\"(?<value>[^\"]+)\"/",
+            "sort": 1,
+            "type": "query"
+          }
+        ]
+      },
+      "time": {
+        "from": "{{ index .Values "products" "services" "dashboards" "rabbitmq-detailed" "timeFrom" | default "now-3h" }}",
+        "to": "now"
+      },
+      "timepicker": {
+        "refresh_intervals": [
+          "15s",
+          "30s",
+          "1m",
+          "5m",
+          "10m"
+        ]
+      },
+      "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
+      "title": "Services / RabbitMQ Detailed",
+      "uid": "rabbitmq-queue-12mk4klgjweg",
+      "version": 1
+    }
+{{- end }}

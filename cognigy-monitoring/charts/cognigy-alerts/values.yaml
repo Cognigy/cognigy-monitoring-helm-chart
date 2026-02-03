@@ -6,7 +6,7 @@ runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
 
 # Enable/disable alert rules groups and separate alerts
 rules:
-  # generic kubernetes alert rules for Cognigy products
+  # Generic kubernetes alert rules for Cognigy products
   kubernetes:
     enabled: true
     kubePodCrashLooping:
@@ -37,7 +37,7 @@ rules:
       containerSingleOOMBlacklist: "^cube-.*|^service-.*|^falco.*"
       containerMultiOOMWhitelist: "^cube-.*|^service-.*"
       timeout: 5m
-      # threshold for ContainerMultiOOMKilled alert
+      # Threshold for ContainerMultiOOMKilled alert
       threshold: 3
       offset: 3h
     cpuThrottlingBackendServiceHigh:
@@ -50,6 +50,7 @@ rules:
       enabled: true
       severity: warning
       timeout: 15m
+
   # Traefik alert rules
   traefik:
     enabled: true
@@ -63,6 +64,7 @@ rules:
       enabled: true
     traefikTlsCertExpireSoon:
       enabled: true
+
   # NGiNX Ingress alert rules (disabled by default)
   nginx:
     enabled: false
@@ -74,6 +76,7 @@ rules:
       enabled: true
     nginxTlsCertExpireSoon:
       enabled: true
+
   # RabbitMQ alert rules
   rabbitmq:
     enabled: true
@@ -82,19 +85,53 @@ rules:
     rabbitmqHighWatermarkCrossed:
       enabled: true
     rabbitmqReadyMessageGettingHigh:
+      enabled: false
+      threshold: 20
+    rabbitmqReadyQueueHigh:
+      enabled: false
+      warnThreshold: 100
+      criticalThreshold: 500
+    rabbitmqUnackedMessageGettingHigh:
+      enabled: false
+      threshold: 20
+    rabbitmqUnackedQueueHigh:
+      enabled: false
+      warnThreshold: 300
+      criticalThreshold: 700
+
+  # RabbitMQ detailed alert rules
+  rabbitmqDetailed:
+    enabled: true
+    rabbitmqReadyMessageGettingHigh:
       enabled: true
       threshold: 20
+      excludeQueues:
+        - "^amq\\.gen-.*"
+        - "^rpc-callback-.*"
+        - "^service-testing-execution-simulation-v[0-9]+-run-queue$"
     rabbitmqReadyQueueHigh:
       enabled: true
       warnThreshold: 100
       criticalThreshold: 500
+      excludeQueues:
+        - "^amq\\.gen-.*"
+        - "^rpc-callback-.*"
+        - "^service-testing-execution-simulation-v[0-9]+-run-queue$"
     rabbitmqUnackedMessageGettingHigh:
       enabled: true
       threshold: 20
+      excludeQueues:
+        - "^amq\\.gen-.*"
+        - "^rpc-callback-.*"
+        - "^service-testing-execution-simulation-v[0-9]+-run-queue$"
     rabbitmqUnackedQueueHigh:
       enabled: true
       warnThreshold: 300
       criticalThreshold: 700
+      excludeQueues:
+        - "^amq\\.gen-.*"
+        - "^rpc-callback-.*"
+        - "^service-testing-execution-simulation-v[0-9]+-run-queue$"
 
   # Redis alert rules
   redis:
@@ -102,6 +139,7 @@ rules:
     redisBlockedClients:
       enabled: true
       threshold: 50
+
   # PostgreSQL alert rules
   postgresql:
     enabled: false
@@ -130,6 +168,7 @@ rules:
       replicationLag:
         enabled: true
         threshold: 500
+
   # MongoDB alert rules
   mongodb:
     enabled: true
@@ -149,9 +188,48 @@ rules:
       enabled: true
     mongodbVirtualMemoryUsage:
       enabled: false
-  # velero alert rules
+
+  # Velero alert rules
   velero:
     enabled: false
+
+  # FluxCD alert rules
+  fluxcd:
+    enabled: false
+    fluxKustomizationFailure:
+      enabled: true
+      period: 15m
+    fluxHelmReleaseFailure:
+      enabled: true
+      period: 15m
+    fluxHelmReleaseFailureLongDuration:
+      enabled: true
+      period: 2h
+      targetHelmRelease: 
+      - "cognigy-.*"
+      - "live-agent"
+      - "voicegateway"
+    fluxSourceIssue:
+      enabled: true
+      period: 15m
+    fluxImageIssue:
+      enabled: false
+      period: 15m
+    fluxResourceInSuspendedState:
+      enabled: true
+      period: 2h
+      resourceKinds: []
+        # - "Alert"
+        # - "Kustomization"
+        # - "HelmRelease"
+        # - "GitRepository"
+        # - "HelmRepository"
+        # - "Bucket"
+        # - "OCIRepository"
+        # - "ImagePolicy"
+        # - "ImageRepository"
+        # - "ImageUpdateAutomation"
+
 
   # Cognigy.AI alert rules
   ai:
@@ -175,28 +253,28 @@ rules:
       enabled: true
     serviceHttp:
       enabled: true
-      # quantile of http requests for high latency evaluation
+      # Quantile of http requests for high latency evaluation
       requestLatencyHighQuantile: 0.8
-      # threshold (seconds) for high latency of http requests
+      # Threshold (seconds) for high latency of http requests
       requestLatencyHighThreshold: 15
     serviceHandover:
       enabled: true
       errorsHigh:
         enabled: true
-        # threshold on number of service handover errors per 5 min
+        # Threshold on number of service handover errors per 5 min
         threshold: 2
       requestLatencyHigh:
         enabled: true
         quantile: 0.95
-        # threshold (seconds) for high requests latency to external providers
+        # Threshold (seconds) for high requests latency to external providers
         threshold: 2
       request5xxErrorRate:
         enabled: true
-        # threshold for 5xx errors to external providers per minute
+        # Threshold for 5xx errors to external providers per minute
         threshold: 2
       rPCCallFailureRateHigh:
         enabled: true
-      # threshold for request_handover_rpc_calls_error
+        # Threshold for request_handover_rpc_calls_error
         evaluationWindow: 5m
         threshold: 30
         numberOfErrors: 20
@@ -204,7 +282,7 @@ rules:
         enabled: true
         evaluationWindow: 5m
         threshold: 50
-        criticalThreshold: 75
+        # criticalThreshold: 75
       eventRPCErrorRateHigh:
         enabled: true
         evaluationWindow: 5m
@@ -235,10 +313,10 @@ rules:
     serviceCollaboration:
       enabled: true
       unhandledErrorThreshold: 5
-      # temporarily making this very high until we have made the queries efficient
+      # Temporarily making this very high until we have made the queries efficient
       requestLatencyHighThreshold: 5000
 
-  # Cognigy.AI runtime services rules
+  # Cognigy.AI runtime services alert rules
   runtime:
     enabled: true
     serviceAI:
@@ -259,6 +337,7 @@ rules:
     serviceSessionStateManager:
       enabled: true
 
+  # Cognigy Voice Gateway alert rules
   vg:
     enabled: false
     featureServer:
@@ -283,6 +362,8 @@ rules:
       enabled: true
       severity: critical
       timeout: 5m
+
+  # Cognigy Live Agent alert rules
   la:
     enabled: false
     HighHttpErrorRate:

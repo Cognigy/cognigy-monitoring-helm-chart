@@ -1,0 +1,932 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "red",
+        "name": "flux events",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [
+            "flux"
+          ],
+          "type": "tags"
+        }
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 109,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 15,
+      "panels": [],
+      "repeat": "customresource_kind",
+      "title": "Status for ${customresource_kind:raw} Resources",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue"
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "id": 24,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {},
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "count(gotk_resource_info{cluster=~\"$cluster\", exported_namespace=~\"$namespace\", customresource_kind=~\"$customresource_kind\", name=~\"$customresource_name\"})",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Total ${customresource_kind:raw}",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-orange"
+              },
+              {
+                "color": "semi-dark-green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "id": 30,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {},
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "count(gotk_resource_info{cluster=~\"$cluster\", exported_namespace=~\"$namespace\", customresource_kind=~\"$customresource_kind\", name=~\"$customresource_name\", ready=\"True\"})",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Ready ${customresource_kind:raw}",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "dark-red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "id": 40,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {},
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "count(gotk_resource_info{cluster=~\"$cluster\", exported_namespace=~\"$namespace\", customresource_kind=~\"$customresource_kind\", name=~\"$customresource_name\", ready=\"False\"})",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Failing ${customresource_kind:raw}",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-green"
+              },
+              {
+                "color": "dark-red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "id": 39,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {},
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "count(gotk_resource_info{cluster=~\"$cluster\", exported_namespace=~\"$namespace\", customresource_kind=~\"$customresource_kind\", name=~\"$customresource_name\", suspended=\"true\"})",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Suspended ${customresource_kind:raw}",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "true": {
+                  "color": "dark-red",
+                  "index": 0,
+                  "text": "Suspended"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent"
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byType",
+              "options": "string"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "basic",
+                  "type": "color-background"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "id": 36,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Namespace"
+          }
+        ]
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "gotk_resource_info{cluster=~\"$cluster\", exported_namespace=~\"$namespace\", customresource_kind=~\"$customresource_kind\", name=~\"$customresource_name\", suspended=\"true\"}",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Suspended Objects",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": false,
+              "Value": false,
+              "__name__": false,
+              "app": false,
+              "bucket_name": false,
+              "container": false,
+              "customresource_group": false,
+              "customresource_kind": false,
+              "customresource_version": false,
+              "endpoint": false,
+              "exported_namespace": false,
+              "gotk_type": false,
+              "instance": false,
+              "job": false,
+              "kubernetes_namespace": false,
+              "kubernetes_pod_name": false,
+              "namespace": false,
+              "pod": false,
+              "pod_template_hash": false,
+              "ready": false,
+              "revision": false,
+              "service": false,
+              "source_name": false,
+              "status": false,
+              "suspended": false,
+              "type": false,
+              "url": false
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time": 1,
+              "Value": 16,
+              "__name__": 2,
+              "chart_name": 17,
+              "chart_source_name": 18,
+              "chart_version": 19,
+              "cloud": 20,
+              "cluster": 0,
+              "container": 3,
+              "customresource_group": 6,
+              "customresource_kind": 7,
+              "customresource_version": 8,
+              "endpoint": 9,
+              "env": 21,
+              "exported_namespace": 5,
+              "instance": 10,
+              "job": 11,
+              "name": 12,
+              "namespace": 4,
+              "pod": 13,
+              "prometheus": 22,
+              "prometheus_replica": 23,
+              "ready": 14,
+              "region": 24,
+              "revision": 25,
+              "service": 15,
+              "suspended": 26
+            },
+            "renameByName": {
+              "cluster": "Cluster",
+              "customresource_kind": "Kind",
+              "exported_namespace": "Namespace",
+              "name": "Name",
+              "suspended": "Suspended"
+            }
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "Namespace",
+                "Kind",
+                "Name",
+                "Suspended"
+              ],
+              "pattern": "(Cluster|Namespace|Name|Kind|Suspended)"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "False": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "Not Ready"
+                },
+                "True": {
+                  "color": "blue",
+                  "index": 0,
+                  "text": "Ready"
+                },
+                "true": {
+                  "color": "dark-red",
+                  "index": 2,
+                  "text": "Suspended"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent"
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byType",
+              "options": "string"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "basic",
+                  "type": "color-background"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 37,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Status"
+          }
+        ]
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "gotk_resource_info{cluster=~\"$cluster\", exported_namespace=~\"$namespace\", customresource_kind=~\"$customresource_kind\", name=~\"$customresource_name\"}",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "${customresource_kind:raw} reconciliation status",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": false,
+              "Value": false,
+              "__name__": false,
+              "app": false,
+              "chart_name": false,
+              "chart_source_name": false,
+              "container": false,
+              "customresource_group": false,
+              "customresource_kind": false,
+              "customresource_version": false,
+              "endpoint": false,
+              "exported_namespace": false,
+              "gotk_type": false,
+              "instance": false,
+              "job": false,
+              "kubernetes_namespace": false,
+              "kubernetes_pod_name": false,
+              "namespace": false,
+              "pod": false,
+              "pod_template_hash": false,
+              "revision": false,
+              "service": false,
+              "source_name": false,
+              "status": false,
+              "suspended": false,
+              "type": false
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time": 1,
+              "Value": 16,
+              "__name__": 2,
+              "chart_app_version": 17,
+              "chart_name": 18,
+              "chart_ref_name": 23,
+              "chart_source_name": 19,
+              "chart_version": 20,
+              "cloud": 24,
+              "cluster": 0,
+              "container": 3,
+              "customresource_group": 5,
+              "customresource_kind": 6,
+              "customresource_version": 7,
+              "endpoint": 8,
+              "env": 25,
+              "exported_namespace": 4,
+              "instance": 9,
+              "job": 10,
+              "name": 11,
+              "namespace": 12,
+              "pod": 13,
+              "prometheus": 26,
+              "prometheus_replica": 27,
+              "ready": 14,
+              "region": 28,
+              "revision": 22,
+              "service": 15,
+              "suspended": 21
+            },
+            "renameByName": {
+              "Value": "",
+              "chart_version": "Chart Version",
+              "cluster": "Cluster",
+              "customresource_kind": "Kind",
+              "env": "",
+              "exported_namespace": "Namespace",
+              "kind": "Kind",
+              "name": "Name",
+              "namespace": "Operator Namespace",
+              "ready": "Status",
+              "revision": "Revision",
+              "suspended": "Suspended"
+            }
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "byVariable": false,
+            "include": {
+              "names": [
+                "Namespace",
+                "Kind",
+                "Name",
+                "Status",
+                "Suspended",
+                "Revision"
+              ],
+              "pattern": "(Cluster|Namespace|Kind|Name|Status|Suspended|Revision)"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "refresh": "5m",
+  "schemaVersion": 41,
+  "tags": [
+    "flux"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "includeAll": false,
+        "label": "Data Source",
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "$datasource"
+        },
+        "definition": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+        "hide": 2,
+        "includeAll": true,
+        "label": "Cluster",
+        "multi": true,
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "query": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
+          "refId": "Metrics-cluster-Variable-Query"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "$datasource"
+        },
+        "definition": "label_values(gotk_reconcile_duration_seconds_sum{cluster=~\"$cluster\"},namespace)",
+        "includeAll": true,
+        "multi": true,
+        "name": "operator_namespace",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(gotk_reconcile_duration_seconds_sum{cluster=~\"$cluster\"},namespace)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 5,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "$datasource"
+        },
+        "definition": "label_values(gotk_resource_info{cluster=~\"$cluster\"},exported_namespace)",
+        "includeAll": true,
+        "multi": true,
+        "name": "namespace",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(gotk_resource_info{cluster=~\"$cluster\"},exported_namespace)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {
+          "text": [
+            "HelmRelease"
+          ],
+          "value": [
+            "HelmRelease"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "$datasource"
+        },
+        "definition": "label_values(gotk_resource_info{cluster=~\"$cluster\", exported_namespace=~\"$namespace\"},customresource_kind)",
+        "description": "",
+        "includeAll": true,
+        "label": "Resource Type",
+        "multi": true,
+        "name": "customresource_kind",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(gotk_resource_info{cluster=~\"$cluster\", exported_namespace=~\"$namespace\"},customresource_kind)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 5,
+        "type": "query"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {
+          "text": [
+            "cognigy-ai",
+            "cognigy-live-agent",
+            "live-agent",
+            "voicegateway"
+          ],
+          "value": [
+            "cognigy-ai",
+            "cognigy-live-agent",
+            "live-agent",
+            "voicegateway"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "$datasource"
+        },
+        "definition": "label_values(gotk_resource_info{cluster=~\"$cluster\", exported_namespace=~\"$namespace\", customresource_kind=~\"$customresource_kind\"},name)",
+        "description": "",
+        "includeAll": true,
+        "label": "Name",
+        "multi": true,
+        "name": "customresource_name",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(gotk_resource_info{cluster=~\"$cluster\", exported_namespace=~\"$namespace\", customresource_kind=~\"$customresource_kind\"},name)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 5,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-3h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
+  "title": "FluxCD / Flux Overview Global",
+  "uid": "flux-overview-global",
+  "version": 1
+}

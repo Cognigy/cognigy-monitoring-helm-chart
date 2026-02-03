@@ -209,20 +209,20 @@ spec:
           summary: 'Provider {{ "{{" }} $labels.providerId {{ "}}" }} SendMessageToProvider RPC error rate is high ({{ "{{" }} $value | printf "%.0f" {{ "}}" }}%)'
           description: 'Provider: {{ "{{" }} $labels.providerId {{ "}}" }}, Org: {{ "{{" }} $labels.organisationId {{ "}}" }} - Current error rate: {{ "{{" }} $value | printf "%.2f" {{ "}}" }}% (threshold: {{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRateHigh.threshold }}%)'
 
-      - alert: ServiceHandoverCriticalSendMessageToProviderErrorRateHigh
-        expr: |
-          (
-            sum by (providerId, organisationId) (increase(cognigy_ai_handover_send_message_to_provider_rpc_error_count{providerId!="none"}[{{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRateHigh.evaluationWindow }}]))
-          /
-            clamp_min(sum by (providerId, organisationId) (increase(cognigy_ai_handover_send_message_to_provider_rpc_calls_total{providerId!="none"}[{{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRateHigh.evaluationWindow }}])), 1) * 100
-          )
-          > {{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRateHigh.criticalThreshold }}
-        for: 20m
-        labels:
-          severity: critical
-        annotations:
-          summary: 'Provider {{ "{{" }} $labels.providerId {{ "}}" }} SendMessageToProvider RPC error rate is high ({{ "{{" }} $value | printf "%.0f" {{ "}}" }}%)'
-          description: 'Provider: {{ "{{" }} $labels.providerId {{ "}}" }}, Org: {{ "{{" }} $labels.organisationId {{ "}}" }} - Current error rate: {{ "{{" }} $value | printf "%.2f" {{ "}}" }}% (threshold: {{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRateHigh.criticalThreshold }}%)'
+      # - alert: ServiceHandoverCriticalSendMessageToProviderErrorRateHigh
+      #   expr: |
+      #     (
+      #       sum by (providerId, organisationId) (increase(cognigy_ai_handover_send_message_to_provider_rpc_error_count{providerId!="none"}[{{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRateHigh.evaluationWindow }}]))
+      #     /
+      #       clamp_min(sum by (providerId, organisationId) (increase(cognigy_ai_handover_send_message_to_provider_rpc_calls_total{providerId!="none"}[{{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRateHigh.evaluationWindow }}])), 1) * 100
+      #     )
+      #     > {{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRateHigh.criticalThreshold }}
+      #   for: 20m
+      #   labels:
+      #     severity: critical
+      #   annotations:
+      #     summary: 'Provider {{ "{{" }} $labels.providerId {{ "}}" }} SendMessageToProvider RPC error rate is high ({{ "{{" }} $value | printf "%.0f" {{ "}}" }}%)'
+      #     description: 'Provider: {{ "{{" }} $labels.providerId {{ "}}" }}, Org: {{ "{{" }} $labels.organisationId {{ "}}" }} - Current error rate: {{ "{{" }} $value | printf "%.2f" {{ "}}" }}% (threshold: {{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRateHigh.criticalThreshold }}%)'
       {{- end }}
       {{- if (.Values.rules.ai.serviceHandover.eventRPCErrorRateHigh.enabled ) }}
       - alert: ServiceHandoverEventRPCErrorRateHigh

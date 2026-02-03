@@ -1,0 +1,87 @@
+{{- $targetNamespace := .Values.appNamespacesTarget }}
+{{- if .Values.rules.rabbitmqDetailed.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-cognigy-rabbitmq-detailed-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+  - name: cognigy.alert.rabbitmq-detailed
+    rules:
+    {{- if (.Values.rules.rabbitmqDetailed.rabbitmqReadyMessageGettingHigh.enabled ) }}
+    - alert: RabbitmqReadyMessageGettingHigh
+      expr: >
+        sum(delta(rabbitmq_detailed_queue_messages_ready{ {{- if .Values.rules.rabbitmqDetailed.rabbitmqReadyMessageGettingHigh.excludeQueues }} queue!~{{ .Values.rules.rabbitmqDetailed.rabbitmqReadyMessageGettingHigh.excludeQueues | join `|` | quote }}{{ end -}} }[5m]))
+        > {{ .Values.rules.rabbitmqDetailed.rabbitmqReadyMessageGettingHigh.threshold }}
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: RabbitMQ Ready message queue is getting high (instance {{`{{`}} $labels.instance }})
+        description: "RabbitMQ Ready message on detailed endpoint is getting high \n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+    {{- if (.Values.rules.rabbitmqDetailed.rabbitmqReadyQueueHigh.enabled ) }}
+    - alert: RabbitmqReadyQueueHigh
+      expr: >
+        sum(rabbitmq_detailed_queue_messages_ready{ {{- if .Values.rules.rabbitmqDetailed.rabbitmqReadyQueueHigh.excludeQueues }} queue!~{{ .Values.rules.rabbitmqDetailed.rabbitmqReadyQueueHigh.excludeQueues | join `|` | quote }}{{ end -}} })
+        > {{ .Values.rules.rabbitmqDetailed.rabbitmqReadyQueueHigh.warnThreshold }}
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: RabbitMQ Ready message queue is high (instance {{`{{`}} $labels.instance }})
+        description: "RabbitMQ Ready queue on detailed endpoint has crossed warning threshold \n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+
+    - alert: RabbitmqReadyQueueHigh
+      expr: >
+        sum(rabbitmq_detailed_queue_messages_ready{ {{- if .Values.rules.rabbitmqDetailed.rabbitmqReadyQueueHigh.excludeQueues }} queue!~{{ .Values.rules.rabbitmqDetailed.rabbitmqReadyQueueHigh.excludeQueues | join `|` | quote }}{{ end -}} })
+        > {{ .Values.rules.rabbitmqDetailed.rabbitmqReadyQueueHigh.criticalThreshold }}
+      for: 15m
+      labels:
+        severity: critical
+      annotations:
+        summary: RabbitMQ Ready message queue is high (instance {{`{{`}} $labels.instance }})
+        description: "RabbitMQ Ready queue on detailed endpoint has crossed critical threshold  \n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+    {{- if (.Values.rules.rabbitmqDetailed.rabbitmqUnackedMessageGettingHigh.enabled ) }}
+    - alert: rabbitmqUnackedMessageGettingHigh
+      expr: >
+        sum(delta(rabbitmq_detailed_queue_messages_unacked{ {{- if .Values.rules.rabbitmqDetailed.rabbitmqUnackedMessageGettingHigh.excludeQueues }} queue!~{{ .Values.rules.rabbitmqDetailed.rabbitmqUnackedMessageGettingHigh.excludeQueues | join `|` | quote }}{{ end -}} }[5m])) 
+        > {{ .Values.rules.rabbitmqDetailed.rabbitmqUnackedMessageGettingHigh.threshold }}
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: RabbitMQ Unacked message queue is getting high (instance {{`{{`}} $labels.instance }})
+        description: "RabbitMQ Unacked message on detailed endpoint is getting high \n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+    {{- if (.Values.rules.rabbitmqDetailed.rabbitmqUnackedQueueHigh.enabled ) }}
+    - alert: RabbitmqUnackedQueueHigh
+      expr: >
+        sum(rabbitmq_detailed_queue_messages_unacked{ {{- if .Values.rules.rabbitmqDetailed.rabbitmqUnackedQueueHigh.excludeQueues }} queue!~{{ .Values.rules.rabbitmqDetailed.rabbitmqUnackedQueueHigh.excludeQueues | join `|` | quote }}{{ end -}} })
+        > {{ .Values.rules.rabbitmqDetailed.rabbitmqUnackedQueueHigh.warnThreshold }}
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: RabbitMQ Unacked message queue is high (instance {{`{{`}} $labels.instance }})
+        description: "RabbitMQ Unacked queue on detailed endpoint has crossed warning threshold \n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+
+    - alert: RabbitmqUnackedQueueHigh
+      expr: >
+        sum(rabbitmq_detailed_queue_messages_unacked{ {{- if .Values.rules.rabbitmqDetailed.rabbitmqUnackedQueueHigh.excludeQueues }} queue!~{{ .Values.rules.rabbitmqDetailed.rabbitmqUnackedQueueHigh.excludeQueues | join `|` | quote }}{{ end -}} })
+        > {{ .Values.rules.rabbitmqDetailed.rabbitmqUnackedQueueHigh.criticalThreshold }}
+      for: 15m
+      labels:
+        severity: critical
+      annotations:
+        summary: RabbitMQ Unacked message queue is high (instance {{`{{`}} $labels.instance }})
+        description: "RabbitMQ Unacked queue on detailed endpoint has crossed critical threshold  \n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
+
+{{- end -}}

@@ -58,7 +58,6 @@ data:
       "graphTooltip": 1,
       "id": 114,
       "links": [],
-      "liveNow": false,
       "panels": [
         {
           "collapsed": false,
@@ -94,6 +93,7 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -124,8 +124,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -138,7 +137,7 @@ data:
           },
           "gridPos": {
             "h": 4,
-            "w": 12,
+            "w": 24,
             "x": 0,
             "y": 1
           },
@@ -151,11 +150,13 @@ data:
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -202,8 +203,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -218,8 +218,8 @@ data:
           "gridPos": {
             "h": 4,
             "w": 6,
-            "x": 12,
-            "y": 1
+            "x": 0,
+            "y": 5
           },
           "id": 24,
           "options": {
@@ -227,6 +227,7 @@ data:
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -238,7 +239,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -273,8 +274,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -289,8 +289,8 @@ data:
           "gridPos": {
             "h": 4,
             "w": 6,
-            "x": 18,
-            "y": 1
+            "x": 6,
+            "y": 5
           },
           "id": 9,
           "options": {
@@ -308,7 +308,7 @@ data:
             "showThresholdMarkers": true,
             "sizing": "auto"
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -336,6 +336,146 @@ data:
           "fieldConfig": {
             "defaults": {
               "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 5
+          },
+          "id": 28,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_method_execution_count{cluster=\"$cluster\",method=\"indexChartNodes\",result!=\"success\"}[$__range]))",
+              "instant": true,
+              "legendFormat": "Node Config Fallback enabled",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "indexChartNodes NCF errors",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 5
+          },
+          "id": 29,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_method_execution_count{cluster=\"$cluster\",method=\"indexChartNodes\",result=\"success\"}[$__range])) / sum(increase(cognigy_resources_node_config_fallback_method_execution_count{cluster=\"$cluster\",method=\"indexChartNodes\"}[$__range]))",
+              "instant": true,
+              "legendFormat": "Node Config Fallback enabled",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "indexChartNodes NCF success rate",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
                 "mode": "palette-classic"
               },
               "custom": {
@@ -345,6 +485,7 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -375,8 +516,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -391,7 +531,7 @@ data:
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 5
+            "y": 9
           },
           "id": 11,
           "options": {
@@ -402,11 +542,13 @@ data:
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -481,6 +623,7 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -511,8 +654,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -527,7 +669,7 @@ data:
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 5
+            "y": 9
           },
           "id": 12,
           "options": {
@@ -538,11 +680,13 @@ data:
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -615,8 +759,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -632,7 +775,7 @@ data:
             "h": 3,
             "w": 12,
             "x": 0,
-            "y": 11
+            "y": 15
           },
           "id": 15,
           "options": {
@@ -640,6 +783,7 @@ data:
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -651,7 +795,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -728,8 +872,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -745,7 +888,7 @@ data:
             "h": 3,
             "w": 12,
             "x": 12,
-            "y": 11
+            "y": 15
           },
           "id": 16,
           "options": {
@@ -753,6 +896,7 @@ data:
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -764,7 +908,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -841,8 +985,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -858,7 +1001,7 @@ data:
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 14
+            "y": 18
           },
           "id": 20,
           "options": {
@@ -866,6 +1009,7 @@ data:
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -877,7 +1021,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -954,8 +1098,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -971,7 +1114,7 @@ data:
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 17
+            "y": 21
           },
           "id": 21,
           "options": {
@@ -979,6 +1122,7 @@ data:
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -990,7 +1134,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -1052,6 +1196,7 @@ data:
           "type": "stat"
         },
         {
+          "collapsed": false,
           "datasource": {
             "type": "prometheus",
             "uid": "$datasource"
@@ -1060,9 +1205,10 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 20
+            "y": 24
           },
           "id": 17,
+          "panels": [],
           "title": "readChartNode",
           "type": "row"
         },
@@ -1083,6 +1229,7 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -1113,8 +1260,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1127,9 +1273,9 @@ data:
           },
           "gridPos": {
             "h": 4,
-            "w": 12,
+            "w": 24,
             "x": 0,
-            "y": 21
+            "y": 25
           },
           "id": 8,
           "options": {
@@ -1140,11 +1286,13 @@ data:
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -1191,8 +1339,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1207,8 +1354,8 @@ data:
           "gridPos": {
             "h": 4,
             "w": 6,
-            "x": 12,
-            "y": 21
+            "x": 0,
+            "y": 29
           },
           "id": 25,
           "options": {
@@ -1216,6 +1363,7 @@ data:
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -1227,7 +1375,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -1262,8 +1410,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1278,8 +1425,8 @@ data:
           "gridPos": {
             "h": 4,
             "w": 6,
-            "x": 18,
-            "y": 21
+            "x": 6,
+            "y": 29
           },
           "id": 10,
           "options": {
@@ -1297,7 +1444,7 @@ data:
             "showThresholdMarkers": true,
             "sizing": "auto"
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -1324,6 +1471,146 @@ data:
           "fieldConfig": {
             "defaults": {
               "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 29
+          },
+          "id": 30,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_method_execution_count{cluster=\"$cluster\",method=\"readChartNode\",result!=\"success\"}[$__range]))",
+              "instant": true,
+              "legendFormat": "Node Config Fallback enabled",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "readChartNode NCF errors",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 29
+          },
+          "id": 31,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_method_execution_count{cluster=\"$cluster\",method=\"readChartNode\",result=\"success\"}[$__range])) / sum(increase(cognigy_resources_node_config_fallback_method_execution_count{cluster=\"$cluster\",method=\"readChartNode\"}[$__range]))",
+              "instant": true,
+              "legendFormat": "Node Config Fallback enabled",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "readChartNode NCF success rate",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
                 "mode": "palette-classic"
               },
               "custom": {
@@ -1333,6 +1620,7 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -1363,8 +1651,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1379,7 +1666,7 @@ data:
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 25
+            "y": 33
           },
           "id": 13,
           "options": {
@@ -1390,11 +1677,13 @@ data:
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -1469,6 +1758,7 @@ data:
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -1499,8 +1789,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1515,7 +1804,7 @@ data:
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 25
+            "y": 33
           },
           "id": 14,
           "options": {
@@ -1526,11 +1815,13 @@ data:
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "maxHeight": 600,
               "mode": "single",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -1603,8 +1894,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1620,7 +1910,7 @@ data:
             "h": 3,
             "w": 12,
             "x": 0,
-            "y": 31
+            "y": 39
           },
           "id": 18,
           "options": {
@@ -1628,6 +1918,7 @@ data:
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -1639,7 +1930,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -1716,8 +2007,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1733,7 +2023,7 @@ data:
             "h": 3,
             "w": 12,
             "x": 12,
-            "y": 31
+            "y": 39
           },
           "id": 19,
           "options": {
@@ -1741,6 +2031,7 @@ data:
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -1752,7 +2043,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -1829,8 +2120,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1846,7 +2136,7 @@ data:
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 34
+            "y": 42
           },
           "id": 22,
           "options": {
@@ -1854,6 +2144,7 @@ data:
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -1865,7 +2156,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -1942,8 +2233,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1959,7 +2249,7 @@ data:
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 37
+            "y": 45
           },
           "id": 23,
           "options": {
@@ -1967,6 +2257,7 @@ data:
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -1978,7 +2269,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -2049,127 +2340,12 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 40
+            "y": 48
           },
-          "id": 5,
+          "id": 26,
           "panels": [],
-          "title": "Node Config Processing",
+          "title": "createChartNode",
           "type": "row"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "description": "Amount of processed Node Configs per timeframe, as total and ",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 100,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "normal"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 41
-          },
-          "id": 1,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"valid\"}[$__rate_interval]))",
-              "format": "time_series",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "valid",
-              "range": true,
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"converted\"}[$__rate_interval]))",
-              "format": "time_series",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "adjusted",
-              "range": true,
-              "refId": "C"
-            }
-          ],
-          "title": "Processed Node Configs",
-          "type": "timeseries"
         },
         {
           "datasource": {
@@ -2187,26 +2363,31 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
                   }
                 ]
-              }
+              },
+              "unit": "none"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 41
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 49
           },
-          "id": 4,
+          "id": 34,
           "options": {
             "colorMode": "value",
             "graphMode": "area",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -2218,7 +2399,7 @@ data:
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -2227,147 +2408,15 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\"}[$__range]))",
-              "format": "time_series",
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_method_execution_count{cluster=\"$cluster\",method=\"createChartNode\"}[$__range]))",
               "instant": true,
-              "legendFormat": "total",
+              "legendFormat": "Node Config Fallback enabled",
               "range": false,
               "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"valid\"}[$__range]))",
-              "format": "time_series",
-              "hide": false,
-              "instant": true,
-              "legendFormat": "valid",
-              "range": false,
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"converted\"}[$__range]))",
-              "format": "time_series",
-              "hide": false,
-              "instant": true,
-              "legendFormat": "adjusted",
-              "range": false,
-              "refId": "C"
             }
           ],
-          "title": "Node Configs processed",
+          "title": "createChartNode NCF calls",
           "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "description": "",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 100,
-                "gradientMode": "opacity",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "percentunit"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 49
-          },
-          "id": 2,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "maxHeight": 600,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"converted\"}[1h])) / sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\"}[1h]))",
-              "format": "time_series",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "ratio of converted node configs",
-              "range": true,
-              "refId": "B"
-            }
-          ],
-          "title": "Ratio of adjusted Node Configs over Time",
-          "type": "timeseries"
         },
         {
           "datasource": {
@@ -2385,8 +2434,78 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 49
+          },
+          "id": 32,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_method_execution_count{cluster=\"$cluster\",method=\"createChartNode\",result!=\"success\"}[$__range]))",
+              "instant": true,
+              "legendFormat": "Node Config Fallback enabled",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "createChartNode NCF errors",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2399,12 +2518,12 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 8,
-            "w": 12,
+            "h": 4,
+            "w": 6,
             "x": 12,
             "y": 49
           },
-          "id": 3,
+          "id": 33,
           "options": {
             "minVizHeight": 75,
             "minVizWidth": 75,
@@ -2420,7 +2539,7 @@ data:
             "showThresholdMarkers": true,
             "sizing": "auto"
           },
-          "pluginVersion": "11.0.0",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -2429,21 +2548,739 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"converted\"}[$__range])) / sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\"}[$__range]))",
-              "format": "time_series",
-              "hide": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_method_execution_count{cluster=\"$cluster\",method=\"createChartNode\",result=\"success\"}[$__range])) / sum(increase(cognigy_resources_node_config_fallback_method_execution_count{cluster=\"$cluster\",method=\"createChartNode\"}[$__range]))",
               "instant": true,
-              "legendFormat": "ratio of converted node configs",
+              "legendFormat": "Node Config Fallback enabled",
               "range": false,
-              "refId": "B"
+              "refId": "A"
             }
           ],
-          "title": "Node Configs adjusted during processing",
+          "title": "createChartNode NCF success rate",
           "type": "gauge"
+        },
+        {
+          "collapsed": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 53
+          },
+          "id": 35,
+          "panels": [],
+          "title": "updateChartNode",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 54
+          },
+          "id": 36,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_method_execution_count{cluster=\"$cluster\",method=\"updateChartNode\"}[$__range]))",
+              "instant": true,
+              "legendFormat": "Node Config Fallback enabled",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "updateChartNode NCF calls",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 54
+          },
+          "id": 37,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_method_execution_count{cluster=\"$cluster\",method=\"updateChartNode\",result!=\"success\"}[$__range]))",
+              "instant": true,
+              "legendFormat": "Node Config Fallback enabled",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "updateChartNode NCF errors",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 54
+          },
+          "id": 38,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(cognigy_resources_node_config_fallback_method_execution_count{cluster=\"$cluster\",method=\"updateChartNode\",result=\"success\"}[$__range])) / sum(increase(cognigy_resources_node_config_fallback_method_execution_count{cluster=\"$cluster\",method=\"updateChartNode\"}[$__range]))",
+              "instant": true,
+              "legendFormat": "Node Config Fallback enabled",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "updateChartNode NCF success rate",
+          "type": "gauge"
+        },
+        {
+          "collapsed": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 58
+          },
+          "id": 5,
+          "panels": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "description": "Amount of processed Node Configs per timeframe, as total and ",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 100,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "normal"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green"
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 135
+              },
+              "id": 1,
+              "options": {
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "maxHeight": 600,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "pluginVersion": "12.0.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"valid\"}[$__rate_interval]))",
+                  "format": "time_series",
+                  "hide": false,
+                  "instant": false,
+                  "legendFormat": "valid",
+                  "range": true,
+                  "refId": "B"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"converted\"}[$__rate_interval]))",
+                  "format": "time_series",
+                  "hide": false,
+                  "instant": false,
+                  "legendFormat": "adjusted",
+                  "range": true,
+                  "refId": "C"
+                }
+              ],
+              "title": "Processed Node Configs",
+              "type": "timeseries"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "description": "",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green"
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 135
+              },
+              "id": 4,
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "pluginVersion": "12.0.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\"}[$__range]))",
+                  "format": "time_series",
+                  "instant": true,
+                  "legendFormat": "total",
+                  "range": false,
+                  "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"valid\"}[$__range]))",
+                  "format": "time_series",
+                  "hide": false,
+                  "instant": true,
+                  "legendFormat": "valid",
+                  "range": false,
+                  "refId": "B"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"converted\"}[$__range]))",
+                  "format": "time_series",
+                  "hide": false,
+                  "instant": true,
+                  "legendFormat": "adjusted",
+                  "range": false,
+                  "refId": "C"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "sum(increase(cognigy_resources_node_config_fallback_convert_node_execution_count{cluster=\"$cluster\",result=\"error\"}[$__range]))",
+                  "hide": false,
+                  "instant": true,
+                  "legendFormat": "error",
+                  "range": false,
+                  "refId": "D"
+                }
+              ],
+              "title": "Node Configs processed",
+              "type": "stat"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "description": "",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 100,
+                    "gradientMode": "opacity",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green"
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "percentunit"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 143
+              },
+              "id": 2,
+              "options": {
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "maxHeight": 600,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "pluginVersion": "12.0.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"converted\"}[1h])) / sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\"}[1h]))",
+                  "format": "time_series",
+                  "hide": false,
+                  "instant": false,
+                  "legendFormat": "ratio of converted node configs",
+                  "range": true,
+                  "refId": "B"
+                }
+              ],
+              "title": "Ratio of adjusted Node Configs over Time",
+              "type": "timeseries"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "description": "",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green"
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "percentunit"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 6,
+                "x": 12,
+                "y": 143
+              },
+              "id": 3,
+              "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto"
+              },
+              "pluginVersion": "12.0.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\",nodeConfigFallbackApplied=\"converted\"}[$__range])) / sum(increase(cognigy_resources_node_config_fallback_processed_node_conversion_count{cluster=\"$cluster\"}[$__range]))",
+                  "format": "time_series",
+                  "hide": false,
+                  "instant": true,
+                  "legendFormat": "ratio of converted node configs",
+                  "range": false,
+                  "refId": "B"
+                }
+              ],
+              "title": "Node Configs adjusted during processing",
+              "type": "gauge"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "description": "",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green"
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "percentunit"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 6,
+                "x": 18,
+                "y": 143
+              },
+              "id": 27,
+              "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto"
+              },
+              "pluginVersion": "12.0.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "sum(increase(cognigy_resources_node_config_fallback_convert_node_execution_count{cluster=\"$cluster\",result=\"success\"}[$__range])) / sum(increase(cognigy_resources_node_config_fallback_convert_node_execution_count{cluster=\"$cluster\"}[$__range]))",
+                  "format": "time_series",
+                  "hide": false,
+                  "instant": true,
+                  "legendFormat": "__auto",
+                  "range": false,
+                  "refId": "B"
+                }
+              ],
+              "title": "Node Config Conversion Success Rate",
+              "type": "gauge"
+            }
+          ],
+          "title": "Node Config Processing",
+          "type": "row"
         }
       ],
+      "preload": false,
       "refresh": "{{ index .Values "products" "ai" "dashboards" "node-config-fallback" "refreshInterval" | default "5m" }}",
-      "schemaVersion": 39,
+      "schemaVersion": 41,
       "tags": [
         "cognigy",
         "cognigy.ai"
@@ -2455,17 +3292,13 @@ data:
               "text": "",
               "value": ""
             },
-            "hide": 0,
             "includeAll": false,
             "label": "Data Source",
-            "multi": false,
             "name": "datasource",
             "options": [],
             "query": "prometheus",
-            "queryValue": "",
             "refresh": 1,
             "regex": "",
-            "skipUrlSync": false,
             "type": "datasource"
           },
           {
@@ -2481,7 +3314,6 @@ data:
             "hide": {{ if .Values.grafana.sidecar.dashboards.multicluster.global.enabled }}0{{ else }}2{{ end }},
             "includeAll": false,
             "label": "Cluster",
-            "multi": false,
             "name": "cluster",
             "options": [],
             "query": {
@@ -2490,13 +3322,8 @@ data:
             },
             "refresh": 2,
             "regex": "",
-            "skipUrlSync": false,
             "sort": 1,
-            "tagValuesQuery": "",
-            "tags": [],
-            "tagsQuery": "",
-            "type": "query",
-            "useTags": false
+            "type": "query"
           }
         ]
       },
@@ -2504,12 +3331,10 @@ data:
         "from": "{{ index .Values "products" "ai" "dashboards" "node-config-fallback" "timeFrom" | default "now-3h" }}",
         "to": "now"
       },
-      "timeRangeUpdatedDuringEditOrView": false,
       "timepicker": {},
       "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
       "title": "AI / Node Config Fallback",
       "uid": "ncf",
-      "version": 10,
-      "weekStart": ""
+      "version": 2
     }
 {{- end }}

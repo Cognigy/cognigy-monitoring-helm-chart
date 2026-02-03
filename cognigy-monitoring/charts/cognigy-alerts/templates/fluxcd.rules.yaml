@@ -1,0 +1,79 @@
+{{- $targetNamespace := .Values.appNamespacesTarget }}
+{{- if .Values.rules.fluxcd.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-cognigy-fluxcd-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+  - name: cognigy.alert.fluxcd
+    rules:
+    {{- if (.Values.rules.fluxcd.fluxKustomizationFailure.enabled ) }}
+    - alert: FluxKustomizationFailure
+      expr: gotk_resource_info{ready="False", customresource_kind="Kustomization"} > 0
+      for: {{ .Values.rules.fluxcd.fluxKustomizationFailure.period }}
+      labels:
+        severity: warning
+      annotations:
+        summary: {{ `Flux Kustomization Failure (instance {{ $labels.instance }})` }}
+        description: "The {{`{{`}} $labels.customresource_kind {{`}}`}} '{{`{{`}} $labels.name {{`}}`}}' in namespace {{`{{`}} $labels.exported_namespace {{`}}`}} is marked as not ready for more than {{ .Values.rules.fluxcd.fluxKustomizationFailure.period }}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+
+    {{- if (.Values.rules.fluxcd.fluxHelmReleaseFailure.enabled ) }}
+    - alert: FluxHelmReleaseFailure
+      expr: gotk_resource_info{ready="False", customresource_kind="HelmRelease"} > 0
+      for: {{ .Values.rules.fluxcd.fluxHelmReleaseFailure.period }}
+      labels:
+        severity: warning
+      annotations:
+        summary: {{ `Flux HelmRelease Failure (instance {{ $labels.instance }})` }}
+        description: "The {{`{{`}} $labels.customresource_kind {{`}}`}} '{{`{{`}} $labels.name {{`}}`}}' in namespace {{`{{`}} $labels.exported_namespace {{`}}`}} is marked as not ready for more than {{ .Values.rules.fluxcd.fluxHelmReleaseFailure.period }}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+
+    {{- if (.Values.rules.fluxcd.fluxHelmReleaseFailureLongDuration.enabled ) }}
+    - alert: FluxHelmReleaseFailureLongDuration
+      expr: gotk_resource_info{ready="False", customresource_kind="HelmRelease" {{- if .Values.rules.fluxcd.fluxHelmReleaseFailureLongDuration.targetHelmRelease }}, name=~{{ .Values.rules.fluxcd.fluxHelmReleaseFailureLongDuration.targetHelmRelease | join "|" | quote }}{{ end -}} } > 0
+      for: {{ .Values.rules.fluxcd.fluxHelmReleaseFailureLongDuration.period }}
+      labels:
+        severity: warning
+      annotations:
+        summary: {{ `Flux HelmRelease Failure Long Duration (instance {{ $labels.instance }})` }}
+        description: "The {{`{{`}} $labels.customresource_kind {{`}}`}} '{{`{{`}} $labels.name {{`}}`}}' in namespace {{`{{`}} $labels.exported_namespace {{`}}`}} is marked as not ready for more than {{ .Values.rules.fluxcd.fluxHelmReleaseFailureLongDuration.period }}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+
+    {{- if (.Values.rules.fluxcd.fluxSourceIssue.enabled ) }}
+    - alert: FluxSourceIssue
+      expr: gotk_resource_info{ready="False", customresource_kind=~"GitRepository|HelmRepository|Bucket|OCIRepository"} > 0
+      for: {{ .Values.rules.fluxcd.fluxSourceIssue.period }}
+      labels:
+        severity: warning
+      annotations:
+        summary: {{ `Flux Source Issue (instance {{ $labels.instance }})` }}
+        description: "Flux source {{`{{`}} $labels.customresource_kind {{`}}`}} '{{`{{`}} $labels.name {{`}}`}}' has issue(s) for more than {{ .Values.rules.fluxcd.fluxSourceIssue.period }}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+
+    {{- if (.Values.rules.fluxcd.fluxImageIssue.enabled ) }}
+    - alert: FluxImageIssue
+      expr: gotk_resource_info{ready="False", customresource_kind=~"ImagePolicy|ImageRepository|ImageUpdateAutomation"} > 0
+      for: {{ .Values.rules.fluxcd.fluxImageIssue.period }}
+      labels:
+        severity: warning
+      annotations:
+        summary: {{ `Flux Image Issue (instance {{ $labels.instance }})` }}
+        description: "The {{`{{`}} $labels.customresource_kind {{`}}`}} '{{`{{`}} $labels.name {{`}}`}}' is marked as not ready for more than {{ .Values.rules.fluxcd.fluxImageIssue.period }}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+
+    {{- if (.Values.rules.fluxcd.fluxResourceInSuspendedState.enabled ) }}
+    - alert: FluxResourceInSuspendedState
+      expr: gotk_resource_info{suspended="true" {{- if .Values.rules.fluxcd.fluxResourceInSuspendedState.resourceKinds }}, customresource_kind=~{{ .Values.rules.fluxcd.fluxResourceInSuspendedState.resourceKinds | join "|" | quote }}{{ end -}} } > 0
+      for: {{ .Values.rules.fluxcd.fluxResourceInSuspendedState.period }}
+      labels:
+        severity: warning
+      annotations:
+        summary: {{ `Flux Resource in Suspended State (instance {{ $labels.instance }})` }}
+        description: "The {{`{{`}} $labels.customresource_kind {{`}}`}} '{{`{{`}} $labels.name {{`}}`}}' in namespace {{`{{`}} $labels.exported_namespace {{`}}`}} is in suspended state for more than {{ .Values.rules.fluxcd.fluxResourceInSuspendedState.period }}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+{{- end }}
+

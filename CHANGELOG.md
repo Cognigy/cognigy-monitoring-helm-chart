@@ -1,5 +1,32 @@
 # Release Notes
 
+### 2026.1.0 💥
+**Released** February 3rd, 2026
+
+Going forward, the new format YEAR.MINOR_RELEASE.PATCH_LEVEL will be used for semantic versioning
+
+**IMPORTANT**: Starting from this release, all the container images included in monitoring stack will be pulled from the Cognigy container registry by default. Check the [upgrade documentation](./README.md/#from-1.31.x-to-2026.1.x) before updating to this version!
+
+
+#### Changes
+- 💥 All the images are now pulled from the Cognigy container registry by default.
+- Introduced new dashboards and alerts for FluxCD.
+- Introduced new PodMonitor, dashboard and alerts for RabbitMQ detailed metrics endpoint. These are enabled by default.
+- Switched the following alerts from RabbitMQ metrics endpoint to RabbitMQ detailed metrics endpoint:
+    - `rabbitmqReadyMessageGettingHigh`
+    - `rabbitmqReadyQueueHigh`
+    - `rabbitmqUnackedMessageGettingHigh`
+    - `rabbitmqUnackedQueueHigh`
+- Introduced the following new dashboards:
+    - `AI / LLM Providers - Comprehensive Monitoring`
+    - `AI / Simulator`
+    - `VG / FreeSWITCH`
+- Deprecated the following dashboards:
+    - `FluxCD / Flux Overview`
+    - `AI / Service Testing`
+- Disabled `ServiceHandoverCriticalSendMessageToProviderErrorRateHigh` alert.
+- Minor updates in some other alerts and dashboards.
+
 ### 1.31.0 💥
 **Released** November 18th, 2025
 

@@ -30,16 +30,22 @@ kubepromstack:
       node: true
       prometheus: true
       prometheusOperator: true
-  # disable kubeProxy monitoring,
-  # otherwise you need to change metricsBindAddress: 0.0.0.0:10249 in kube-proxy-config ConfigMap
+  # Disable kubeProxy monitoring,
+  # otherwise change metricsBindAddress: 0.0.0.0:10249 in kube-proxy-config ConfigMap
   kubeProxy:
     enabled: false
-  # not supported on EKS
+  # Not supported on EKS
   kubeControllerManager:
     enabled: false
-  # not supported on EKS
+  # Not supported on EKS
   kubeScheduler:
     enabled: false
+
+  # Global image registry and pull secrets
+  global:
+    imageRegistry: "cognigy.azurecr.io"
+    imagePullSecrets:
+      - name: "cognigy-registry-token"
 
   ### AlertManager Configuration
   alertmanager:
@@ -63,6 +69,7 @@ kubepromstack:
             - 'severity = info'
           equal:
             - 'namespace'
+
       route:
         receiver: 'pagerduty'
         group_by: ['cluster', 'alertname', 'namespace']
@@ -97,7 +104,7 @@ kubepromstack:
   ### Prometheus configuration
   prometheus:
     prometheusSpec:
-      ## disable label-based selectors, otherwise release: {{ .Release.Name }} is used
+      ## Disable label-based selectors, otherwise release: {{ .Release.Name }} is used
       podMonitorSelectorNilUsesHelmValues: false
       serviceMonitorSelectorNilUsesHelmValues: false
       probeSelectorNilUsesHelmValues: false
@@ -130,7 +137,6 @@ kubepromstack:
               requests:
                 storage: "15Gi"
 
-
       ## Prometheus Pod resources
       resources:
         requests:
@@ -159,7 +165,7 @@ kubepromstack:
     adminUser: admin
     ## adminPassword: strongpassword
 
-    ## ingress settings
+    ## Ingress settings
     # currently with defaults for traefik
     ingress:
       # If true, Grafana Ingress will be created
@@ -202,7 +208,7 @@ kubepromstack:
     #    orgId: 1
     #  - name: InfluxDB-Telegraf
     #    orgId: 1
-    
+
     additionalDataSources: []
     #  - name: InfluxDB
     #    type: influxdb
@@ -224,6 +230,12 @@ kubepromstack:
     #      timeInterval: "15s"
     #    # <bool> allow users to edit datasources from the UI.
     #    editable: true
+
+    ## initChownData container image
+    initChownData:
+      image:
+        ## Repository name in cognigy.azurecr.io ACR
+        repository: busybox
 
 ## Cognigy Product Dashboards, enable/disable dashboards according to your installation
 cognigy-dashboards:
@@ -284,11 +296,19 @@ cognigy-monitors:
 ## Some legacy clusters do not come with CPU Metrics out of the box, enable cadvisor for such clusters
 cadvisor:
   enabled: false
+  image:
+    repository: cognigy.azurecr.io/cadvisor/cadvisor
+  pullSecrets:
+    - cognigy-registry-token
 
 ## MS Teams-based alerting for Cognigy.AI runtime alerts
 # enable only if runtime alerts are enabled
 prometheus-msteams:
   enabled: false
+  image:
+    repository: cognigy.azurecr.io/prometheusmsteams/prometheus-msteams
+  imagePullSecrets:
+    - name: "cognigy-registry-token"
   resources:
     limits:
       cpu: 100m

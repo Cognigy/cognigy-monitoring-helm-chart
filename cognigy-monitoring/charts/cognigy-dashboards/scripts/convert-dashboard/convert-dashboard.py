@@ -109,7 +109,7 @@ def yaml_str_repr(struct, indent=2):
     return text
 
 
-def patch_dashboards_json(content, multicluster_key, dashboard_type, resource_name):
+def patch_dashboards_json(content, multicluster_key, dashboard_type, resource_name, keep_variable_current_values):
     try:
         content_struct = json.loads(content)
 
@@ -131,10 +131,12 @@ def patch_dashboards_json(content, multicluster_key, dashboard_type, resource_na
 
         for variable in content_struct['templating']['list']:
             logging.debug(f"Checking {variable['name']} variable")
-            variable['current'] = {
-                "text": "",
-                "value": ""
-            }
+            if not keep_variable_current_values:
+                logging.debug(f'Resetting {variable['name']} variable current values')
+                variable['current'] = {
+                    "text": "",
+                    "value": ""
+                }
 
             if variable['name'] == 'cluster':
                 variable['hide'] = ':multicluster:'
@@ -280,7 +282,8 @@ def write_group_to_file(resource_name,
                         destination,
                         min_kubernetes,
                         max_kubernetes,
-                        multicluster_key):
+                        multicluster_key,
+                        keep_variable_current_values):
 
     # initialize header
     lines = header % {
@@ -293,7 +296,7 @@ def write_group_to_file(resource_name,
     }
 
     content = patch_double_curly_brackets(content)
-    content = patch_dashboards_json(content, multicluster_key, dashboard_type, resource_name)
+    content = patch_dashboards_json(content, multicluster_key, dashboard_type, resource_name, keep_variable_current_values)
     content = patch_json_set_timezone_as_variable(content)
 
     filename_struct = {resource_name + '.json': (LiteralStr(json.loads(content)))}
@@ -342,6 +345,9 @@ def main():
         if 'multicluster_key' not in dashboard:
             dashboard['multicluster_key'] = '.Values.grafana.sidecar.dashboards.multicluster.global.enabled'
 
+        if 'keep_variable_current_values' not in dashboard:
+            dashboard['keep_variable_current_values'] = False
+
         logging.info(f"Generating dashboard from {dashboard['source']}/{dashboard['name']}.json")
 
         with open(f"{dashboard['source']}/{dashboard['name']}.json") as f:
@@ -354,7 +360,8 @@ def main():
                             destination=f"{dashboard['destination']}/{dashboard['dashboard_type']}",
                             min_kubernetes=dashboard['min_kubernetes'],
                             max_kubernetes=dashboard['max_kubernetes'],
-                            multicluster_key=dashboard['multicluster_key']
+                            multicluster_key=dashboard['multicluster_key'],
+                            keep_variable_current_values=dashboard['keep_variable_current_values']
                             )
         logging.debug('Finished')
 
