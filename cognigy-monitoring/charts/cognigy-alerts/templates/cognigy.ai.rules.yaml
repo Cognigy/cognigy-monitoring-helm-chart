@@ -24,6 +24,7 @@ spec:
       for: {{ .Values.rules.ai.cpuThrottlingAIServiceHigh.timeout }}
       labels:
         severity: {{ .Values.rules.ai.cpuThrottlingAIServiceHigh.severity }}
+        group: ai-custom-alert-rules-aluminium
   {{- end }}
   {{- if or (.Values.rules.ai.conversationVolume.enabled ) (.Values.rules.ai.conversationVolumeDynamic.enabled ) }}
   - name: cognigy.alert.conversation-volume
@@ -35,6 +36,7 @@ spec:
         for: 1m
         labels:
           severity: warning
+          group: ai-custom-alert-rules-aluminium
         annotations:
           summary: Messages/min rate is high (instance {{`{{`}} $labels.instance }})
           description: "Messages/min rate has crossed {{$.Values.rules.ai.conversationVolume.threshold }} threshold: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
@@ -48,6 +50,7 @@ spec:
         for: 10m
         labels:
           severity: warning
+          group: ai-custom-alert-rules-aluminium
         annotations:
           summary: Messages/min rate is {{$.Values.rules.ai.conversationVolumeDynamic.percentageThreshold}}% higher than peak levels (instance {{`{{`}} $labels.instance }})
           description: "Current messages/min rate ({{`{{`}} $value | printf \"%.0f\" }}) is {{$.Values.rules.ai.conversationVolumeDynamic.percentageThreshold}}% higher than the 95th percentile of the past {{$.Values.rules.ai.conversationVolumeDynamic.baselineDays}} days\n  LABELS = {{`{{`}} $labels }}"
@@ -62,6 +65,7 @@ spec:
         for: 5m
         labels:
           severity: warning
+          group: ai-custom-alert-rules-carbon
         annotations:
           summary: NLP matcher had findKeyphrase error (instance {{`{{`}} $labels.instance }})
           description: "NLP Matcher had findKeyphrase errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
@@ -75,6 +79,7 @@ spec:
         for: 5m
         labels:
           severity: warning
+          group: ai-custom-alert-rules-aluminium
         annotations:
           summary: functions scheduler scheduling conflicts on (instance {{`{{`}} $labels.instance }})
           description: "Number of scheduling functions per organization has reached the limit. \n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
@@ -88,6 +93,7 @@ spec:
         for: 15m
         labels:
           severity: warning
+          group: ai-custom-alert-rules-aluminium
         annotations:
           summary: extension execution time is higher than 15 sec (instance {{`{{`}} $labels.instance }})
           description: "Extension execution time on service-execution is {{`{{`}} $value }} sec over last 15 minutes\n LABELS = {{`{{`}} $labels }}"
@@ -107,6 +113,7 @@ spec:
         for: 15m
         labels:
           severity: warning
+          group: ai-custom-alert-rules-dubnium
         annotations:
           summary: Average message processing time has increased over {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeIncreasingThreshold }}% in last 15 minutes compared to previous 3 hours (instance {{`{{`}} $labels.instance }})
           description: "Average message processing time has increased by {{`{{`}} $value }}% in the last 15 minutes\n LABELS = {{`{{`}} $labels }}"
@@ -118,6 +125,7 @@ spec:
         for: 15m
         labels:
           severity: warning
+          group: ai-custom-alert-rules-dubnium
         annotations:
           summary: Message processing time is higher than {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeThreshold }} sec for {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeQuantile }}% of messages on (instance {{`{{`}} $labels.instance }})
           description: "Message processing time is {{`{{`}} $value }} sec for {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeQuantile }}% of messages for last 15 minutes\n LABELS = {{`{{`}} $labels }}"
@@ -135,6 +143,7 @@ spec:
         for: {{ .Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.timeout }}
         labels:
           severity: {{ .Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.severity }}
+          group: ai-custom-alert-rules-dubnium
       {{- end }}
   {{- end }}
 
@@ -147,6 +156,7 @@ spec:
         for: 5m
         labels:
           severity: warning
+          group: iron-custom-alert-rules
         annotations:
           summary: handover errors in organisationId {{`{{`}} $labels.organisationId }} projectId {{`{{`}} $labels.projectId }} is high
           description: "Number of handover errors is {{`{{`}} $value }} in last 5 minutes\n LABELS = {{`{{`}} $labels }}"
@@ -159,6 +169,7 @@ spec:
               {{ $.Values.rules.ai.serviceHandover.requestLatencyHigh.threshold }}
         for: 5m
         labels:
+          group: iron-custom-alert-rules
           severity: warning
         annotations:
           summary: service-handover HTTP requests latency for provider {{`{{`}} $labels.route }} is high
@@ -171,6 +182,7 @@ spec:
             {{ $.Values.rules.ai.serviceHandover.request5xxErrorRate.threshold }}
         for: 5m
         labels:
+          group: iron-custom-alert-rules
           severity: warning
         annotations:
           summary: service-handover 5xx HTTP requests rate for provider {{`{{`}} $labels.route }} is high
@@ -188,6 +200,7 @@ spec:
           sum by (providerId, organisationId) (increase(cognigy_ai_handover_request_handover_rpc_calls_error_count{providerId!="none", providerId!="salesforce"}[{{ $.Values.rules.ai.serviceHandover.rPCCallFailureRateHigh.evaluationWindow }}])) > {{ $.Values.rules.ai.serviceHandover.rPCCallFailureRateHigh.numberOfErrors }}
         for: 5m
         labels:
+          group: iron-custom-alert-rules
           severity: warning
         annotations:
           summary: 'Provider {{ "{{" }} $labels.providerId {{ "}}" }} RPC failure rate is high ({{ "{{" }} $value | printf "%.0f" {{ "}}" }}%)'
@@ -204,25 +217,11 @@ spec:
           > {{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRateHigh.threshold }}
         for: 15m
         labels:
+          group: iron-custom-alert-rules
           severity: warning
         annotations:
           summary: 'Provider {{ "{{" }} $labels.providerId {{ "}}" }} SendMessageToProvider RPC error rate is high ({{ "{{" }} $value | printf "%.0f" {{ "}}" }}%)'
           description: 'Provider: {{ "{{" }} $labels.providerId {{ "}}" }}, Org: {{ "{{" }} $labels.organisationId {{ "}}" }} - Current error rate: {{ "{{" }} $value | printf "%.2f" {{ "}}" }}% (threshold: {{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRateHigh.threshold }}%)'
-
-      # - alert: ServiceHandoverCriticalSendMessageToProviderErrorRateHigh
-      #   expr: |
-      #     (
-      #       sum by (providerId, organisationId) (increase(cognigy_ai_handover_send_message_to_provider_rpc_error_count{providerId!="none"}[{{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRateHigh.evaluationWindow }}]))
-      #     /
-      #       clamp_min(sum by (providerId, organisationId) (increase(cognigy_ai_handover_send_message_to_provider_rpc_calls_total{providerId!="none"}[{{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRateHigh.evaluationWindow }}])), 1) * 100
-      #     )
-      #     > {{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRateHigh.criticalThreshold }}
-      #   for: 20m
-      #   labels:
-      #     severity: critical
-      #   annotations:
-      #     summary: 'Provider {{ "{{" }} $labels.providerId {{ "}}" }} SendMessageToProvider RPC error rate is high ({{ "{{" }} $value | printf "%.0f" {{ "}}" }}%)'
-      #     description: 'Provider: {{ "{{" }} $labels.providerId {{ "}}" }}, Org: {{ "{{" }} $labels.organisationId {{ "}}" }} - Current error rate: {{ "{{" }} $value | printf "%.2f" {{ "}}" }}% (threshold: {{ $.Values.rules.ai.serviceHandover.sendMessageToProviderErrorRateHigh.criticalThreshold }}%)'
       {{- end }}
       {{- if (.Values.rules.ai.serviceHandover.eventRPCErrorRateHigh.enabled ) }}
       - alert: ServiceHandoverEventRPCErrorRateHigh
@@ -236,6 +235,7 @@ spec:
           sum by (providerId, organisationId) (increase(cognigy_ai_handover_rpc_event_error_count{providerId!="none"}[{{ $.Values.rules.ai.serviceHandover.eventRPCErrorRateHigh.evaluationWindow }}])) > {{ $.Values.rules.ai.serviceHandover.eventRPCErrorRateHigh.numberOfErrors }}
         for: 5m
         labels:
+          group: iron-custom-alert-rules
           severity: warning
         annotations:
           summary: 'Provider {{ "{{" }} $labels.providerId {{ "}}" }} Event RPC error rate is high ({{ "{{" }} $value | printf "%.0f" {{ "}}" }}%)'
@@ -246,6 +246,7 @@ spec:
         expr: increase(kube_pod_container_status_restarts_total{container=~"service-handover"}[{{ $.Values.rules.ai.serviceHandover.containerRestartWarning.evaluationWindow }}]) > {{ $.Values.rules.ai.serviceHandover.containerRestartWarning.threshold }}
         for: 2m
         labels:
+          group: iron-custom-alert-rules
           severity: warning
         annotations:
           summary: 'Container {{ "{{" }} $labels.container {{ "}}" }} in pod {{ "{{" }} $labels.pod {{ "}}" }} (namespace {{ "{{" }} $labels.namespace {{ "}}" }}) has restarted several times in the last {{ $.Values.rules.ai.serviceHandover.containerRestartWarning.evaluationWindow }}.'
@@ -263,6 +264,7 @@ spec:
             {{ $.Values.rules.ai.serviceHttp.requestLatencyHighThreshold }}
         for: 5m
         labels:
+          group: iron-custom-alert-rules
           severity: warning
         annotations:
           summary: service-HTTP requests latency is high for organisationId {{`{{`}} $labels.organisationId  }} projectId {{`{{`}} $labels.projectId  }}
@@ -278,6 +280,7 @@ spec:
       for: 1m
       labels:
         severity: warning
+        group: ai-custom-alert-rules-aluminium
       annotations:
         summary: service-collaboration had uncaught errors on (instance {{`{{`}} $labels.instance }})
         description: "service-collaboration had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
@@ -286,6 +289,7 @@ spec:
       for: 5m
       labels:
         severity: warning
+        group: ai-custom-alert-rules-aluminium
       annotations:
         summary: collaboration request latency is higher than 500ms sec (instance {{`{{`}} $labels.instance }})
         description: "collaboration request latency is {{`{{`}} $value }} sec over last 5 minutes\n LABELS = {{`{{`}} $labels }}"

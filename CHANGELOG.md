@@ -1,5 +1,13 @@
 # Release Notes
 
+### 2026.2.0
+**Released** March 24th, 2026
+
+#### Changes
+- Switched from kubelet Endpoints to EndpointSlice.
+- Minor improvement in `VG / Overview v3` dashboard.
+
+
 ### 2026.1.0 💥
 **Released** February 3rd, 2026
 
