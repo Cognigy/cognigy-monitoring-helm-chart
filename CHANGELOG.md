@@ -1,5 +1,11 @@
 # Release Notes
 
+### 2026.2.1
+**Released** March 27th, 2026
+
+#### Changes
+- Switched back from kubelet EndpointSlice to Endpoints.
+
 ### 2026.2.0
 **Released** March 24th, 2026
 
