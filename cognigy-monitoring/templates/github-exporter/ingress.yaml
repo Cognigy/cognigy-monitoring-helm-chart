@@ -26,10 +26,10 @@ spec:
                 name: {{ include "cognigy-monitoring.fullname" . }}-github-exporter
                 port:
                   number: {{ $ge.service.port }}
-  {{- with $ge.ingress.tls }}
+  {{- if and $ge.ingress.tls $ge.ingress.tls.secretName }}
   tls:
     - hosts:
         - {{ $host | quote }}
-      secretName: {{ .secretName }}
+      secretName: {{ $ge.ingress.tls.secretName }}
   {{- end }}
 {{- end }}
