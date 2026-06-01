@@ -1,0 +1,139 @@
+{
+  "title": "CI / GitHub Actions",
+  "uid": "cognigy-github-actions",
+  "tags": ["cognigy", "ci", "github-actions"],
+  "editable": true,
+  "graphTooltip": 0,
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5m",
+  "time": { "from": "now-7d", "to": "now" },
+  "timezone": "browser",
+  "templating": {
+    "list": [
+      {
+        "name": "repo",
+        "label": "Repository",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "query": { "query": "label_values(github_workflow_run_status, repo)", "refId": "repo" },
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": { "text": "All", "value": "$__all" }
+      },
+      {
+        "name": "workflow",
+        "label": "Workflow",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "query": { "query": "label_values(github_workflow_run_status{repo=~\"$repo\"}, name)", "refId": "workflow" },
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": { "text": "All", "value": "$__all" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Total runs (selected range)",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "blue", "value": null }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "background", "graphMode": "area", "textMode": "value" },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${datasource}" }, "expr": "count(count by (run) (max_over_time(github_workflow_run_status{repo=~\"$repo\", name=~\"$workflow\"}[$__range])))" }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Successful runs",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": null }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "background", "graphMode": "area", "textMode": "value" },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${datasource}" }, "expr": "count(count by (run) (max_over_time(github_workflow_run_status{status=\"success\", repo=~\"$repo\", name=~\"$workflow\"}[$__range])))" }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Failed runs",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "red", "value": null }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "background", "graphMode": "area", "textMode": "value" },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${datasource}" }, "expr": "count(count by (run) (max_over_time(github_workflow_run_status{status=\"failure\", repo=~\"$repo\", name=~\"$workflow\"}[$__range]))) or vector(0)" }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Failure rate",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "percent", "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 10 }, { "color": "red", "value": 25 }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "background", "graphMode": "none", "textMode": "value" },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${datasource}" }, "expr": "100 * (count(count by (run) (max_over_time(github_workflow_run_status{status=\"failure\", repo=~\"$repo\", name=~\"$workflow\"}[$__range]))) or vector(0)) / count(count by (run) (max_over_time(github_workflow_run_status{repo=~\"$repo\", name=~\"$workflow\"}[$__range])))" }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Tracked runs by conclusion",
+      "description": "Number of runs currently tracked by the exporter, grouped by conclusion/status. Reflects activity over the retention window.",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 15, "stacking": { "mode": "normal" } }, "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${datasource}" }, "expr": "count by (status) (github_workflow_run_status{repo=~\"$repo\", name=~\"$workflow\"})", "legendFormat": "{{status}}" }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "table",
+      "title": "Workflows that fail the most",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 12 },
+      "fieldConfig": { "defaults": { "custom": { "align": "auto" } }, "overrides": [] },
+      "options": { "showHeader": true, "sortBy": [{ "displayName": "Failed runs", "desc": true }] },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${datasource}" }, "format": "table", "instant": true, "expr": "topk(20, count by (repo, name) (max_over_time(github_workflow_run_status{status=\"failure\", repo=~\"$repo\"}[$__range])))" }
+      ],
+      "transformations": [
+        { "id": "organize", "options": { "excludeByName": { "Time": true }, "renameByName": { "name": "Workflow", "repo": "Repository", "Value": "Failed runs" } } }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "table",
+      "title": "Longest runs (max duration)",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 12 },
+      "fieldConfig": { "defaults": { "custom": { "align": "auto" }, "unit": "ms" }, "overrides": [] },
+      "options": { "showHeader": true, "sortBy": [{ "displayName": "Max duration", "desc": true }] },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${datasource}" }, "format": "table", "instant": true, "expr": "topk(20, max by (repo, name) (max_over_time(github_workflow_run_duration_ms{repo=~\"$repo\", name=~\"$workflow\"}[$__range])))" }
+      ],
+      "transformations": [
+        { "id": "organize", "options": { "excludeByName": { "Time": true }, "renameByName": { "name": "Workflow", "repo": "Repository", "Value": "Max duration" } } }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Average run duration by workflow",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 21 },
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 10 }, "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "right", "calcs": ["mean", "max"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "refId": "A", "datasource": { "type": "prometheus", "uid": "${datasource}" }, "expr": "avg by (name) (github_workflow_run_duration_ms{repo=~\"$repo\", name=~\"$workflow\"})", "legendFormat": "{{name}}" }
+      ]
+    }
+  ]
+}

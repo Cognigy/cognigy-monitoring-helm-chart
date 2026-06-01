@@ -306,6 +306,67 @@ cadvisor:
   pullSecrets:
     - cognigy-registry-token
 
+## GitHub Actions pipeline metrics exporter (promhippie/github_exporter)
+## Webhook-driven: GitHub delivers workflow_run/workflow_job events to the webhook
+## ingress, the exporter stores them in a small sqlite DB and exposes them as
+## Prometheus gauges (github_workflow_run_*) which Prometheus scrapes internally.
+## Only the webhook collectors are enabled, so NO GitHub API token is needed and
+## there is no API rate-limit pressure. Disabled by default - enable per-cluster
+## (currently dev only) together with cognigy-dashboards.products.ci.
+githubExporter:
+  enabled: false
+  image:
+    repository: ghcr.io/promhippie/github-exporter
+    tag: "14.1.0"
+    pullPolicy: IfNotPresent
+  ## Pull secret(s) - only needed if the image is mirrored into a private registry
+  imagePullSecrets: []
+  logLevel: info
+  ## Webhook-fed collectors (no API polling). Runs gives run-level status/duration;
+  ## jobs adds per-job conclusions (higher cardinality) - keep off unless needed.
+  collectors:
+    workflowRuns: true
+    workflowJobs: false
+  ## How long a run/job is retained in the exporter's store and exposed as a metric.
+  ## Prometheus retains the scraped samples independently (see prometheus retention).
+  workflowRuns:
+    window: 168h
+    purgeWindow: 168h
+  ## Persist the sqlite store so webhook history survives pod restarts.
+  persistence:
+    enabled: true
+    size: 2Gi
+    storageClassName: ""
+  ## SealedSecret holding the webhook HMAC secret (must match the GitHub App webhook).
+  webhookSecret:
+    existingSecret: "github-exporter-webhook"
+    key: GITHUB_EXPORTER_WEBHOOK_SECRET
+  webhookPath: /github
+  service:
+    port: 9504
+  ## Public ingress for the webhook path ONLY (metrics are never exposed here).
+  ingress:
+    enabled: false
+    className: traefik
+    host: ""
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    tls:
+      secretName: cognigy-traefik
+  serviceMonitor:
+    enabled: true
+    interval: 60s
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
 ## MS Teams-based alerting for Cognigy.AI runtime alerts
 # enable only if runtime alerts are enabled
 prometheus-msteams:
