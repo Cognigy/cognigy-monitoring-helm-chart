@@ -1,5 +1,10 @@
 # Release Notes
 
+### 2026.3.0
+
+#### Changes
+- Introduced an optional, webhook-driven GitHub Actions pipeline metrics exporter (`promhippie/github_exporter`) and a `CI / GitHub Actions` Grafana dashboard. Both are **disabled by default** (`githubExporter.enabled=false`, `cognigy-dashboards.products.ci.enabled=false`) and intended for non-prod/dev first. The exporter ingests `workflow_run`/`workflow_job` webhook events into a small sqlite store (PVC) and exposes `github_workflow_run_*` metrics scraped internally via a ServiceMonitor; only the webhook path is exposed via ingress. No GitHub API token is required in webhook-only mode.
+
 ### 2026.2.1
 **Released** March 27th, 2026
 

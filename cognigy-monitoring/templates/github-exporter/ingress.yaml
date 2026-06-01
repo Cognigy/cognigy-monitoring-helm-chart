@@ -1,0 +1,35 @@
+{{- if and .Values.githubExporter.enabled .Values.githubExporter.ingress.enabled }}
+{{- $ge := .Values.githubExporter }}
+{{- $host := required "githubExporter.ingress.host is required when githubExporter.ingress.enabled is true" $ge.ingress.host }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "cognigy-monitoring.fullname" . }}-github-exporter
+  labels:
+    {{- include "cognigy-monitoring.labels" . | nindent 4 }}
+    app.kubernetes.io/component: github-exporter
+  {{- with $ge.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ $ge.ingress.className }}
+  rules:
+    # Only the webhook path is exposed publicly; /metrics stays cluster-internal
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: {{ $ge.webhookPath }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "cognigy-monitoring.fullname" . }}-github-exporter
+                port:
+                  number: {{ $ge.service.port }}
+  {{- if and $ge.ingress.tls $ge.ingress.tls.secretName }}
+  tls:
+    - hosts:
+        - {{ $host | quote }}
+      secretName: {{ $ge.ingress.tls.secretName }}
+  {{- end }}
+{{- end }}

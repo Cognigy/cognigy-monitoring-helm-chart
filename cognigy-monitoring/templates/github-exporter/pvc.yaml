@@ -1,0 +1,19 @@
+{{- if and .Values.githubExporter.enabled .Values.githubExporter.persistence.enabled }}
+{{- $ge := .Values.githubExporter }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "cognigy-monitoring.fullname" . }}-github-exporter
+  labels:
+    {{- include "cognigy-monitoring.labels" . | nindent 4 }}
+    app.kubernetes.io/component: github-exporter
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- with $ge.persistence.storageClassName }}
+  storageClassName: {{ . }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ $ge.persistence.size }}
+{{- end }}

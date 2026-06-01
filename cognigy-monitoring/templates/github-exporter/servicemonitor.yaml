@@ -1,0 +1,22 @@
+{{- if and .Values.githubExporter.enabled .Values.githubExporter.serviceMonitor.enabled }}
+{{- $ge := .Values.githubExporter }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "cognigy-monitoring.fullname" . }}-github-exporter
+  labels:
+    {{- include "cognigy-monitoring.labels" . | nindent 4 }}
+    app.kubernetes.io/component: github-exporter
+spec:
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ $ge.serviceMonitor.interval | default "60s" }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "cognigy-monitoring.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: github-exporter
+{{- end }}

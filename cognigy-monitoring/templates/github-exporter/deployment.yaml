@@ -1,0 +1,111 @@
+{{- if .Values.githubExporter.enabled }}
+{{- $ge := .Values.githubExporter }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cognigy-monitoring.fullname" . }}-github-exporter
+  labels:
+    {{- include "cognigy-monitoring.labels" . | nindent 4 }}
+    app.kubernetes.io/component: github-exporter
+spec:
+  replicas: 1
+  # sqlite PVC is ReadWriteOnce, so a single pod must release it before the next starts
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "cognigy-monitoring.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: github-exporter
+  template:
+    metadata:
+      labels:
+        {{- include "cognigy-monitoring.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: github-exporter
+    spec:
+      {{- with $ge.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+      containers:
+        - name: github-exporter
+          image: "{{ $ge.image.repository }}:{{ $ge.image.tag }}"
+          imagePullPolicy: {{ $ge.image.pullPolicy | default "IfNotPresent" }}
+          args:
+            - server
+          env:
+            - name: GITHUB_EXPORTER_WEB_ADDRESS
+              value: "0.0.0.0:{{ $ge.service.port }}"
+            - name: GITHUB_EXPORTER_WEB_PATH
+              value: "/metrics"
+            - name: GITHUB_EXPORTER_WEBHOOK_PATH
+              value: {{ $ge.webhookPath | quote }}
+            - name: GITHUB_EXPORTER_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $ge.webhookSecret.existingSecret }}
+                  key: {{ $ge.webhookSecret.key }}
+            # sqlite store persisted on the mounted PVC (triple slash = absolute path)
+            - name: GITHUB_EXPORTER_DATABASE_DSN
+              value: "sqlite:///data/exporter.sqlite3"
+            # Webhook-driven collectors only -> no GitHub API polling, no token required
+            - name: GITHUB_EXPORTER_COLLECTOR_WORKFLOW_RUNS
+              value: {{ $ge.collectors.workflowRuns | quote }}
+            - name: GITHUB_EXPORTER_COLLECTOR_WORKFLOW_JOBS
+              value: {{ $ge.collectors.workflowJobs | quote }}
+            - name: GITHUB_EXPORTER_WORKFLOW_RUNS_WINDOW
+              value: {{ $ge.workflowRuns.window | quote }}
+            - name: GITHUB_EXPORTER_WORKFLOW_RUNS_PURGE_WINDOW
+              value: {{ $ge.workflowRuns.purgeWindow | quote }}
+            - name: GITHUB_EXPORTER_WORKFLOW_JOBS_WINDOW
+              value: {{ $ge.workflowRuns.window | quote }}
+            - name: GITHUB_EXPORTER_WORKFLOW_JOBS_PURGE_WINDOW
+              value: {{ $ge.workflowRuns.purgeWindow | quote }}
+            - name: GITHUB_EXPORTER_LOG_LEVEL
+              value: {{ $ge.logLevel | default "info" | quote }}
+          ports:
+            - name: http
+              containerPort: {{ $ge.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          resources:
+            {{- toYaml $ge.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+        {{- if $ge.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "cognigy-monitoring.fullname" . }}-github-exporter
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
+      {{- with $ge.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $ge.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $ge.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
