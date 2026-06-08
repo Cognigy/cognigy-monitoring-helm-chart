@@ -85,17 +85,6 @@ spec:
           description: "Number of scheduling functions per organization has reached the limit. \n VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
   {{- end }}
 
-  {{- if (.Values.rules.ai.functionExecution.enabled ) }}
-  - name: cognigy.recording.functions-deprecation
-    interval: 1h
-    rules:
-      - record: cognigy_function_scheduler_scheduled_functions:increase1h
-        expr: >
-          sum by (organisationId) (
-            increase(cognigy_function_scheduler_scheduled_functions_count[1h])
-          )
-  {{- end }}
-
   {{- if (.Values.rules.ai.serviceExecution.enabled ) }}
   - name: cognigy.alert.service-execution
     rules:
