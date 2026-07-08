@@ -178,7 +178,9 @@
         "footer": {
           "countRows": false,
           "fields": "",
-          "reducer": ["sum"],
+          "reducer": [
+            "sum"
+          ],
           "show": false
         },
         "showHeader": true,
@@ -259,7 +261,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
+        "w": 6,
         "x": 0,
         "y": 9
       },
@@ -325,8 +327,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
-        "x": 8,
+        "w": 6,
+        "x": 6,
         "y": 9
       },
       "id": 3,
@@ -392,8 +394,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 8,
-        "x": 16,
+        "w": 6,
+        "x": 12,
         "y": 9
       },
       "id": 4,
@@ -427,6 +429,73 @@
       ],
       "description": "Pods killed due to out-of-memory (OOM) conditions. Red if any OOM kills occurred. This indicates memory limits are too low or memory leaks exist. Check pod logs and consider increasing memory limits.",
       "title": "💀 OOM Kills (Selected Range)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 9
+      },
+      "id": 106,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(vg_feature_server_unhandled_rejection_total{cluster=\"$cluster\"}[5m])) * 60",
+          "legendFormat": "Rejections/min",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "description": "Unhandled promise rejections per minute. These are silent async failures that may cause undefined behavior. Red if any occur. Investigate logs immediately.",
+      "title": "💣 Unhandled Rejections (per min)",
       "type": "stat"
     },
     {
@@ -475,10 +544,10 @@
         "overrides": []
       },
       "gridPos": {
+        "y": 16,
         "h": 6,
         "w": 6,
-        "x": 0,
-        "y": 16
+        "x": 0
       },
       "id": 5,
       "options": {
@@ -543,10 +612,10 @@
         "overrides": []
       },
       "gridPos": {
+        "y": 16,
         "h": 6,
         "w": 6,
-        "x": 6,
-        "y": 16
+        "x": 6
       },
       "id": 6,
       "options": {
@@ -609,10 +678,10 @@
         "overrides": []
       },
       "gridPos": {
+        "y": 16,
         "h": 6,
         "w": 6,
-        "x": 12,
-        "y": 16
+        "x": 12
       },
       "id": 7,
       "options": {
@@ -702,10 +771,10 @@
         "overrides": []
       },
       "gridPos": {
+        "y": 16,
         "h": 6,
         "w": 6,
-        "x": 18,
-        "y": 16
+        "x": 18
       },
       "id": 8,
       "options": {
@@ -755,7 +824,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 44
       },
       "id": 102,
       "panels": [],
@@ -794,7 +863,7 @@
         "h": 8,
         "w": 6,
         "x": 0,
-        "y": 23
+        "y": 45
       },
       "id": 22,
       "options": {
@@ -819,7 +888,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(vg_feature_server_handover_error_total{cluster=\"$cluster\"}[5m])) * 60",
+          "expr": "sum(rate(vg_feature_server_handover_total{cluster=\"$cluster\", category=\"failed\"}[5m])) * 60",
           "legendFormat": "Errors/min",
           "range": true,
           "refId": "A"
@@ -861,7 +930,7 @@
         "h": 8,
         "w": 6,
         "x": 6,
-        "y": 23
+        "y": 45
       },
       "id": 23,
       "options": {
@@ -924,7 +993,7 @@
         "h": 8,
         "w": 6,
         "x": 12,
-        "y": 23
+        "y": 45
       },
       "id": 9,
       "options": {
@@ -1014,7 +1083,7 @@
         "h": 8,
         "w": 6,
         "x": 18,
-        "y": 23
+        "y": 45
       },
       "id": 10,
       "options": {
@@ -1106,7 +1175,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 31
+        "y": 53
       },
       "id": 11,
       "options": {
@@ -1196,7 +1265,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 31
+        "y": 53
       },
       "id": 12,
       "options": {
@@ -1262,7 +1331,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 39
+        "y": 61
       },
       "id": 13,
       "options": {
@@ -1332,7 +1401,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 39
+        "y": 61
       },
       "id": 14,
       "options": {
@@ -1368,12 +1437,188 @@
       "type": "stat"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "y": 69,
+        "h": 8,
+        "w": 24,
+        "x": 0
+      },
+      "id": 107,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.50, sum(rate(vg_feature_server_session_durations_bucket{cluster=\"$cluster\"}[5m])) by (le))",
+          "legendFormat": "p50",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum(rate(vg_feature_server_session_durations_bucket{cluster=\"$cluster\"}[5m])) by (le))",
+          "legendFormat": "p95",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "description": "Completed session duration percentiles (p50, p95). Shows how long calls typically last. Sudden changes may indicate stuck calls or early disconnections.",
+      "title": "⏱️ Session Duration (p50/p95)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "y": 218,
+        "h": 8,
+        "w": 18,
+        "x": 6
+      },
+      "id": 108,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(vg_feature_server_grpc_tts_errors_total{cluster=\"$cluster\"}[5m])) * 60",
+          "legendFormat": "Errors/min",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "description": "gRPC TTS streaming errors per minute. Yellow: 1+/min, Red: 5+/min. Indicates issues with streaming text-to-speech (e.g., ElevenLabs, PlayHT). Check vendor connectivity and credentials.",
+      "title": "🔊 gRPC TTS Errors (per min)",
+      "type": "stat"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 47
+        "y": 77
       },
       "id": 103,
       "panels": [],
@@ -1408,7 +1653,7 @@
         "h": 8,
         "w": 6,
         "x": 0,
-        "y": 48
+        "y": 78
       },
       "id": 15,
       "options": {
@@ -1501,7 +1746,7 @@
         "h": 8,
         "w": 9,
         "x": 6,
-        "y": 48
+        "y": 78
       },
       "id": 16,
       "options": {
@@ -1582,7 +1827,7 @@
         "h": 8,
         "w": 9,
         "x": 15,
-        "y": 48
+        "y": 78
       },
       "id": 17,
       "options": {
@@ -1622,7 +1867,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 56
+        "y": 92
       },
       "id": 105,
       "panels": [],
@@ -1657,7 +1902,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 57
+        "y": 93
       },
       "id": 24,
       "options": {
@@ -1728,7 +1973,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 57
+        "y": 93
       },
       "id": 25,
       "options": {
@@ -1820,7 +2065,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 57
+        "y": 93
       },
       "id": 26,
       "options": {
@@ -1859,7 +2104,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 65
+        "y": 101
       },
       "id": 104,
       "panels": [],
@@ -1876,7 +2121,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 66
+        "y": 102
       },
       "id": 27,
       "options": {
@@ -1884,7 +2129,9 @@
         "footer": {
           "countRows": false,
           "fields": "",
-          "reducer": ["sum"],
+          "reducer": [
+            "sum"
+          ],
           "show": false
         },
         "showHeader": true,
@@ -2064,7 +2311,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 108
+        "y": 144
       },
       "id": 18,
       "options": {
@@ -2155,7 +2402,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 116
+        "y": 152
       },
       "id": 19,
       "options": {
@@ -2267,7 +2514,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 74
+        "y": 110
       },
       "id": 21,
       "options": {
@@ -2275,7 +2522,9 @@
         "footer": {
           "countRows": false,
           "fields": "",
-          "reducer": ["sum"],
+          "reducer": [
+            "sum"
+          ],
           "show": false
         },
         "showHeader": true,
@@ -2390,12 +2639,15 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 82
+        "y": 118
       },
       "id": 29,
       "options": {
         "legend": {
-          "calcs": ["sum", "max"],
+          "calcs": [
+            "sum",
+            "max"
+          ],
           "displayMode": "table",
           "placement": "right",
           "showLegend": true,
@@ -2423,18 +2675,1959 @@
       ],
       "title": "📊 Pod Restart Timeline (5min intervals)",
       "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 168
+      },
+      "id": 200,
+      "panels": [],
+      "title": "📞 Call Outcomes & Flow",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Feature Server call outcomes per minute, split by final status (success/failed). Answers 'are calls working?' at cluster scope — the signal that used to require SIP response drill-downs (see RFC §4.1 gap analysis).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 169
+      },
+      "id": 201,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum by (status) (rate(vg_feature_server_calls_total{cluster=\"$cluster\"}[5m])) * 60",
+          "legendFormat": "{{status}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "📈 Calls by Outcome (per min)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Call termination reasons per minute (bot, caller, media_server_failure, etc). Critical for triage: a spike in 'media_server_failure' points to FreeSWITCH/RTPengine, a spike in 'caller' is benign.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 169
+      },
+      "id": 202,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum by (reason) (rate(vg_feature_server_call_termination_total{cluster=\"$cluster\"}[5m])) * 60",
+          "legendFormat": "{{reason}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "🪦 Call Terminations by Reason",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Rolling 5 minute call success ratio across the cluster. Falls below 85% → matches RFC alert VGHighCallFailureRate (§6.2).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 85
+              },
+              {
+                "color": "yellow",
+                "value": 95
+              },
+              {
+                "color": "green",
+                "value": 99
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 177
+      },
+      "id": 203,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "100 * sum(rate(vg_feature_server_calls_total{cluster=\"$cluster\", status=\"success\"}[5m])) / clamp_min(sum(rate(vg_feature_server_calls_total{cluster=\"$cluster\"}[5m])), 0.001)",
+          "legendFormat": "Success %",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "📊 Call Success Rate (5m)",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Terminations attributed to media-plane failure (FreeSWITCH/RTPengine). Red if >0 — almost always OPERATIONAL.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 177
+      },
+      "id": 204,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(vg_feature_server_call_termination_total{cluster=\"$cluster\", reason=\"media_server_failure\"}[5m])) * 60",
+          "legendFormat": "Media failures/min",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "💥 Media Server Termination (per min)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Call outcomes split by session type (inbound vs rest API-initiated). Helps attribute failures to the entry path.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 177
+      },
+      "id": 205,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum by (session_type, status) (rate(vg_feature_server_calls_total{cluster=\"$cluster\"}[5m])) * 60",
+          "legendFormat": "{{session_type}} - {{status}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "📞 Calls by Session Type",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 185
+      },
+      "id": 206,
+      "panels": [],
+      "title": "📡 SIP & Media Reliability (Feature Server)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "SIP 4xx/5xx responses sent BY the feature server, broken down by status code and method. Complements the drachtio-side view (which aggregates across all components).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 186
+      },
+      "id": 207,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum by (status_code, method) (rate(vg_feature_server_sip_error_response_total{cluster=\"$cluster\"}[5m])) * 60",
+          "legendFormat": "{{method}} {{status_code}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "🚫 SIP Error Responses (per min)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Mid-call SIP re-INVITE outcomes (hold, unhold, modify, siprec, failure). Rising 'failed' or 'rejected' without a corresponding customer config change suggests RELEASE or OPERATIONAL regression.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 186
+      },
+      "id": 208,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum by (status, reason) (rate(vg_feature_server_sip_reinvite_total{cluster=\"$cluster\"}[5m])) * 60",
+          "legendFormat": "{{status}} - {{reason}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "🔁 SIP Re-INVITE Outcomes",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Forked-audio WebSocket lifecycle events (Listen verb / external STT streaming). A rising 'failed' or 'error' line indicates the customer audio sink is unreachable.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 194
+      },
+      "id": 209,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum by (status) (rate(vg_feature_server_forked_audio_connection_total{cluster=\"$cluster\"}[5m])) * 60",
+          "legendFormat": "{{status}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "🎧 Forked Audio Connections (Listen)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 202
+      },
+      "id": 210,
+      "panels": [],
+      "title": "🎵 FreeSWITCH Media Capacity",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Media channels currently in use, reported by FreeSWITCH via feature-server ESL polling. Tracks media-plane load.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 0,
+        "y": 203
+      },
+      "id": 211,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(vg_feature_server_freeswitch_media_channels_in_use{cluster=\"$cluster\"})",
+          "legendFormat": "In use",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "🎛️ FreeSWITCH Media Channels In Use",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Free FreeSWITCH media channels. Red when ≤5 → see RFC alert VGFreeSWITCHNoFreeChannels (§6.2). Scale feature-server replicas when this stays low.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 5
+              },
+              {
+                "color": "yellow",
+                "value": 20
+              },
+              {
+                "color": "green",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 6,
+        "y": 203
+      },
+      "id": 212,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(vg_feature_server_freeswitch_media_channels_free{cluster=\"$cluster\"})",
+          "legendFormat": "Free",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "🟢 FreeSWITCH Media Channels Free",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Aggregate FreeSWITCH CPS (calls-per-second) reported by all feature-server pods. Used for capacity planning.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 12,
+        "y": 203
+      },
+      "id": 213,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(vg_feature_server_freeswitch_media_calls_per_second{cluster=\"$cluster\"})",
+          "legendFormat": "CPS",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "📞 FreeSWITCH Media Calls / Second",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "FreeSWITCH media CPU idle percentage (averaged across pods). Red when <20% idle — media processing saturated.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 20
+              },
+              {
+                "color": "yellow",
+                "value": 40
+              },
+              {
+                "color": "green",
+                "value": 60
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 18,
+        "y": 203
+      },
+      "id": 214,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "avg(vg_feature_server_freeswitch_media_cpu_idle{cluster=\"$cluster\"})",
+          "legendFormat": "CPU Idle %",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "🧠 FreeSWITCH Media CPU Idle %",
+      "type": "gauge"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 210
+      },
+      "id": 215,
+      "panels": [],
+      "title": "🔧 STT / TTS Configuration",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "STT errors where a fallback vendor was configured but the manager did not attempt it. Red if >0 — RELEASE bug or missing implementation path.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "y": 211,
+        "h": 6,
+        "w": 6,
+        "x": 6
+      },
+      "id": 216,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(vg_feature_server_stt_fallback_not_implemented_total{cluster=\"$cluster\"}[$__range]))",
+          "legendFormat": "Fallback gaps",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "🚨 STT Fallback Not Implemented",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "STT sessions where no language was configured and we silently fell back to en-US. Customer-facing quality risk.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "orange",
+                "value": 10
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "y": 211,
+        "h": 6,
+        "w": 6,
+        "x": 12
+      },
+      "id": 217,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(vg_feature_server_stt_language_fallback_total{cluster=\"$cluster\"}[$__range]))",
+          "legendFormat": "en-US fallbacks",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "🌐 STT Language Fallback to en-US",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "setChannelVarsForStt calls invoked without a vendor — corrupted STT configuration. Red if >0 — CUSTOMER or RELEASE config drift.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "y": 211,
+        "h": 6,
+        "w": 6,
+        "x": 18
+      },
+      "id": 218,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(vg_feature_server_stt_missing_vendor_total{cluster=\"$cluster\"}[$__range]))",
+          "legendFormat": "Missing vendor",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "❓ STT Missing Vendor",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "gRPC streaming TTS stop events that did not arrive within the timeout. Indicates streaming TTS vendor/transport issues.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "y": 218,
+        "h": 6,
+        "w": 6,
+        "x": 0
+      },
+      "id": 219,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(vg_feature_server_grpc_tts_timeouts_total{cluster=\"$cluster\"}[5m])) * 60",
+          "legendFormat": "Timeouts/min",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "⏱️ gRPC TTS Timeouts (per min)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Cognigy AI WebSocket connections dropped by TCP RST. Distinguishes transport-level failures from application-level closes.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "y": 22,
+        "h": 6,
+        "w": 6,
+        "x": 0
+      },
+      "id": 220,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(vg_feature_server_websocket_econnreset_total{cluster=\"$cluster\"}[5m])) * 60",
+          "legendFormat": "ECONNRESET/min",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "💥 WS ECONNRESET (per min)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "WebSocket messages that failed to be processed after delivery. RELEASE bug smell — indicates malformed payloads or parsing errors.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "y": 22,
+        "h": 6,
+        "w": 6,
+        "x": 6
+      },
+      "id": 221,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(vg_feature_server_websocket_failed_to_process_message_total{cluster=\"$cluster\"}[5m])) * 60",
+          "legendFormat": "Failed/min",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "❌ WS Failed to Process Msg (per min)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "User-input timeouts during gather operations. High values without a corresponding reset counter suggest caller silence or STT degradation.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "y": 211,
+        "h": 6,
+        "w": 6,
+        "x": 0
+      },
+      "id": 222,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(vg_feature_server_user_input_timeout_total{cluster=\"$cluster\"}[5m])) * 60",
+          "legendFormat": "Timeouts/min",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "⏳ User Input Timeouts (per min)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Webhook connection fallbacks. Customer webhook is flaky and VG is taking the configured fallback transfer path — CUSTOMER issue.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "y": 36,
+        "h": 6,
+        "w": 6,
+        "x": 0
+      },
+      "id": 223,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(vg_feature_server_webhook_connection_fallback_count{cluster=\"$cluster\"}[5m])) * 60",
+          "legendFormat": "Fallbacks/min",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "🔗 Webhook Fallback (per min)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Wire-level SIP parse failures from drachtio over the selected range. Red if >0 — malformed SIP usually means a release regression or a carrier change.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 86
+      },
+      "id": 301,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(vg_feature_server_sip_parse_error_total{cluster=\"$cluster\"}[$__range]))",
+          "legendFormat": "Parse failures",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "🛰️ SIP Parse Errors",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "FeatureServer-initiated hangups because no AI command arrived on the WebSocket within VG_NEXT_COMMAND_TIMEOUT_MS after task completion (task starvation). Red if >0.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "y": 22,
+        "h": 6,
+        "w": 6,
+        "x": 12
+      },
+      "id": 302,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(vg_feature_server_next_command_timeout_total{cluster=\"$cluster\"}[$__range]))",
+          "legendFormat": "Timeouts",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "⏳ Next-Command Timeouts",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "p95 wait time inside _awaitCommandsOrHangup before next AI command, session end, or timeout. Excludes `last_completed_verb=dial` — bridged dial sessions sit in this wait for the full call duration and would skew the p95 by call length rather than AI latency. Healthy ≤ 500 ms; >5 s indicates AI-side latency.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 5000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "y": 22,
+        "h": 6,
+        "w": 6,
+        "x": 18
+      },
+      "id": 303,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(vg_feature_server_next_command_wait_milliseconds_bucket{cluster=\"$cluster\", last_completed_verb!=\"dial\"}[5m])))",
+          "legendFormat": "p95 ms",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "⏱️ Next-Command Wait p95 (excl. dial)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "p95 latency of webhook HTTP requests issued by the feature server. Pair with the existing webhook-fallback / connection-error counters to triage customer webhook health.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 2000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "y": 36,
+        "h": 6,
+        "w": 6,
+        "x": 6
+      },
+      "id": 304,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(vg_feature_server_http_requestor_request_duration_milliseconds_bucket{cluster=\"$cluster\"}[5m])))",
+          "legendFormat": "p95 ms",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "🔗 Webhook Request p95",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Rate of FeatureServer-initiated hangups due to no next AI command, sliced by the verb that completed just before the timeout. Shows which verbs most commonly precede task starvation (e.g. dial post-bridge).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "y": 28,
+        "h": 8,
+        "w": 24,
+        "x": 0
+      },
+      "id": 305,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum by (last_completed_verb) (rate(vg_feature_server_next_command_timeout_total{cluster=\"$cluster\"}[5m])) * 60",
+          "legendFormat": "{{last_completed_verb}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Next-Command Timeouts by Last Verb (per min)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "p50 and p95 of HTTP requests from the webhook requestor. Use alongside the webhook fallback / connection-error counters to attribute customer webhook degradation.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "y": 36,
+        "h": 8,
+        "w": 12,
+        "x": 12
+      },
+      "id": 306,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(vg_feature_server_http_requestor_request_duration_milliseconds_bucket{cluster=\"$cluster\"}[5m])))",
+          "legendFormat": "p50",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(vg_feature_server_http_requestor_request_duration_milliseconds_bucket{cluster=\"$cluster\"}[5m])))",
+          "legendFormat": "p95",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Webhook Request Latency (p50 / p95)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 217
+      },
+      "id": 400,
+      "panels": [],
+      "title": "🛣️ gRPC Streaming",
+      "type": "row"
     }
   ],
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["vg", "health", "infrastructure", "monitoring"],
+  "tags": [
+    "vg",
+    "health",
+    "infrastructure",
+    "monitoring"
+  ],
   "templating": {
     "list": [
       {
         "current": {
-          "selected": false,
-          "text": "Prometheus",
-          "value": "prometheus"
+          "text": "",
+          "value": ""
         },
         "hide": 0,
         "includeAll": false,
@@ -2452,7 +4645,6 @@
       {
         "allValue": "",
         "current": {
-          "selected": false,
           "text": "",
           "value": ""
         },
@@ -2461,7 +4653,7 @@
           "uid": "${datasource}"
         },
         "definition": "label_values(kube_pod_info{namespace=\"voicegateway\"}, cluster)",
-        "hide": 0,
+        "hide": 2,
         "includeAll": false,
         "label": "Cluster",
         "multi": false,
@@ -2484,7 +4676,18 @@
     "to": "now"
   },
   "timepicker": {
-    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"]
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
   },
   "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
   "title": "VG / Health v1",

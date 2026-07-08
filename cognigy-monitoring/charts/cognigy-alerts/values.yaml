@@ -192,6 +192,13 @@ rules:
   # Velero alert rules
   velero:
     enabled: false
+    # increase() lookback window; keep it above the 12h repeat_interval and the backup cadence.
+    lookbackWindow: "25h"
+    # PromQL label selectors to exclude from the alerts, appended as `unless`
+    # clauses. Scope is cluster+schedule only (no app-namespace/volume label).
+    #   - '{namespace="velero", schedule="velero-full"}'
+    failureExcludeSelectors: []
+    partialFailureExcludeSelectors: []
 
   # FluxCD alert rules
   fluxcd:
@@ -230,6 +237,60 @@ rules:
         # - "ImageRepository"
         # - "ImageUpdateAutomation"
 
+  # Sealed Secrets alert rules
+  sealedSecrets:
+    enabled: false
+    sealedSecretNotSynced:
+      enabled: true
+      period: 15m
+      severity: warning
+    sealedSecretUnsealError:
+      enabled: true
+      period: 5m
+      severity: warning
+    sealedSecretControllerDown:
+      enabled: true
+      period: 5m
+      severity: warning
+
+  # Azure Load Balancer alert rules (Promitor-scraped azure_lb_* metrics).
+  azureLoadBalancer:
+    enabled: false
+    # Promitor scraper is not exporting azure_lb_* metrics at all.
+    azureLBMetricsAbsent:
+      enabled: true
+      severity: warning
+      timeout: 15m
+    # LB frontend (VIP) availability dropped below threshold % over 5m.
+    azureLBVipUnavailable:
+      enabled: true
+      severity: warning
+      timeout: 5m
+      threshold: 90
+    # LB backend (DIP) health probes failing — threshold is per-LB averaged availability %.
+    azureLBDipUnavailable:
+      enabled: true
+      severity: warning
+      timeout: 5m
+      threshold: 80
+    # Predictive: a node is using > threshold fraction of its allocated TCP SNAT ports.
+    azureLBSnatPortsHighUsage:
+      enabled: true
+      severity: warning
+      timeout: 10m
+      # Fraction (0.0 – 1.0); 0.8 = 80% of allocated TCP SNAT ports.
+      threshold: 0.8
+    azureLBSnatExhaustionWarning:
+      enabled: true
+      severity: warning
+      timeout: 5m
+      threshold: 10
+    azureLBSnatExhaustionHigh:
+      enabled: true
+      severity: critical
+      timeout: 5m
+      threshold: 50
+
 
   # Cognigy.AI alert rules
   ai:
@@ -243,8 +304,24 @@ rules:
       threshold: 1000
     conversationVolumeDynamic:
       enabled: true
+      # Alert when smoothed volume exceeds the dynamic baseline by this percentage.
       percentageThreshold: 30
+      # Lookback window used to build the baseline.
       baselineDays: 7
+      # Smoothing window for both the current value and the baseline samples.
+      # A longer window (e.g. 30m) averages out short spikes and avoids the
+      # quantization noise of 1-minute message counts.
+      smoothingWindow: 30m
+      # Quantile used for the baseline. A high quantile (0.99) reflects the
+      # cluster's real active peak instead of being pulled down by idle periods,
+      # which is what caused frequent false positives on small/dev clusters.
+      baselineQuantile: 0.99
+      # Absolute floor (messages per smoothingWindow). Below this the alert never
+      # fires, so low-traffic clusters don't page on a 30% jump that is only a
+      # handful of extra messages.
+      minMessages: 500
+      # 'for' duration the condition must hold before firing.
+      timeout: 15m
     nlpMatcher:
       enabled: true
     functionExecution:
@@ -315,6 +392,103 @@ rules:
       unhandledErrorThreshold: 5
       # Temporarily making this very high until we have made the queries efficient
       requestLatencyHighThreshold: 5000
+    # service-cxone-aws-gateway alert rules
+    cxoneAwsGateway:
+      enabled: false
+      kinesisConsumptionFailure:
+        enabled: false
+      kinesisSubscriptionRateExceeded:
+        enabled: false
+        # Regex matching Kinesis subscription-related operations
+        operationRegex: "SubscribeToShard"
+        # Subscription error rate per minute that triggers the alert
+        threshold: 5
+      crossAccountRoleFailure:
+        enabled: false
+        # STS AssumeRole error rate per minute that triggers the alert
+        threshold: 5
+
+  # LLM Gateway V1 API alert rules
+  llmGateway:
+    enabled: false
+    errorRateHigh:
+      enabled: true
+      # Fraction of failed requests that triggers a warning (0.05 = 5%)
+      warningThreshold: 0.05
+      # Fraction of failed requests that triggers a critical alert (0.10 = 10%)
+      criticalThreshold: 0.10
+    requestLatencyHigh:
+      enabled: true
+      # Quantile to evaluate for high latency
+      quantile: 0.95
+      # Warning threshold in seconds
+      warningThreshold: 5
+      # Critical threshold in seconds
+      criticalThreshold: 10
+    rateLimitErrors:
+      enabled: true
+      # Fraction of config-set failures that are rate-limit errors before warning (0.20 = 20%)
+      warningThreshold: 0.20
+      # Fraction of config-set failures that are rate-limit errors before critical alert (0.40 = 40%)
+      criticalThreshold: 0.40
+    elevatedFallbackRate:
+      enabled: true
+      # Fraction of requests that activate a config-set fallback (0.10 = 10%)
+      threshold: 0.10
+    timeToFirstToken:
+      enabled: true
+      # p95 time-to-first-token warning threshold in seconds
+      warningThreshold: 5
+      # p95 time-to-first-token critical threshold in seconds
+      criticalThreshold: 10
+
+  # Serverless router alert rules
+  serverless:
+    enabled: false
+    executionSlo:
+      enabled: true
+      # p95 stream duration warning threshold in seconds
+      warningThreshold: 10
+      # p95 stream duration critical (SLO) threshold in seconds
+      criticalThreshold: 15
+    coldStartSlo:
+      enabled: true
+      # p95 cold start routing duration warning threshold in seconds
+      warningThreshold: 10
+      # p95 cold start routing duration critical (SLO) threshold in seconds
+      criticalThreshold: 15
+    coldStartRolloutTimeouts:
+      enabled: true
+      # Number of rollout timeouts in 10m to trigger critical alert
+      threshold: 20
+    routingErrors:
+      enabled: true
+      # Routing errors per second warning threshold (20 in 5m = 0.0667)
+      warningThreshold: 0.0667
+      # Routing errors per second critical threshold (100 in 10m = 0.1667)
+      criticalThreshold: 0.1667
+    reconcileErrors:
+      enabled: true
+      # Reconcile errors per second warning threshold (20 in 5m = 0.0667)
+      warningThreshold: 0.0667
+      # Reconcile errors per second critical threshold (100 in 10m = 0.1667)
+      criticalThreshold: 0.1667
+    builderFailures:
+      enabled: true
+      # Number of builder failures in 10m to trigger critical alert
+      threshold: 20
+    lockAcquisitionTimeouts:
+      enabled: true
+      # Lock acquisition timeouts per second threshold (20 in 5m = 0.0667)
+      threshold: 0.0667
+    lockContention:
+      enabled: true
+      # Lock contention per second threshold (20 in 5m = 0.0667)
+      threshold: 0.0667
+    lifecyclePendingWrites:
+      enabled: true
+      # Pending writes gauge threshold
+      threshold: 100
 
   # Cognigy.AI runtime services alert rules
   runtime:
@@ -351,6 +525,31 @@ rules:
       handoverErrors:
         enabled: true
         threshold: 5
+      unhandledRejections:
+        enabled: true
+        threshold: 5
+      wsMaxReconnectsExceeded:
+        enabled: true
+      wsConnectionTimeouts:
+        enabled: true
+      speechErrors:
+        enabled: true
+        threshold: 10
+      grpcTtsErrors:
+        enabled: true
+        threshold: 5
+      speechFallback:
+        enabled: true
+        threshold: 5
+      callSetupTimeSlow:
+        enabled: true
+        threshold: 5000
+      webhookConnectionErrors:
+        enabled: true
+        threshold: 5
+      audioPlayerThreadLeak:
+        enabled: true
+        timeout: 10m
       analyticsDataErrors:
         enabled: true
         threshold: 5

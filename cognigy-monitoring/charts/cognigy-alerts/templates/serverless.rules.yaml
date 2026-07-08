@@ -1,0 +1,189 @@
+{{- if .Values.rules.serverless.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-serverless-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+  {{- if .Values.rules.serverless.executionSlo.enabled }}
+  - name: cognigy.alert.serverless.execution-slo
+    rules:
+    - alert: ServerlessExecutionLatencyDegrading
+      expr: |-
+        histogram_quantile(0.95,
+          sum by (le, execution_type) (rate(serverless_proxy_stream_duration_seconds_bucket[5m]))
+        ) > {{ .Values.rules.serverless.executionSlo.warningThreshold }}
+      for: 5m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Serverless execution p95 latency is degrading for {{`{{`}} $labels.execution_type {{`}}`}}
+        description: "Serverless p95 stream duration for execution type {{`{{`}} $labels.execution_type {{`}}`}} is {{`{{`}} $value | humanizeDuration {{`}}`}}, above the {{ .Values.rules.serverless.executionSlo.warningThreshold }}s warning threshold. Approaching SLO breach.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    - alert: ServerlessExecutionSloBreach
+      expr: |-
+        histogram_quantile(0.95,
+          sum by (le, execution_type) (rate(serverless_proxy_stream_duration_seconds_bucket[10m]))
+        ) > {{ .Values.rules.serverless.executionSlo.criticalThreshold }}
+      for: 5m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Serverless execution SLO breach for {{`{{`}} $labels.execution_type {{`}}`}}
+        description: "Serverless p95 stream duration for execution type {{`{{`}} $labels.execution_type {{`}}`}} is {{`{{`}} $value | humanizeDuration {{`}}`}}, above the {{ .Values.rules.serverless.executionSlo.criticalThreshold }}s SLO. Users are experiencing timeouts.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+  {{- end }}
+
+  {{- if .Values.rules.serverless.coldStartSlo.enabled }}
+  - name: cognigy.alert.serverless.cold-start-slo
+    rules:
+    - alert: ServerlessColdStartLatencyDegrading
+      expr: |-
+        histogram_quantile(0.95,
+          sum by (le) (rate(serverless_proxy_routing_duration_seconds_bucket{path="slow"}[5m]))
+        ) > {{ .Values.rules.serverless.coldStartSlo.warningThreshold }}
+      for: 5m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Serverless cold start p95 latency is degrading
+        description: "Serverless cold start p95 routing duration is {{`{{`}} $value | humanizeDuration {{`}}`}}, above the {{ .Values.rules.serverless.coldStartSlo.warningThreshold }}s warning threshold. Approaching SLO breach.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    - alert: ServerlessColdStartSloBreach
+      expr: |-
+        histogram_quantile(0.95,
+          sum by (le) (rate(serverless_proxy_routing_duration_seconds_bucket{path="slow"}[10m]))
+        ) > {{ .Values.rules.serverless.coldStartSlo.criticalThreshold }}
+      for: 5m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Serverless cold start SLO breach
+        description: "Serverless cold start p95 routing duration is {{`{{`}} $value | humanizeDuration {{`}}`}}, above the {{ .Values.rules.serverless.coldStartSlo.criticalThreshold }}s SLO. First-time executor requests are degraded.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+  {{- end }}
+
+  {{- if .Values.rules.serverless.coldStartRolloutTimeouts.enabled }}
+  - name: cognigy.alert.serverless.cold-start-rollout
+    rules:
+    - alert: ServerlessColdStartRolloutTimeouts
+      expr: |-
+        sum(increase(serverless_execution_reconcile_errors_total{reason="wait_timeout"}[10m])) > {{ .Values.rules.serverless.coldStartRolloutTimeouts.threshold }}
+      for: 5m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Serverless cold start rollout timeouts detected
+        description: "{{`{{`}} $value | printf \"%.0f\" {{`}}`}} cold start rollout timeouts in the last 10 minutes, above the {{ .Values.rules.serverless.coldStartRolloutTimeouts.threshold }} threshold. Pods are not becoming ready — possible node capacity, image pull, or resource quota issue.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+  {{- end }}
+
+  {{- if .Values.rules.serverless.routingErrors.enabled }}
+  - name: cognigy.alert.serverless.routing-errors
+    rules:
+    - alert: ServerlessRoutingErrorsElevated
+      expr: |-
+        sum(rate(serverless_proxy_routing_errors_total[5m])) > {{ .Values.rules.serverless.routingErrors.warningThreshold }}
+      for: 5m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Serverless routing errors are elevated
+        description: "Serverless routing error rate is {{`{{`}} $value | printf \"%.4f\" {{`}}`}}/s, above the {{ .Values.rules.serverless.routingErrors.warningThreshold }}/s warning threshold. May indicate intermittent metadata issues or flapping executor connections.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    - alert: ServerlessHighRoutingErrorRate
+      expr: |-
+        sum(rate(serverless_proxy_routing_errors_total[10m])) > {{ .Values.rules.serverless.routingErrors.criticalThreshold }}
+      for: 5m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Serverless routing error rate is critically high
+        description: "Serverless routing error rate is {{`{{`}} $value | printf \"%.4f\" {{`}}`}}/s, above the {{ .Values.rules.serverless.routingErrors.criticalThreshold }}/s critical threshold. Requests are failing before reaching executors.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+  {{- end }}
+
+  {{- if .Values.rules.serverless.reconcileErrors.enabled }}
+  - name: cognigy.alert.serverless.reconcile-errors
+    rules:
+    - alert: ServerlessReconcileErrorsElevated
+      expr: |-
+        sum(rate(serverless_execution_reconcile_errors_total{reason!="wait_timeout"}[5m])) > {{ .Values.rules.serverless.reconcileErrors.warningThreshold }}
+      for: 5m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Serverless reconcile errors are elevated
+        description: "Serverless reconcile error rate is {{`{{`}} $value | printf \"%.4f\" {{`}}`}}/s, above the {{ .Values.rules.serverless.reconcileErrors.warningThreshold }}/s warning threshold. Possible transient K8s API instability.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    - alert: ServerlessHighReconcileErrorRate
+      expr: |-
+        sum(rate(serverless_execution_reconcile_errors_total{reason!="wait_timeout"}[10m])) > {{ .Values.rules.serverless.reconcileErrors.criticalThreshold }}
+      for: 5m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Serverless reconcile error rate is critically high
+        description: "Serverless reconcile error rate is {{`{{`}} $value | printf \"%.4f\" {{`}}`}}/s, above the {{ .Values.rules.serverless.reconcileErrors.criticalThreshold }}/s critical threshold. Executor creation is failing at scale.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+  {{- end }}
+
+  {{- if .Values.rules.serverless.builderFailures.enabled }}
+  - name: cognigy.alert.serverless.builder
+    rules:
+    - alert: ServerlessSustainedBuilderFailures
+      expr: |-
+        sum(increase(serverless_builder_jobs_total{result="failure"}[10m])) > {{ .Values.rules.serverless.builderFailures.threshold }}
+      for: 5m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Serverless builder failures are sustained
+        description: "{{`{{`}} $value | printf \"%.0f\" {{`}}`}} build failures in the last 10 minutes, above the {{ .Values.rules.serverless.builderFailures.threshold }} threshold. Systemic build infrastructure problem — new extension deployments are blocked.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+  {{- end }}
+
+  {{- if or .Values.rules.serverless.lockAcquisitionTimeouts.enabled .Values.rules.serverless.lockContention.enabled }}
+  - name: cognigy.alert.serverless.locking
+    rules:
+    - alert: ServerlessLockAcquisitionTimeouts
+      expr: |-
+        sum(rate(serverless_execution_lock_attempts_total{result="timeout"}[5m])) > {{ .Values.rules.serverless.lockAcquisitionTimeouts.threshold }}
+      for: 5m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Serverless lock acquisition timeouts detected
+        description: "Serverless lock timeout rate is {{`{{`}} $value | printf \"%.4f\" {{`}}`}}/s, above the {{ .Values.rules.serverless.lockAcquisitionTimeouts.threshold }}/s threshold. Cold start requests are failing to acquire distributed locks.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- if .Values.rules.serverless.lockContention.enabled }}
+    - alert: ServerlessLockContentionSustained
+      expr: |-
+        sum(rate(serverless_store_lock_contention_total[5m])) > {{ .Values.rules.serverless.lockContention.threshold }}
+      for: 5m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Serverless lock contention is sustained
+        description: "Serverless lock contention rate is {{`{{`}} $value | printf \"%.4f\" {{`}}`}}/s, above the {{ .Values.rules.serverless.lockContention.threshold }}/s threshold. Multiple router replicas competing for the same executor lock.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{- end }}
+
+  {{- if .Values.rules.serverless.lifecyclePendingWrites.enabled }}
+  - name: cognigy.alert.serverless.lifecycle
+    rules:
+    - alert: ServerlessLifecyclePendingWritesBuildup
+      expr: |-
+        sum(serverless_lifecycle_pending_writes) > {{ .Values.rules.serverless.lifecyclePendingWrites.threshold }}
+      for: 5m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Serverless lifecycle pending writes are building up
+        description: "Serverless pending lifecycle writes are at {{`{{`}} $value | printf \"%.0f\" {{`}}`}}, above the {{ .Values.rules.serverless.lifecyclePendingWrites.threshold }} threshold. Stale executor usage data risks premature executor cleanup.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+  {{- end }}
+{{- end -}}

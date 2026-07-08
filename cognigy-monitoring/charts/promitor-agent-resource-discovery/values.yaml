@@ -1,0 +1,199 @@
+# Default values for promitor-agent-resource-discovery.
+# This is a YAML-formatted file.
+
+replicaCount: 1
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: containers.promitor.io/tomkerkhove/promitor-agent-resource-discovery
+  pullPolicy: Always
+  pullSecrets: []
+  tag:
+
+azureAuthentication:
+  appId: "" # [Deprecated] Prefer identity.id
+  appKey: "" # [Deprecated] Prefer identity.key
+  mode: "ServicePrincipal"
+  identity:
+    id: ""
+    key: ""
+    binding: ""
+
+cache:
+  enabled: true
+  durationInMinutes: 5
+
+prometheus:
+  enabled: true
+  enableServiceDiscovery: true
+  serviceMonitor:
+    enabled: false
+    namespace: ""
+    labels: {}
+    interval: 60s
+    timeout: 10s
+
+telemetry:
+  defaultLogLevel: "Error"
+  applicationInsights:
+    enabled: false
+    key: ""
+    logLevel: ""
+  containerLogs:
+    enabled: true
+    logLevel: ""
+
+## Metric Declaration YAML
+azureLandscape:
+  cloud: Global
+  tenantId:
+  subscriptions: []
+  # This field is deprecated, use subscriptions instead please
+  subscriptionIds: []
+
+resourceDiscoveryGroups: []
+# Sample resource discovery group configuration below
+# - name: logic-apps-landscape
+#   type: LogicApp
+#   criteria: <-- Optional, can have one or more of the criterias below
+#     include:
+#       subscriptionIds:
+#       - SUBSCRIPTON-ID-ABC
+#       - SUBSCRIPTON-ID-GHI
+#       resourceGroups:
+#       - promitor-resource-group-1
+#       - promitor-resource-group-2
+#       tags:
+#         app: promitor
+#         region: europe
+#       regions:
+#       - northeurope
+#       - westeurope
+
+deployment:
+  env:
+    extra: []
+    # - name: AZURE_STORAGE_QUEUE_SAS_TOKEN
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: promitor-agent-resource-discovery
+    #       key: azure-storage-queue-sas-token
+
+secrets:
+  # To use your own secret, set createSecret to false and define the name/keys that your secret uses
+  createSecret: true
+  secretName: ""
+  appKeySecret: azure-app-key
+  extra: {}
+  # azure-storage-queue-sas-token: <value>
+
+service:
+  port: 8889
+  ## By default this pod is running as a non-root user.
+  ## If you choose targetPort <1024 it will fail to start.
+  targetPort: 5000
+  loadBalancer:
+    enabled: false
+    azure:
+      dnsPrefix:
+      exposeInternally: false
+
+health:
+  readiness:
+    enabled: true
+    verifyDependencies: false
+    delay: 5
+    interval: 5
+    timeoutSeconds: 1
+    thresholds:
+      failure: 3
+      success: 1
+  liveness:
+    enabled: true
+    verifyDependencies: false
+    delay: 5
+    interval: 30
+    timeoutSeconds: 1
+    thresholds:
+      failure: 3
+      success: 1
+
+affinity: {}
+
+podLabels: {}
+
+annotations: {}
+
+priorityClassName: ""
+
+resources: {}
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+## Role-based access control
+## https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+rbac:
+  ## If true, create & use RBAC resources
+  create: true
+
+  ## If true, create & use Pod Security Policy resources
+  ## ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/
+  podSecurityPolicyEnabled: false
+
+  ## Service Account for pods
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  serviceAccount:
+    ## Specifies whether a service account should be created
+    create: true
+
+    ## The name of the service account to use if create is false
+    ## If create is true, a name is generated using the fullname template
+    name: promitor-resource-discovery
+    annotations: {}
+
+    ## Set this to true if you plan on using Pod Security Policy
+    automountServiceAccountToken: false
+
+nodeSelector: {}
+
+## securityContext and containerSecurityContext are using secure defaults.
+## Only override if you have a good reason to.
+securityContext:
+  enabled: true
+  runAsGroup: 10000
+  runAsNonRoot: true
+  runAsUser: 10000
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  enabled: true
+  privileged: false
+  readOnlyRootFilesystem: true
+
+tolerations: []
+
+## Pass extra volumeMounts to the promitor container
+extraVolumeMounts: []
+  # - name: secrets-store-inline
+  #   mountPath: "/mnt/promitor-secrets"
+  #   readOnly: true
+
+## Pass extra volumes to the promitor deployment
+extraVolumes: []
+  # - name: secrets-store-inline
+  #   csi:
+  #       driver: secrets-store.csi.k8s.io
+  #       readOnly: true
+  #       volumeAttributes:
+  #         secretProviderClass: "promitor-secrets"

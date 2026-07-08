@@ -286,7 +286,6 @@ cognigy-alerts:
     vg:
       enabled: false
 
-
 ## Prometheus Monitors for backend services
 cognigy-monitors:
   enabled: true
@@ -324,3 +323,192 @@ prometheus-msteams:
   connectors:
     - runtime: MSTEAMS_RUNTIME_WEBHOOK_URL # specify MS Teams Webhook URL for Runtime alerts
     - vg: MSTEAMS_VG_WEBHOOK_URL # specify MS Teams Webhook URL for VG alerts
+
+## Promitor: scrape Azure Monitor metrics into Prometheus.
+## Bundles two upstream charts as optional dependencies:
+##   - promitor-agent-resource-discovery (alias: promitorDiscovery)
+##   - promitor-agent-scraper            (alias: promitorScraper)
+##
+## Both are disabled by default. When enabled, Prometheus picks up the
+## scraper via its built-in ServiceMonitor (enabled below).
+##
+
+## Resource-discovery agent. Disabled by default.
+promitorDiscovery:
+  enabled: false
+
+  fullnameOverride: promitor-discovery
+  nameOverride: promitor-discovery
+
+  image:
+    repository: cognigy.azurecr.io/promitor/promitor-agent-resource-discovery
+    tag: "0.15.0"
+    pullSecrets:
+      - name: cognigy-registry-token
+
+  ## SP auth. identity.id = the Service Principal's appId (REQUIRED when enabled).
+  azureAuthentication:
+    mode: ServicePrincipal
+    identity:
+      id: ""
+      key: ""
+
+  secrets:
+    createSecret: false  # required so the Deployment mounts PROMITOR_AUTH_APPKEY from `secretName` below (operator-created) instead of the chart creating its own Secret.
+    secretName: promitor-azure-credentials
+
+  azureLandscape:
+    tenantId: ""
+    subscriptions: []
+    ## Example:
+    ## subscriptions:
+    ##   - "00000000-0000-0000-0000-000000000000"
+
+  ## Groups of Azure resources to enumerate. The scraper references these
+  ## groups by name under each metric's `resourceDiscoveryGroups`.
+  resourceDiscoveryGroups:
+    - name: all-loadbalancers
+      type: LoadBalancer
+
+## Scraper agent. Disabled by default.
+promitorScraper:
+  enabled: false
+
+  fullnameOverride: promitor-scraper
+  nameOverride: promitor-scraper
+  
+  image:
+    repository: cognigy.azurecr.io/promitor/promitor-agent-scraper
+    tag: "2.15.0"
+    pullSecrets:
+      - name: cognigy-registry-token
+
+  azureAuthentication:
+    mode: ServicePrincipal
+    identity:
+      id: ""
+      key: ""
+
+  secrets:
+    createSecret: false  # required so the Deployment mounts PROMITOR_AUTH_APPKEY from `secretName` below (operator-created) instead of the chart creating its own Secret.
+    secretName: promitor-azure-credentials
+
+  azureMetadata:
+    tenantId: ""
+    subscriptionId: ""
+    resourceGroupName: promitor
+    cloud: "Global"
+
+  metricDefaults:
+    aggregation:
+      interval: 00:01:00
+    scraping:
+      schedule: "* * * * *"
+
+  metricSinks:
+    prometheusScrapingEndpoint:
+      enabled: true
+      baseUriPath: /metrics
+      enableMetricTimestamps: true
+      serviceMonitor:
+        enabled: true
+        interval: 60s
+        timeout: 10s
+
+  resourceDiscovery:
+    enabled: true
+    host: promitor-discovery
+    port: 8889
+
+  ## Metrics to scrape. Defaults cover the Azure Load Balancer SLI set
+  ## (VIP/DIP availability, byte/packet counters, SNAT health). Override or
+  ## extend as needed.
+  metrics:
+    - name: azure_lb_vip_availability
+      description: "Azure Load Balancer VIP availability"
+      resourceType: LoadBalancer
+      azureMetricConfiguration:
+        metricName: VipAvailability
+        aggregation:
+          type: Average
+      resourceDiscoveryGroups:
+        - name: all-loadbalancers
+
+    - name: azure_lb_dip_availability
+      description: "Azure Load Balancer DIP availability"
+      resourceType: LoadBalancer
+      azureMetricConfiguration:
+        metricName: DipAvailability
+        aggregation:
+          type: Average
+      resourceDiscoveryGroups:
+        - name: all-loadbalancers
+
+    - name: azure_lb_byte_count
+      description: "Azure Load Balancer byte count"
+      resourceType: LoadBalancer
+      azureMetricConfiguration:
+        metricName: ByteCount
+        aggregation:
+          type: Total
+      resourceDiscoveryGroups:
+        - name: all-loadbalancers
+
+    - name: azure_lb_packet_count
+      description: "Azure Load Balancer packet count"
+      resourceType: LoadBalancer
+      azureMetricConfiguration:
+        metricName: PacketCount
+        aggregation:
+          type: Total
+      resourceDiscoveryGroups:
+        - name: all-loadbalancers
+
+    - name: azure_lb_syn_count
+      description: "Azure Load Balancer SYN count"
+      resourceType: LoadBalancer
+      azureMetricConfiguration:
+        metricName: SYNCount
+        aggregation:
+          type: Total
+      resourceDiscoveryGroups:
+        - name: all-loadbalancers
+
+    - name: azure_lb_snat_connection_count
+      description: "Azure Load Balancer SNAT connections (split by Backend IP and Connection State per SNAT Exhaustion runbook)"
+      resourceType: LoadBalancer
+      azureMetricConfiguration:
+        metricName: SnatConnectionCount
+        aggregation:
+          type: Total
+        dimensions:
+          - name: BackendIPAddress
+          - name: ConnectionState
+      resourceDiscoveryGroups:
+        - name: all-loadbalancers
+
+    - name: azure_lb_allocated_snat_ports
+      description: "Azure Load Balancer allocated SNAT ports (split by Backend IP and Protocol; filter Protocol=TCP for per-node value, see SNAT Exhaustion runbook)"
+      resourceType: LoadBalancer
+      azureMetricConfiguration:
+        metricName: AllocatedSnatPorts
+        aggregation:
+          type: Average
+        dimensions:
+          - name: BackendIPAddress
+          - name: ProtocolType
+      resourceDiscoveryGroups:
+        - name: all-loadbalancers
+
+    - name: azure_lb_used_snat_ports
+      description: "Azure Load Balancer used SNAT ports (split by Backend IP and Protocol; the key signal of SNAT exhaustion per node)"
+      resourceType: LoadBalancer
+      azureMetricConfiguration:
+        metricName: UsedSnatPorts
+        aggregation:
+          type: Average
+        dimensions:
+          - name: BackendIPAddress
+          - name: ProtocolType
+      resourceDiscoveryGroups:
+        - name: all-loadbalancers

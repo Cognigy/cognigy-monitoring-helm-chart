@@ -1,0 +1,148 @@
+{{- if .Values.rules.llmGateway.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-service-llm-gateway-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+  {{- if .Values.rules.llmGateway.errorRateHigh.enabled }}
+  - name: cognigy.alert.llm-gateway
+    rules:
+    - alert: LlmGatewayHighErrorRate
+      expr: |-
+        sum(rate(llm_gateway_requests_total{status="failure"}[10m]))
+          /
+        sum(rate(llm_gateway_requests_total[10m]))
+          > {{ .Values.rules.llmGateway.errorRateHigh.warningThreshold }}
+      for: 10m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway error rate is high
+        description: "LLM Gateway request failure rate is {{`{{`}} $value | humanizePercentage {{`}}`}}, above the {{ .Values.rules.llmGateway.errorRateHigh.warningThreshold }} warning threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    - alert: LlmGatewayCriticalErrorRate
+      expr: |-
+        sum(rate(llm_gateway_requests_total{status="failure"}[10m]))
+          /
+        sum(rate(llm_gateway_requests_total[10m]))
+          > {{ .Values.rules.llmGateway.errorRateHigh.criticalThreshold }}
+      for: 10m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway error rate is critically high
+        description: "LLM Gateway request failure rate is {{`{{`}} $value | humanizePercentage {{`}}`}}, above the {{ .Values.rules.llmGateway.errorRateHigh.criticalThreshold }} critical threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+  {{- end }}
+
+  {{- if .Values.rules.llmGateway.requestLatencyHigh.enabled }}
+  - name: cognigy.alert.llm-gateway.latency
+    rules:
+    - alert: LlmGatewayHighRequestLatency
+      expr: |-
+        histogram_quantile(
+          {{ .Values.rules.llmGateway.requestLatencyHigh.quantile }},
+          sum(rate(llm_gateway_request_duration_seconds_bucket{status="success"}[10m])) by (le)
+        ) > {{ .Values.rules.llmGateway.requestLatencyHigh.warningThreshold }}
+      for: 10m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway p{{ .Values.rules.llmGateway.requestLatencyHigh.quantile }} request latency is high
+        description: "LLM Gateway p{{ .Values.rules.llmGateway.requestLatencyHigh.quantile }} request latency is {{`{{`}} $value | humanizeDuration {{`}}`}}, above the {{ .Values.rules.llmGateway.requestLatencyHigh.warningThreshold }}s warning threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    - alert: LlmGatewayCriticalRequestLatency
+      expr: |-
+        histogram_quantile(
+          {{ .Values.rules.llmGateway.requestLatencyHigh.quantile }},
+          sum(rate(llm_gateway_request_duration_seconds_bucket{status="success"}[10m])) by (le)
+        ) > {{ .Values.rules.llmGateway.requestLatencyHigh.criticalThreshold }}
+      for: 10m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway p{{ .Values.rules.llmGateway.requestLatencyHigh.quantile }} request latency is critically high
+        description: "LLM Gateway p{{ .Values.rules.llmGateway.requestLatencyHigh.quantile }} request latency is {{`{{`}} $value | humanizeDuration {{`}}`}}, above the {{ .Values.rules.llmGateway.requestLatencyHigh.criticalThreshold }}s critical threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+  {{- end }}
+
+  {{- if or .Values.rules.llmGateway.rateLimitErrors.enabled .Values.rules.llmGateway.elevatedFallbackRate.enabled }}
+  - name: cognigy.alert.llm-gateway.providers
+    rules:
+    {{- if .Values.rules.llmGateway.rateLimitErrors.enabled }}
+    - alert: LlmGatewayProviderRateLimitHigh
+      expr: |-
+        sum(rate(llm_gateway_config_set_failures_total{error_type="rate_limit"}[10m]))
+          /
+        sum(rate(llm_gateway_config_set_failures_total[10m]))
+          > {{ .Values.rules.llmGateway.rateLimitErrors.warningThreshold }}
+      for: 10m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway is experiencing provider rate limiting
+        description: "{{`{{`}} $value | humanizePercentage {{`}}`}} of LLM Gateway config-set failures are rate-limit errors, above the {{ .Values.rules.llmGateway.rateLimitErrors.warningThreshold }} warning threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    - alert: LlmGatewayProviderRateLimitCritical
+      expr: |-
+        sum(rate(llm_gateway_config_set_failures_total{error_type="rate_limit"}[10m]))
+          /
+        sum(rate(llm_gateway_config_set_failures_total[10m]))
+          > {{ .Values.rules.llmGateway.rateLimitErrors.criticalThreshold }}
+      for: 10m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway is experiencing critical provider rate limiting
+        description: "{{`{{`}} $value | humanizePercentage {{`}}`}} of LLM Gateway config-set failures are rate-limit errors, above the {{ .Values.rules.llmGateway.rateLimitErrors.criticalThreshold }} critical threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{- if .Values.rules.llmGateway.elevatedFallbackRate.enabled }}
+    - alert: LlmGatewayElevatedFallbackRate
+      expr: |-
+        sum(rate(llm_gateway_fallback_activations_total[10m]))
+          /
+        sum(rate(llm_gateway_requests_total[10m]))
+          > {{ .Values.rules.llmGateway.elevatedFallbackRate.threshold }}
+      for: 10m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway config-set fallback rate is elevated
+        description: "{{`{{`}} $value | humanizePercentage {{`}}`}} of LLM Gateway requests are triggering a config-set fallback, above the {{ .Values.rules.llmGateway.elevatedFallbackRate.threshold }} threshold. Primary providers may be degraded.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{- end }}
+
+  {{- if .Values.rules.llmGateway.timeToFirstToken.enabled }}
+  - name: cognigy.alert.llm-gateway.streaming
+    rules:
+    - alert: LlmGatewayHighTimeToFirstToken
+      expr: |-
+        histogram_quantile(0.95,
+          sum(rate(llm_gateway_time_to_first_token_seconds_bucket[10m])) by (le)
+        ) > {{ .Values.rules.llmGateway.timeToFirstToken.warningThreshold }}
+      for: 10m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway p95 time-to-first-token is high
+        description: "LLM Gateway p95 time-to-first-token is {{`{{`}} $value | humanizeDuration {{`}}`}}, above the {{ .Values.rules.llmGateway.timeToFirstToken.warningThreshold }}s warning threshold. Streaming UX may be degraded.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    - alert: LlmGatewayCriticalTimeToFirstToken
+      expr: |-
+        histogram_quantile(0.95,
+          sum(rate(llm_gateway_time_to_first_token_seconds_bucket[10m])) by (le)
+        ) > {{ .Values.rules.llmGateway.timeToFirstToken.criticalThreshold }}
+      for: 10m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway p95 time-to-first-token is critically high
+        description: "LLM Gateway p95 time-to-first-token is {{`{{`}} $value | humanizeDuration {{`}}`}}, above the {{ .Values.rules.llmGateway.timeToFirstToken.criticalThreshold }}s critical threshold. Streaming UX is severely degraded.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+  {{- end }}
+{{- end -}}

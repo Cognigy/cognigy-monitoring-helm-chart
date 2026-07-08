@@ -1,4 +1,5 @@
 {{- $targetNamespace := .Values.appNamespacesTarget }}
+{{- $window := .Values.rules.velero.lookbackWindow | default "25h" }}
 {{- if .Values.rules.velero.enabled -}}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
@@ -11,22 +12,30 @@ spec:
   - name: cognigy.alert.velero
     rules:
     - alert: VeleroBackupFailed
-      expr:  velero_backup_failure_total > 0
+      expr: >-
+        increase(velero_backup_failure_total[{{ $window }}]) > 0
+        {{- range .Values.rules.velero.failureExcludeSelectors }}
+        unless increase(velero_backup_failure_total{{ . }}[{{ $window }}]) > 0
+        {{- end }}
       for: 15m
       labels:
         severity: warning
       annotations:
         summary: Velero backup has failed (instance {{`{{`}} $labels.instance }})
-        description: "Velero backup has failed\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+        description: "Velero backup has failed in the last {{ $window }}\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
 
     - alert: VeleroBackupPartiallyFailed
-      expr:  velero_backup_partial_failure_total > 0
+      expr: >-
+        increase(velero_backup_partial_failure_total[{{ $window }}]) > 0
+        {{- range .Values.rules.velero.partialFailureExcludeSelectors }}
+        unless increase(velero_backup_partial_failure_total{{ . }}[{{ $window }}]) > 0
+        {{- end }}
       for: 15m
       labels:
         severity: warning
       annotations:
         summary: Velero backup has failed partially (instance {{`{{`}} $labels.instance }})
-        description: "Velero backup has failed partially \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+        description: "Velero backup has failed partially in the last {{ $window }}\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
 
     - alert: Velero backup absent
       expr: absent(velero_backup_success_total)

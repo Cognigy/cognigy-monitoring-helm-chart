@@ -1,0 +1,60 @@
+{{- if .Values.rules.ai.cxoneAwsGateway.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-service-cxone-aws-gateway-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+  {{- if .Values.rules.ai.cxoneAwsGateway.kinesisConsumptionFailure.enabled }}
+  - name: cognigy.alert.cxone-aws-gateway.kinesis
+    rules:
+    - alert: CxoneAwsGatewayKinesisConsumptionFailure
+      expr: |-
+        sum by (stream_name) (
+          increase(kinesis_records_consumed_total{job="service-cxone-aws-gateway"}[5m])
+        ) == 0
+      for: 5m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-boron
+      annotations:
+        summary: cxone-aws-gateway Kinesis consumption stalled on stream {{`{{`}} $labels.stream_name {{`}}`}}
+        description: "service-cxone-aws-gateway consumed no Kinesis records from stream {{`{{`}} $labels.stream_name {{`}}`}} in the last 5 minutes. Event loss risk.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+  {{- end }}
+
+  {{- if .Values.rules.ai.cxoneAwsGateway.kinesisSubscriptionRateExceeded.enabled }}
+  - name: cognigy.alert.cxone-aws-gateway.kinesis.subscription
+    rules:
+    - alert: CxoneAwsGatewayKinesisSubscriptionRateExceeded
+      expr: |-
+        sum(
+          rate(kinesis_errors_total{job="service-cxone-aws-gateway", operation=~"{{ .Values.rules.ai.cxoneAwsGateway.kinesisSubscriptionRateExceeded.operationRegex }}"}[5m])
+        ) * 60 > {{ .Values.rules.ai.cxoneAwsGateway.kinesisSubscriptionRateExceeded.threshold }}
+      for: 5m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-boron
+      annotations:
+        summary: cxone-aws-gateway Kinesis subscription rate limit exceeded
+        description: "service-cxone-aws-gateway is receiving {{`{{`}} $value | printf \"%.1f\" {{`}}`}} Kinesis subscription errors/min, above the {{ .Values.rules.ai.cxoneAwsGateway.kinesisSubscriptionRateExceeded.threshold }}/min threshold. Multiple pods may be attempting to subscribe to the same shard.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+  {{- end }}
+
+  {{- if .Values.rules.ai.cxoneAwsGateway.crossAccountRoleFailure.enabled }}
+  - name: cognigy.alert.cxone-aws-gateway.sts
+    rules:
+    - alert: CxoneAwsGatewayCrossAccountRoleFailure
+      expr: |-
+        sum(
+          rate(sts_assume_role_errors_total{job="service-cxone-aws-gateway"}[5m])
+        ) * 60 > {{ .Values.rules.ai.cxoneAwsGateway.crossAccountRoleFailure.threshold }}
+      for: 5m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-boron
+      annotations:
+        summary: cxone-aws-gateway STS AssumeRole errors are high
+        description: "service-cxone-aws-gateway is receiving {{`{{`}} $value | printf \"%.1f\" {{`}}`}} STS AssumeRole errors/min, above the {{ .Values.rules.ai.cxoneAwsGateway.crossAccountRoleFailure.threshold }}/min threshold. Cross-account AWS calls may be blocked.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+  {{- end }}
+{{- end -}}

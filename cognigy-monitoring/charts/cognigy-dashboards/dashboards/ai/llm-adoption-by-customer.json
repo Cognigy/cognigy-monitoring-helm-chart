@@ -1,0 +1,844 @@
+  {
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 1,
+    "id": null,
+    "links": [],
+    "panels": [
+      {
+        "collapsed": false,
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+        "id": 1,
+        "panels": [],
+        "title": "Adoption Overview",
+        "type": "row"
+      },
+      {
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "description": "Number of distinct organisations that made at least one LLM request in the last 7 days",
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "thresholds" },
+            "mappings": [],
+            "thresholds": { "mode": "absolute", "steps": [{ "color": "blue" }] },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": { "h": 6, "w": 8, "x": 0, "y": 1 },
+        "id": 2,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+          "showPercentChange": false,
+          "textMode": "auto",
+          "wideLayout": true
+        },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "${datasource}" },
+            "expr": "count(count by (organisationId) (last_over_time(llm:model_diversity:per_org_7d{cluster=~\"$cluster\"}[2h])))",
+            "instant": true,
+            "legendFormat": "Organisations",
+            "refId": "A"
+          }
+        ],
+        "title": "Active Organisations",
+        "type": "stat"
+      },
+      {
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "description": "Number of distinct LLM provider+model combinations in use",
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "thresholds" },
+            "mappings": [],
+            "thresholds": { "mode": "absolute", "steps": [{ "color": "purple" }] },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": { "h": 6, "w": 8, "x": 8, "y": 1 },
+        "id": 3,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+          "showPercentChange": false,
+          "textMode": "auto",
+          "wideLayout": true
+        },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "${datasource}" },
+            "expr": "count(count by (provider, modelType) (last_over_time(llm:model_adoption:org_count_7d{cluster=~\"$cluster\"}[2h])))",
+            "instant": true,
+            "legendFormat": "Models",
+            "refId": "A"
+          }
+        ],
+        "title": "Distinct Models in Use",
+        "type": "stat"
+      },
+      {
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "description": "Number of distinct LLM providers in use",
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "thresholds" },
+            "mappings": [],
+            "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }] },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": { "h": 6, "w": 8, "x": 16, "y": 1 },
+        "id": 4,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+          "showPercentChange": false,
+          "textMode": "auto",
+          "wideLayout": true
+        },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "${datasource}" },
+            "expr": "count(count by (provider) (last_over_time(llm:provider_adoption:org_count_7d{cluster=~\"$cluster\"}[2h])))",
+            "instant": true,
+            "legendFormat": "Providers",
+            "refId": "A"
+          }
+        ],
+        "title": "Distinct Providers in Use",
+        "type": "stat"
+      },
+      {
+        "collapsed": false,
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
+        "id": 5,
+        "panels": [],
+        "title": "Model & Provider Adoption",
+        "type": "row"
+      },
+      {
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "description": "How many organisations use each provider+model combination",
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "thresholds" },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green" },
+                { "color": "yellow", "value": 10 },
+                { "color": "red", "value": 50 }
+              ]
+            },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": { "h": 10, "w": 12, "x": 0, "y": 8 },
+        "id": 6,
+        "options": {
+          "displayMode": "gradient",
+          "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+          "maxVizHeight": 300,
+          "minVizHeight": 16,
+          "minVizWidth": 0,
+          "namePlacement": "left",
+          "orientation": "horizontal",
+          "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+          "showUnfilled": true,
+          "sizing": "auto",
+          "valueMode": "color"
+        },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "${datasource}" },
+            "editorMode": "code",
+            "expr": "sort_desc(sum by (provider, modelType) (last_over_time(llm:model_adoption:org_count_7d{cluster=~\"$cluster\"}[2h])))",
+            "instant": true,
+            "legendFormat": "{{provider}} / {{modelType}}",
+            "range": false,
+            "refId": "A"
+          }
+        ],
+      "title": "Organisation Count by Model",
+      "type": "bargauge"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "description": "How many organisations use each provider",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green" },
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 50 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 8 },
+      "id": 7,
+      "options": {
+        "displayMode": "gradient",
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 0,
+        "namePlacement": "left",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "editorMode": "code",
+          "expr": "sort_desc(sum by (provider) (last_over_time(llm:provider_adoption:org_count_7d{cluster=~\"$cluster\"}[2h])))",
+          "instant": true,
+          "legendFormat": "{{provider}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Organisation Count by Provider",
+      "type": "bargauge"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 },
+      "id": 8,
+        "panels": [],
+        "title": "Use Case Adoption",
+        "type": "row"
+      },
+      {
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "description": "How many organisations use each LLM use case",
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "thresholds" },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green" },
+                { "color": "yellow", "value": 10 },
+                { "color": "red", "value": 50 }
+              ]
+            },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+"gridPos": { "h": 10, "w": 12, "x": 0, "y": 19 },
+      "id": 9,
+        "options": {
+          "displayMode": "gradient",
+          "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+          "maxVizHeight": 300,
+          "minVizHeight": 16,
+          "minVizWidth": 0,
+          "namePlacement": "left",
+          "orientation": "horizontal",
+          "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+          "showUnfilled": true,
+          "sizing": "auto",
+          "valueMode": "color"
+        },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "${datasource}" },
+            "editorMode": "code",
+            "expr": "sort_desc(sum by (useCase) (last_over_time(llm:usecase_adoption:org_count_7d{cluster=~\"$cluster\"}[2h])))",
+            "instant": true,
+            "legendFormat": "{{useCase}}",
+            "range": false,
+            "refId": "A"
+          }
+        ],
+        "title": "Organisation Count by Use Case",
+        "type": "bargauge"
+      },
+      {
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "description": "Total LLM request volume per use case over the last 7 days",
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "thresholds" },
+            "decimals": 0,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "blue" },
+                { "color": "yellow", "value": 10000 },
+                { "color": "red", "value": 100000 }
+              ]
+            },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+"gridPos": { "h": 10, "w": 12, "x": 12, "y": 19 },
+      "id": 16,
+        "options": {
+          "displayMode": "gradient",
+          "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+          "maxVizHeight": 300,
+          "minVizHeight": 16,
+          "minVizWidth": 0,
+          "namePlacement": "left",
+          "orientation": "horizontal",
+          "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+          "showUnfilled": true,
+          "sizing": "auto",
+          "valueMode": "color"
+        },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "${datasource}" },
+            "editorMode": "code",
+            "expr": "sort_desc(sum by (useCase) (last_over_time(llm:requests:by_usecase:increase_7d{cluster=~\"$cluster\"}[2h])))",
+            "instant": true,
+            "legendFormat": "{{useCase}}",
+            "range": false,
+            "refId": "A"
+          }
+        ],
+        "title": "Requests by Use Case",
+        "type": "bargauge"
+      },
+      {
+        "collapsed": false,
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 29 },
+        "id": 10,
+        "panels": [],
+        "title": "Traffic Concentration",
+        "type": "row"
+      },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "description": "Total LLM request volume per provider and model over the last 7 days",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue" },
+              { "color": "yellow", "value": 10000 },
+              { "color": "red", "value": 100000 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 12, "w": 12, "x": 0, "y": 30 },
+      "id": 17,
+      "options": {
+        "displayMode": "gradient",
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 0,
+        "namePlacement": "left",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "editorMode": "code",
+          "expr": "sort_desc(sum by (provider, modelType) (last_over_time(llm:requests:by_org_provider_model:increase_7d{cluster=~\"$cluster\"}[2h])))",
+          "instant": true,
+          "legendFormat": "{{provider}} / {{modelType}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Request Volume by Model",
+      "type": "bargauge"
+    },
+      {
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "description": "Organisations by total LLM request volume, broken down by provider and model",
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "palette-classic" },
+            "custom": {
+              "align": "auto",
+              "cellOptions": { "type": "auto" },
+              "inspect": false
+            },
+            "mappings": [],
+            "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }] }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Requests" },
+              "properties": [
+                { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } },
+                { "id": "unit", "value": "short" }
+              ]
+            }
+          ]
+        },
+        "gridPos": { "h": 12, "w": 12, "x": 12, "y": 30 },
+        "id": 11,
+        "options": {
+          "cellHeight": "sm",
+          "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
+          "showHeader": true,
+          "sortBy": [{ "desc": true, "displayName": "Requests" }]
+        },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "${datasource}" },
+            "editorMode": "code",
+            "exemplar": false,
+            "expr": "topk(50, sum by (organisationId, provider, modelType) (last_over_time(llm:requests:by_org_provider_model:increase_7d{cluster=~\"$cluster\"}[2h])))",
+            "format": "table",
+            "instant": true,
+            "legendFormat": "__auto",
+            "range": false,
+            "refId": "A"
+          },
+          {
+            "datasource": { "type": "prometheus", "uid": "${datasource}" },
+            "editorMode": "code",
+            "exemplar": false,
+            "expr": "group by (organisationId, organisationName) (cognigy_ai_flow_execution_processing_time_count{cluster=~\"$cluster\"})",
+            "format": "table",
+            "instant": true,
+            "legendFormat": "__auto",
+            "range": false,
+            "refId": "B",
+            "hide": false
+          }
+        ],
+        "title": "Organisations by Traffic per Model",
+        "transformations": [
+          {
+            "id": "joinByField",
+            "options": {
+              "byField": "organisationId",
+              "mode": "outer"
+            }
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": { "Time #A": true, "Time #B": true, "__name__": true, "Value #B": true },
+              "indexByName": {
+                "organisationId": 0,
+                "organisationName": 1,
+                "provider": 2,
+                "modelType": 3,
+                "Value #A": 4
+              },
+              "renameByName": {
+                "organisationId": "Organisation",
+                "organisationName": "Organisation Name",
+                "provider": "Provider",
+                "modelType": "Model",
+                "Value #A": "Requests"
+              }
+            }
+          }
+        ],
+        "type": "table"
+      },
+      {
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "description": "Maximum traffic share held by a single organisation for each model. A value of 100% means a single customer dominates that model's usage.",
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "thresholds" },
+            "custom": {
+              "align": "auto",
+              "cellOptions": { "type": "auto" },
+              "inspect": false
+            },
+            "mappings": [],
+            "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }] }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Max Share" },
+              "properties": [
+                { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } },
+                { "id": "unit", "value": "percent" },
+                { "id": "decimals", "value": 1 },
+                { "id": "max", "value": 100 },
+                { "id": "min", "value": 0 },
+                { "id": "thresholds", "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 50 },
+                    { "color": "orange", "value": 75 },
+                    { "color": "red", "value": 90 }
+                  ]
+                }}
+              ]
+            }
+          ]
+        },
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 42 },
+        "id": 12,
+        "options": {
+          "cellHeight": "sm",
+          "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
+          "showHeader": true,
+          "sortBy": [{ "desc": true, "displayName": "Max Share" }]
+        },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "${datasource}" },
+            "editorMode": "code",
+            "exemplar": false,
+            "expr": "sort_desc(max by (provider, modelType) (last_over_time(llm:requests:org_traffic_share:ratio_7d{cluster=~\"$cluster\"}[2h])) * 100)",
+            "format": "table",
+            "instant": true,
+            "legendFormat": "__auto",
+            "range": false,
+            "refId": "A"
+          }
+        ],
+        "title": "Traffic Concentration - Max Single-Org Share per Model",
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": { "Time": true, "__name__": true },
+              "indexByName": {
+                "provider": 0,
+                "modelType": 1,
+                "Value": 2
+              },
+              "renameByName": {
+                "provider": "Provider",
+                "modelType": "Model",
+                "Value": "Max Share"
+              }
+            }
+          }
+        ],
+        "type": "table"
+      },
+      {
+        "collapsed": false,
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 52 },
+      "id": 13,
+        "panels": [],
+        "title": "Model Diversity",
+        "type": "row"
+      },
+      {
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "description": "Distribution of organisations by how many distinct models they use. Each bar shows how many organisations use that number of models.",
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "palette-classic" },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "fillOpacity": 80,
+              "gradientMode": "hue",
+              "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+              "lineWidth": 1,
+              "scaleDistribution": { "type": "linear" },
+              "thresholdsStyle": { "mode": "off" }
+            },
+            "mappings": [],
+            "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }] },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+"gridPos": { "h": 10, "w": 12, "x": 0, "y": 53 },
+      "id": 14,
+        "options": {
+          "barRadius": 0.05,
+          "barWidth": 0.7,
+          "fullHighlight": false,
+          "groupWidth": 0.7,
+          "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+          "orientation": "vertical",
+          "showValue": "always",
+          "stacking": "none",
+          "tooltip": { "hideZeros": false, "maxHeight": 600, "mode": "single", "sort": "none" },
+          "xField": "Models Used",
+          "xTickLabelRotation": 0
+        },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "${datasource}" },
+            "editorMode": "code",
+            "exemplar": false,
+            "expr": "last_over_time(llm:model_diversity:per_org_7d{cluster=~\"$cluster\"}[2h])",
+            "format": "table",
+            "instant": true,
+            "legendFormat": "__auto",
+            "range": false,
+            "refId": "A"
+          }
+        ],
+        "title": "Model Diversity Distribution",
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": { "Time": true },
+              "indexByName": {},
+              "renameByName": {}
+            }
+          },
+          {
+            "id": "convertFieldType",
+            "options": {
+              "conversions": [
+                { "destinationType": "string", "targetField": "Value" }
+              ],
+              "fields": {}
+            }
+          },
+          {
+            "id": "groupBy",
+            "options": {
+              "fields": {
+                "Value": {
+                  "aggregations": [],
+                  "operation": "groupby"
+                },
+                "organisationId": {
+                  "aggregations": ["count"],
+                  "operation": "aggregate"
+                }
+              }
+            }
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {},
+              "indexByName": {},
+              "renameByName": {
+                "Value": "Models Used",
+                "organisationId (count)": "Organisations"
+              }
+            }
+          },
+          {
+            "id": "convertFieldType",
+            "options": {
+              "conversions": [
+                { "destinationType": "number", "targetField": "Models Used" }
+              ],
+              "fields": {}
+            }
+          },
+          {
+            "id": "sortBy",
+            "options": {
+              "fields": {},
+              "sort": [{ "field": "Models Used", "desc": false }]
+            }
+          },
+          {
+            "id": "convertFieldType",
+            "options": {
+              "conversions": [
+                { "destinationType": "string", "targetField": "Models Used" }
+              ],
+              "fields": {}
+            }
+          }
+        ],
+        "type": "barchart"
+      },
+      {
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "description": "Organisations by number of distinct LLM models used. High diversity may indicate broad feature adoption; low diversity means higher risk if a single provider has outages.",
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "palette-classic" },
+            "custom": {
+              "align": "auto",
+              "cellOptions": { "type": "auto" },
+              "inspect": false
+            },
+            "mappings": [],
+            "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }] }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Models Used" },
+              "properties": [
+                { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } },
+                { "id": "unit", "value": "short" },
+                { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "yellow", "value": 3 }, { "color": "red", "value": 6 }] } }
+              ]
+            }
+          ]
+        },
+"gridPos": { "h": 10, "w": 12, "x": 12, "y": 53 },
+      "id": 15,
+        "options": {
+          "cellHeight": "sm",
+          "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
+          "showHeader": true,
+          "sortBy": [{ "desc": true, "displayName": "Models Used" }]
+        },
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "${datasource}" },
+            "editorMode": "code",
+            "exemplar": false,
+            "expr": "sort_desc(last_over_time(llm:model_diversity:per_org_7d{cluster=~\"$cluster\"}[2h]))",
+            "format": "table",
+            "instant": true,
+            "legendFormat": "__auto",
+            "range": false,
+            "refId": "A"
+          },
+          {
+            "datasource": { "type": "prometheus", "uid": "${datasource}" },
+            "editorMode": "code",
+            "exemplar": false,
+            "expr": "group by (organisationId, organisationName) (cognigy_ai_flow_execution_processing_time_count{cluster=~\"$cluster\"})",
+            "format": "table",
+            "instant": true,
+            "legendFormat": "__auto",
+            "range": false,
+            "refId": "B",
+            "hide": false
+          }
+        ],
+        "title": "Organisations by Model Diversity",
+        "transformations": [
+          {
+            "id": "joinByField",
+            "options": {
+              "byField": "organisationId",
+              "mode": "outer"
+            }
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": { "Time #A": true, "Time #B": true, "__name__": true, "Value #B": true },
+              "indexByName": {
+                "organisationId": 0,
+                "organisationName": 1,
+                "Value #A": 2
+              },
+              "renameByName": {
+                "organisationId": "Organisation",
+                "organisationName": "Organisation Name",
+                "Value #A": "Models Used"
+              }
+            }
+          }
+        ],
+        "type": "table"
+      }
+    ],
+    "preload": false,
+    "refresh": "5m",
+    "schemaVersion": 41,
+    "tags": [
+      "llm-providers",
+      "ai",
+      "adoption"
+    ],
+    "templating": {
+      "list": [
+        {
+          "current": { "text": "", "value": "" },
+          "includeAll": false,
+          "label": "Data Source",
+          "name": "datasource",
+          "options": [],
+          "query": "prometheus",
+          "refresh": 1,
+          "regex": "",
+          "type": "datasource"
+        },
+        {
+          "allValue": ".*",
+          "current": { "text": "", "value": "" },
+          "datasource": { "type": "prometheus", "uid": "$datasource" },
+          "definition": "label_values(llm_providers_requests_total, cluster)",
+          "hide": 2,
+          "includeAll": true,
+          "label": "Cluster",
+          "multi": true,
+          "name": "cluster",
+          "options": [],
+          "query": {
+            "qryType": 1,
+            "query": "label_values(llm_providers_requests_total, cluster)",
+            "refId": "PrometheusVariableQueryEditor-VariableQuery"
+          },
+          "refresh": 2,
+          "regex": "",
+          "sort": 1,
+          "type": "query"
+        }
+      ]
+    },
+    "time": { "from": "now-7d", "to": "now" },
+    "timepicker": {},
+    "timezone": "",
+    "title": "AI / LLM Adoption by Customer",
+    "uid": "llm-adoption-by-customer",
+    "version": 1
+  }

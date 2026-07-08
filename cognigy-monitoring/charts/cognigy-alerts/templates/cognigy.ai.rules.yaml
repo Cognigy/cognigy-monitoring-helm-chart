@@ -36,7 +36,6 @@ spec:
         for: 1m
         labels:
           severity: warning
-          group: ai-custom-alert-rules-aluminium
         annotations:
           summary: Messages/min rate is high (instance {{`{{`}} $labels.instance }})
           description: "Messages/min rate has crossed {{$.Values.rules.ai.conversationVolume.threshold }} threshold: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
@@ -44,16 +43,22 @@ spec:
       {{- if (.Values.rules.ai.conversationVolumeDynamic.enabled ) }}
       - alert: highConversationVolumeDynamic
         expr: >
-          sum(increase(cognigy_endpoint_raw_messages_count[1m])) > 
-          (1 + {{$.Values.rules.ai.conversationVolumeDynamic.percentageThreshold}}/100) * 
-          quantile_over_time(0.95, sum(increase(cognigy_endpoint_raw_messages_count[1m]))[{{$.Values.rules.ai.conversationVolumeDynamic.baselineDays}}d:1m])
-        for: 10m
+          (
+          sum(increase(cognigy_endpoint_raw_messages_count[{{$.Values.rules.ai.conversationVolumeDynamic.smoothingWindow}}])) >
+          {{$.Values.rules.ai.conversationVolumeDynamic.minMessages}}
+          )
+          and
+          (
+          sum(increase(cognigy_endpoint_raw_messages_count[{{$.Values.rules.ai.conversationVolumeDynamic.smoothingWindow}}])) >
+          (1 + {{$.Values.rules.ai.conversationVolumeDynamic.percentageThreshold}}/100) *
+          quantile_over_time({{$.Values.rules.ai.conversationVolumeDynamic.baselineQuantile}}, sum(increase(cognigy_endpoint_raw_messages_count[{{$.Values.rules.ai.conversationVolumeDynamic.smoothingWindow}}]))[{{$.Values.rules.ai.conversationVolumeDynamic.baselineDays}}d:5m])
+          )
+        for: {{$.Values.rules.ai.conversationVolumeDynamic.timeout}}
         labels:
           severity: warning
-          group: ai-custom-alert-rules-aluminium
         annotations:
-          summary: Messages/min rate is {{$.Values.rules.ai.conversationVolumeDynamic.percentageThreshold}}% higher than peak levels (instance {{`{{`}} $labels.instance }})
-          description: "Current messages/min rate ({{`{{`}} $value | printf \"%.0f\" }}) is {{$.Values.rules.ai.conversationVolumeDynamic.percentageThreshold}}% higher than the 95th percentile of the past {{$.Values.rules.ai.conversationVolumeDynamic.baselineDays}} days\n  LABELS = {{`{{`}} $labels }}"
+          summary: Conversation volume over {{$.Values.rules.ai.conversationVolumeDynamic.smoothingWindow}} is more than {{$.Values.rules.ai.conversationVolumeDynamic.percentageThreshold}}% above the dynamic baseline (instance {{`{{`}} $labels.instance }})
+          description: "Messages in the last {{$.Values.rules.ai.conversationVolumeDynamic.smoothingWindow}} ({{`{{`}} $value | printf \"%.0f\" }}) are more than {{$.Values.rules.ai.conversationVolumeDynamic.percentageThreshold}}% above the {{$.Values.rules.ai.conversationVolumeDynamic.baselineQuantile}} quantile of the past {{$.Values.rules.ai.conversationVolumeDynamic.baselineDays}} days (alert only fires above {{$.Values.rules.ai.conversationVolumeDynamic.minMessages}} messages per {{$.Values.rules.ai.conversationVolumeDynamic.smoothingWindow}})\n  LABELS = {{`{{`}} $labels }}"
       {{- end }}
   {{- end }}
 
@@ -264,11 +269,12 @@ spec:
             {{ $.Values.rules.ai.serviceHttp.requestLatencyHighThreshold }}
         for: 5m
         labels:
-          group: iron-custom-alert-rules
+          group: ai-custom-alert-rules-aluminium
           severity: warning
         annotations:
           summary: service-HTTP requests latency is high for organisationId {{`{{`}} $labels.organisationId  }} projectId {{`{{`}} $labels.projectId  }}
           description: "Service-HTTP requests latency is higher than {{`{{`}} $value }} sec\n LABELS = {{`{{`}} $labels }}"
+          recommendation: "Check RabbitMQ/message queue length. High latency may indicate message backpressure."
   {{- end }}
 
   {{- if (.Values.rules.ai.serviceCollaboration.enabled ) }}

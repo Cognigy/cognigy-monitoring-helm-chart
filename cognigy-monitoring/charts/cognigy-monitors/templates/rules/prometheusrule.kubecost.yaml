@@ -1,0 +1,54 @@
+---
+{{- if .Values.monitors.kubecost.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-kubecost-recording-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+    app: cost-analyzer
+spec:
+  groups:
+  # Pre-computed cost building blocks for the "Services / Kubecost Global v2" dashboard.
+  # Gated on the same flag as the kubecost ServiceMonitor (monitors.kubecost.enabled), so the
+  # rule is evaluated locally in every cluster that scrapes kubecost. Each cluster emits its own
+  # {cluster,cloud} series, which Thanos aggregates for the central Grafana. Every by() includes
+  # `cluster`, so re-summing centrally never double-counts.
+  - name: cognigy.recording.kubecost.global
+    interval: 1h
+    rules:
+    # Monthly run-rate of compute (CPU + GPU) cost per cluster/cloud.
+    - record: kubecost:compute_cost:monthly_usd
+      expr: |
+        sum by (cluster, cloud) (
+          (
+            avg by (node, cluster, cloud) (kube_node_status_capacity{resource="cpu", unit="core"})
+            * avg by (node, cluster, cloud) (node_cpu_hourly_cost * 730)
+          )
+          + (avg by (node, cluster, cloud) (node_gpu_hourly_cost * 730))
+        )
+
+    # Monthly run-rate of memory cost per cluster/cloud.
+    - record: kubecost:memory_cost:monthly_usd
+      expr: |
+        sum by (cluster, cloud) (
+          avg by (node, cluster, cloud) (kube_node_status_capacity{resource="memory", unit="byte"}) / 1024 / 1024 / 1024
+          * avg by (node, cluster, cloud) (node_ram_hourly_cost * 730)
+        )
+
+    # Monthly run-rate of PersistentVolume storage cost per cluster/cloud.
+    - record: kubecost:storage_pv_cost:monthly_usd
+      expr: |
+        sum by (cluster, cloud) (
+          avg by (persistentvolume, cluster, cloud) (pv_hourly_cost) * 730
+          * avg by (persistentvolume, cluster, cloud) (kube_persistentvolume_capacity_bytes) / 1024 / 1024 / 1024
+        )
+
+    # Local (node attached disk) storage in GB per cluster/cloud.
+    # Cost is applied in the panel via the $localStorageGBCost constant.
+    - record: kubecost:storage_local_gb:total
+      expr: |
+        sum by (cluster, cloud) (
+          node_filesystem_size_bytes{job="node-exporter", fstype!="", fstype!="tmpfs", fstype!="nfs4"}
+        ) / 1024 / 1024 / 1024
+{{- end -}}

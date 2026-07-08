@@ -1000,6 +1000,148 @@ data:
               "thresholds": [],
               "title": "Message execution time (full receive message)",
               "type": "timeseries"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "description": "Latency of the Cognigy.AI message stack (seconds).",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "smooth",
+                    "lineWidth": 1,
+                    "pointSize": 1,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": true,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "line"
+                    }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "unit": "s"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 36
+              },
+              "id": 100,
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "last",
+                    "mean"
+                  ],
+                  "displayMode": "table",
+                  "placement": "right",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "pluginVersion": "12.0.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": true,
+                  "expr": "histogram_quantile(0.80, sum(rate(cognigy_ai_message_stack_latency_bucket{cluster=\"$cluster\"}[5m])) by (le)) / 1000",
+                  "hide": false,
+                  "interval": "",
+                  "legendFormat": "80th",
+                  "range": true,
+                  "refId": "C"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": true,
+                  "expr": "histogram_quantile(0.90, sum(rate(cognigy_ai_message_stack_latency_bucket{cluster=\"$cluster\"}[5m])) by (le)) / 1000",
+                  "hide": false,
+                  "interval": "",
+                  "legendFormat": "90th",
+                  "range": true,
+                  "refId": "B"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "histogram_quantile(0.95, sum(rate(cognigy_ai_message_stack_latency_bucket{cluster=\"$cluster\"}[5m])) by (le)) / 1000",
+                  "instant": false,
+                  "interval": "",
+                  "legendFormat": "95th",
+                  "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": true,
+                  "expr": "histogram_quantile(0.99, sum(rate(cognigy_ai_message_stack_latency_bucket{cluster=\"$cluster\"}[5m])) by (le)) / 1000",
+                  "hide": false,
+                  "interval": "",
+                  "legendFormat": "99th",
+                  "range": true,
+                  "refId": "D"
+                }
+              ],
+              "thresholds": [],
+              "title": "Message Stack Latency",
+              "type": "timeseries"
             }
           ],
           "targets": [

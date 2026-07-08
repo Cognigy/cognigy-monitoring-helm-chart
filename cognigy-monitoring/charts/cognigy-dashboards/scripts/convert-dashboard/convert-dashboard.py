@@ -132,7 +132,7 @@ def patch_dashboards_json(content, multicluster_key, dashboard_type, resource_na
         for variable in content_struct['templating']['list']:
             logging.debug(f"Checking {variable['name']} variable")
             if not keep_variable_current_values:
-                logging.debug(f'Resetting {variable['name']} variable current values')
+                logging.debug(f"Resetting {variable['name']} variable current values")
                 variable['current'] = {
                     "text": "",
                     "value": ""

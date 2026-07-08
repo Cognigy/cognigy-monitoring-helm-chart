@@ -1,0 +1,71 @@
+{{- if and
+    (index .Values "products" "ai" "enabled")
+    (index .Values "products" "ai" "dashboards" "llm-adoption-by-customer" "enabled")
+}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-cognigy-llm-adoption-rules
+  namespace: {{ template "cognigy-dashboards.namespace" . }}
+  labels:
+    {{- include "cognigy-dashboards.labels" . | nindent 4 }}
+    release: {{ .Release.Name }}
+spec:
+  groups:
+  - name: cognigy.recording.llm.adoption
+    interval: 1h
+    rules:
+    - record: llm:model_adoption:org_count_7d
+      expr: |
+        count by (cluster, provider, modelType) (
+          count by (cluster, organisationId, provider, modelType) (
+            increase(llm_providers_requests_total[7d]) > 0
+          )
+        )
+
+    - record: llm:provider_adoption:org_count_7d
+      expr: |
+        count by (cluster, provider) (
+          count by (cluster, organisationId, provider) (
+            increase(llm_providers_requests_total[7d]) > 0
+          )
+        )
+
+    - record: llm:usecase_adoption:org_count_7d
+      expr: |
+        count by (cluster, useCase) (
+          count by (cluster, organisationId, useCase) (
+            increase(llm_providers_requests_total[7d]) > 0
+          )
+        )
+
+    - record: llm:requests:by_org_provider_model:increase_7d
+      expr: |
+        sum by (cluster, organisationId, provider, modelType) (
+          increase(llm_providers_requests_total[7d])
+        )
+
+    - record: llm:requests:org_traffic_share:ratio_7d
+      expr: |
+        sum by (cluster, organisationId, provider, modelType) (
+          increase(llm_providers_requests_total[7d])
+        )
+        / ignoring(organisationId) group_left
+        sum by (cluster, provider, modelType) (
+          increase(llm_providers_requests_total[7d])
+        )
+
+    - record: llm:model_diversity:per_org_7d
+      expr: |
+        count by (cluster, organisationId) (
+          count by (cluster, organisationId, provider, modelType) (
+            increase(llm_providers_requests_total[7d]) > 0
+          )
+        )
+
+    - record: llm:requests:by_usecase:increase_7d
+      expr: |
+        sum by (cluster, useCase) (
+          increase(llm_providers_requests_total[7d])
+        )
+{{- end -}}

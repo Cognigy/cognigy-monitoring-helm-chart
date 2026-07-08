@@ -13,12 +13,6 @@ resources:
   repositories:
     - repository: self
 
-    - repository: GitHub
-      type: github
-      endpoint: github.com_mayrbenjamin92
-      name: Cognigy/cognigy-monitoring-helm-chart
-      ref: main
-
 variables:
   azureContainerRegistry: "Azure Container Registry Prod"
   chartPath: "cognigy-monitoring"
@@ -66,6 +60,8 @@ stages:
 
       - job: createGithubRelease
         displayName: Publish Helm Chart Github repo
+        variables:
+          - group: github-app-creds
         steps:
           - task: HelmInstaller@0
             displayName: Install Helm 3.8.2
@@ -74,34 +70,74 @@ stages:
               checkLatestHelmVersion: false
 
           - checkout: self
-            persistCredentials: "true"
             clean: "true"
             displayName: Checkout Helm Chart Source Repo
 
-          - checkout: GitHub
-            persistCredentials: "true"
-            clean: "true"
-            displayName: Checkout Helm Chart Target Repo
+          - task: DownloadSecureFile@1
+            name: githubAppKey
+            displayName: Download GitHub App private key
+            inputs:
+              secureFile: cognigy-bypass-branch-protection.2026-07-08.private-key.pem
 
           - script: |
+              set -euo pipefail
+
+              app_id="$(GH_APP_ID)"
+              installation_id="$(GH_APP_INSTALLATION_ID)"
+              pem="$(githubAppKey.secureFilePath)"
+
+              # Build a short-lived JWT (RS256) signed with the GitHub App private key
+              now=$(date +%s)
+              iat=$((now - 60))
+              exp=$((now + 540))
+
+              b64url() { openssl base64 -A | tr '+/' '-_' | tr -d '='; }
+              header=$(printf '{"alg":"RS256","typ":"JWT"}' | b64url)
+              payload=$(printf '{"iat":%d,"exp":%d,"iss":"%s"}' "$iat" "$exp" "$app_id" | b64url)
+              unsigned="${header}.${payload}"
+              signature=$(printf '%s' "$unsigned" | openssl dgst -sha256 -sign "$pem" -binary | b64url)
+              jwt="${unsigned}.${signature}"
+
+              # Exchange the JWT for a GitHub App installation access token
+              token=$(curl -sS -X POST \
+                -H "Authorization: Bearer ${jwt}" \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                "https://api.github.com/app/installations/${installation_id}/access_tokens" \
+                | yq e '.token' -)
+
+              if [ -z "$token" ] || [ "$token" = "null" ]; then
+                echo "Failed to obtain GitHub App installation token"
+                exit 1
+              fi
+
+              echo "##vso[task.setsecret]$token"
+              echo "##vso[task.setvariable variable=GH_TOKEN;issecret=true]$token"
+            displayName: Generate GitHub App installation token
+
+          - script: |
+              set -euo pipefail
+
               git config --global user.email "azure-pipeline@cognigy.com"
               git config --global user.name "Azure Pipelines Bot"
-              
-              cd $(chartGithubPath)
-              rm -fr ./*
-              cd ..
 
-              cd $(AzureDevOpsRepo)
+              githubDir="$(Agent.BuildDirectory)/$(chartGithubPath)"
+              rm -rf "$githubDir"
+              git clone "https://x-access-token:$(GH_TOKEN)@github.com/Cognigy/cognigy-monitoring-helm-chart.git" "$githubDir"
+
+              # Wipe existing chart contents (the repo's .git directory is preserved)
+              cd "$githubDir"
+              rm -fr ./*
+              cd "$(Build.SourcesDirectory)"
+
               helmChartVersion="$(yq e '.version' $(chartPath)/Chart.yaml)"
               echo "Helm Chart version is $helmChartVersion"
 
               rm -fr .git
               rm -fr CHANGELOG
-              cp -r ./ ../$(chartGithubPath)
+              cp -r ./ "$githubDir"
 
-              cd ../$(chartGithubPath)
-              git fetch origin
-              git checkout -b main --track origin/main
+              cd "$githubDir"
               git add -A
               git commit -m "Adding files for Helm Chart $helmChartVersion"
               git tag v$helmChartVersion

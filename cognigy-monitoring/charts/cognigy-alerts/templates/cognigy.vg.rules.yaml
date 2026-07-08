@@ -85,7 +85,7 @@ spec:
 
       {{- if (.Values.rules.vg.featureServer.handoverErrors.enabled ) }}
       - alert: HandoverErrorsFeatureServer
-        expr: sum(increase(vg_feature_server_handover_error_total{status!~"busy|no-answer"}[5m])) >  {{$.Values.rules.vg.featureServer.handoverErrors.threshold }}
+        expr: sum(increase(vg_feature_server_handover_total{category="failed", status!~"busy|no-answer"}[5m])) > {{$.Values.rules.vg.featureServer.handoverErrors.threshold }}
         for: 0m
         labels:
           severity: warning
@@ -93,6 +93,117 @@ spec:
         annotations:
           summary: feature-server had handover errors (instance {{`{{`}} $labels.instance }})
           description: "feature-server had handover errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.unhandledRejections.enabled ) }}
+      - alert: UnhandledRejectionsFeatureServer
+        expr: sum(increase(vg_feature_server_unhandled_rejection_total[5m])) > {{$.Values.rules.vg.featureServer.unhandledRejections.threshold }}
+        for: 5m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: feature-server had unhandled promise rejections
+          description: "feature-server unhandled rejections exceeded threshold: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.wsMaxReconnectsExceeded.enabled ) }}
+      - alert: WebSocketMaxReconnectsExceeded
+        expr: sum(increase(vg_feature_server_websocket_exceeded_max_reconnects_total[5m])) > 0
+        for: 0m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: feature-server exhausted WebSocket reconnect attempts to Cognigy AI
+          description: "VG gave up reconnecting to Cognigy AI. Calls will fail silently.\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.wsConnectionTimeouts.enabled ) }}
+      - alert: WebSocketConnectionTimeouts
+        expr: sum(increase(vg_feature_server__websocket_connection_timeout_after_retries[5m])) > 0
+        for: 0m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: feature-server WebSocket connection timed out after all retries
+          description: "WebSocket connection to Cognigy AI timed out after 3 retries.\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.speechErrors.enabled ) }}
+      - alert: SpeechErrorRateHigh
+        expr: sum(rate(vg_feature_server_speech_error[5m])) * 60 > {{$.Values.rules.vg.featureServer.speechErrors.threshold }}
+        for: 5m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "Speech error rate is high ({{`{{`}} $value {{`}}`}} errors/min)"
+          description: "STT/TTS vendor errors exceeded {{$.Values.rules.vg.featureServer.speechErrors.threshold }}/min threshold.\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.grpcTtsErrors.enabled ) }}
+      - alert: GrpcTtsErrorRateHigh
+        expr: sum(rate(vg_feature_server_grpc_tts_errors_total[5m])) * 60 > {{$.Values.rules.vg.featureServer.grpcTtsErrors.threshold }}
+        for: 5m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "gRPC TTS error rate is high ({{`{{`}} $value {{`}}`}} errors/min)"
+          description: "Streaming TTS errors (ElevenLabs, PlayHT) exceeded {{$.Values.rules.vg.featureServer.grpcTtsErrors.threshold }}/min threshold.\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.speechFallback.enabled ) }}
+      - alert: SpeechFallbackRateHigh
+        expr: sum(rate(vg_feature_server_speech_fallback[5m])) * 60 > {{$.Values.rules.vg.featureServer.speechFallback.threshold }}
+        for: 5m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "Speech fallback rate is high ({{`{{`}} $value {{`}}`}} fallbacks/min)"
+          description: "Primary speech vendor failing, fallback vendor in use. Service degraded.\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.callSetupTimeSlow.enabled ) }}
+      - alert: CallSetupTimeSlow
+        expr: histogram_quantile(0.95, sum(rate(vg_feature_server_call_setup_time_milliseconds_bucket[5m])) by (le)) > {{$.Values.rules.vg.featureServer.callSetupTimeSlow.threshold }}
+        for: 5m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "Call setup time p95 is slow ({{`{{`}} $value {{`}}`}}ms)"
+          description: "p95 call setup time exceeded {{$.Values.rules.vg.featureServer.callSetupTimeSlow.threshold }}ms. Users may hear silence on call start.\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.webhookConnectionErrors.enabled ) }}
+      - alert: WebhookConnectionErrorRateHigh
+        expr: sum(rate(vg_feature_server_webhook_connection_error_count[5m])) * 60 > {{$.Values.rules.vg.featureServer.webhookConnectionErrors.threshold }}
+        for: 5m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "Webhook connection error rate is high ({{`{{`}} $value {{`}}`}} errors/min)"
+          description: "VG cannot reach configured webhooks. Check webhook URLs and external service health.\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.audioPlayerThreadLeak.enabled ) }}
+      - alert: AudioPlayerThreadLeak
+        expr: |-
+          sum by (pod) (vg_freeswitch_audio_player_threads_active)
+            > 2 * sum by (pod) (vg_feature_server_freeswitch_media_channels_in_use)
+            and sum by (pod) (vg_feature_server_freeswitch_media_channels_in_use) > 0
+        for: {{ $.Values.rules.vg.featureServer.audioPlayerThreadLeak.timeout }}
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "AudioPlayer thread leak detected on pod {{`{{`}} $labels.pod {{`}}`}}"
+          description: "AudioPlayer active threads ({{`{{`}} $value {{`}}`}}) exceed 2x active channels. Threads are not being cleaned up. Consider restarting the pod.\n  LABELS = {{`{{`}} $labels }}"
       {{- end }}
     {{- end }}
 {{- end -}}

@@ -1,0 +1,139 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "promitor-agent-resource-discovery.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "promitor-agent-resource-discovery.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      {{- include "promitor-agent-resource-discovery.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "promitor-agent-resource-discovery.selectorLabels" . | nindent 8 }}
+      {{- if .Values.podLabels }}
+      {{- toYaml .Values.podLabels | nindent 8 }}
+      {{- end }}
+      {{- if empty .Values.azureAuthentication.identity.binding | not }}
+        aadpodidbinding: {{ .Values.azureAuthentication.identity.binding }}
+      {{- end }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- if .Values.secrets.createSecret }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if .Values.annotations }}
+        {{- toYaml .Values.annotations | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- if and .Values.rbac.create .Values.rbac.serviceAccount.create .Values.rbac.serviceAccount.automountServiceAccountToken }}
+      automountServiceAccountToken: true
+      {{- end }}
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        runAsGroup: {{ .Values.securityContext.runAsGroup }}
+        runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
+        runAsUser: {{ .Values.securityContext.runAsUser }}
+      {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.Version }}
+        seccompProfile:
+          type: {{ .Values.securityContext.seccompProfile.type }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.rbac.create }}
+      serviceAccountName: {{ template "promitor-agent-resource-discovery.serviceaccountname" . }}
+      {{- end }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations:
+        {{- toYaml .Values.tolerations | nindent 6 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+  {{- if or (or .Values.azureAuthentication.identity.key .Values.azureAuthentication.appKey (eq .Values.secrets.createSecret false)) .Values.deployment.env.extra }}
+          env:
+  {{- if or .Values.azureAuthentication.identity.key .Values.azureAuthentication.appKey (eq .Values.secrets.createSecret false) }}
+          - name: PROMITOR_AUTH_APPKEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "promitor-agent-resource-discovery.secretname" . }}
+                key: {{ .Values.secrets.appKeySecret }}
+        {{- end }}
+        {{- if .Values.deployment.env.extra }}
+{{ toYaml .Values.deployment.env.extra | indent 10 }}
+        {{- end }}
+        {{- end }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          - name: config-volume-{{ template "promitor-agent-resource-discovery.name" . }}
+            mountPath: /config/
+          {{- if and .Values.containerSecurityContext.enabled .Values.containerSecurityContext.readOnlyRootFilesystem }}
+          - name: tmp
+            mountPath: /tmp/
+          {{- end }}
+          {{- if .Values.extraVolumeMounts }}
+{{ toYaml .Values.extraVolumeMounts | indent 10 }}
+          {{- end }}
+  {{- if .Values.health.liveness.enabled }}
+          livenessProbe:
+            failureThreshold: {{ .Values.health.liveness.thresholds.failure }}
+            httpGet:
+              path: /api/v1/health?includeDependencies={{ .Values.health.liveness.verifyDependencies }}
+              port: http
+            initialDelaySeconds: {{ .Values.health.liveness.delay }}
+            periodSeconds: {{ .Values.health.liveness.interval }}
+            successThreshold: {{ .Values.health.liveness.thresholds.success }}
+            timeoutSeconds: {{ .Values.health.liveness.timeoutSeconds }}
+  {{- end }}
+  {{- if .Values.health.readiness.enabled }}
+          readinessProbe:
+            failureThreshold: {{ .Values.health.readiness.thresholds.failure }}
+            httpGet:
+              path: /api/v1/health?includeDependencies={{ .Values.health.readiness.verifyDependencies }}
+              port: http
+            initialDelaySeconds: {{ .Values.health.readiness.delay }}
+            periodSeconds: {{ .Values.health.readiness.interval }}
+            successThreshold: {{ .Values.health.readiness.thresholds.success }}
+            timeoutSeconds: {{ .Values.health.readiness.timeoutSeconds }}
+  {{- end }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName | quote }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity: {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: config-volume-{{ template "promitor-agent-resource-discovery.name" . }}
+          configMap:
+            name: config-map-{{ template "promitor-agent-resource-discovery.name" . }}
+        {{- if and .Values.containerSecurityContext.enabled .Values.containerSecurityContext.readOnlyRootFilesystem }}
+        - emptyDir: { }
+          name: tmp
+        {{- end }}
+        {{- if .Values.extraVolumes }}
+{{ toYaml .Values.extraVolumes | indent 8 }}
+        {{- end }}

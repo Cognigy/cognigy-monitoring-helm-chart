@@ -50,7 +50,7 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 1,
-      "id": 112,
+      "id": null,
       "links": [],
       "panels": [
         {
@@ -125,7 +125,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[$__range]))",
+              "expr": "sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range]))",
               "refId": "A"
             }
           ],
@@ -198,7 +198,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",status=\"success\"}[$__range])) / sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[$__range]))",
+              "expr": "sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"success\"}[$__range])) / sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range]))",
               "refId": "A"
             }
           ],
@@ -268,7 +268,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[1m])))",
+              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[1m])))",
               "refId": "A"
             }
           ],
@@ -429,7 +429,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",status=\"success\"}[$__range]))",
+              "expr": "sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"success\"}[$__range]))",
               "instant": true,
               "legendFormat": "Success",
               "range": false,
@@ -442,7 +442,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",status=\"failure\"}[$__range]))",
+              "expr": "sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"failure\"}[$__range]))",
               "instant": true,
               "legendFormat": "Failure",
               "range": false,
@@ -521,7 +521,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum by(provider) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[$__range])))",
+              "expr": "(sum by(provider) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range])))",
               "instant": true,
               "legendFormat": "{{`{{`}}provider{{`}}`}}",
               "range": false,
@@ -600,7 +600,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[$__range])))",
+              "expr": "(sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range])))",
               "instant": true,
               "legendFormat": "{{`{{`}}useCase{{`}}`}}",
               "range": false,
@@ -681,7 +681,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum by(llmResourceLevel) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[$__range])))",
+              "expr": "(sum by(llmResourceLevel) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range])))",
               "instant": true,
               "legendFormat": "{{`{{`}}llmResourceLevel{{`}}`}}",
               "range": false,
@@ -795,7 +795,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[1h]))",
+              "expr": "sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[1h]))",
               "legendFormat": "{{`{{`}}useCase{{`}}`}}",
               "refId": "A"
             }
@@ -890,7 +890,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[1h]))",
+              "expr": "sum by(provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[1h]))",
               "legendFormat": "{{`{{`}}provider{{`}}`}} - {{`{{`}}modelType{{`}}`}}",
               "refId": "A"
             }
@@ -1005,7 +1005,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.50, sum by(le) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[1m])))",
+              "expr": "histogram_quantile(0.50, sum by(le) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[1m])))",
               "legendFormat": "p50",
               "refId": "A"
             },
@@ -1014,7 +1014,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[1m])))",
+              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[1m])))",
               "legendFormat": "p95",
               "refId": "B"
             },
@@ -1023,7 +1023,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.99, sum by(le) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[1m])))",
+              "expr": "histogram_quantile(0.99, sum by(le) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[1m])))",
               "legendFormat": "p99",
               "refId": "C"
             }
@@ -1118,7 +1118,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.95, sum by(le, provider, modelType) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[1m])))",
+              "expr": "histogram_quantile(0.95, sum by(le, provider, modelType) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[1m])))",
               "legendFormat": "{{`{{`}}provider{{`}}`}} - {{`{{`}}modelType{{`}}`}}",
               "refId": "A"
             }
@@ -1230,7 +1230,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(failureReason) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",status=\"failure\"}[5m]))",
+              "expr": "sum by(failureReason) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"failure\"}[5m]))",
               "legendFormat": "{{`{{`}}failureReason{{`}}`}}",
               "refId": "A"
             }
@@ -1324,7 +1324,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(failureReason, retryCount) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",status=\"failure\"}[5m]))",
+              "expr": "sum by(failureReason, retryCount) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"failure\"}[5m]))",
               "legendFormat": "{{`{{`}}failureReason{{`}}`}} (retry {{`{{`}}retryCount{{`}}`}})",
               "refId": "A"
             }
@@ -1475,7 +1475,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum(rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",status=\"success\",retryCount!=\"0\"}[5m]))",
+              "expr": "sum(rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"success\",retryCount!=\"0\"}[5m]))",
               "legendFormat": "Successful Retries",
               "refId": "A"
             },
@@ -1484,7 +1484,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum(rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",status=\"failure\",retryCount!=\"0\"}[5m]))",
+              "expr": "sum(rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"failure\",retryCount!=\"0\"}[5m]))",
               "legendFormat": "Failed Retries",
               "refId": "B"
             },
@@ -1493,7 +1493,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum(rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",status=\"success\",retryCount!=\"0\"}[5m])) / sum(rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",retryCount!=\"0\"}[5m]))",
+              "expr": "sum(rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"success\",retryCount!=\"0\"}[5m])) / sum(rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",retryCount!=\"0\"}[5m]))",
               "legendFormat": "Success Rate",
               "refId": "C"
             }
@@ -1564,7 +1564,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum by(failureReason) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",status=\"failure\"}[$__range]))",
+              "expr": "sum by(failureReason) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"failure\"}[$__range]))",
               "instant": true,
               "legendFormat": "{{`{{`}}failureReason{{`}}`}}",
               "range": false,
@@ -1678,7 +1678,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(useCase) (rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[$__rate_interval])) * 60",
+              "expr": "sum by(useCase) (rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])) * 60",
               "legendFormat": "{{`{{`}}useCase{{`}}`}}",
               "refId": "A"
             }
@@ -1773,7 +1773,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(llmResourceLevel) (rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[$__rate_interval])) * 60",
+              "expr": "sum by(llmResourceLevel) (rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])) * 60",
               "legendFormat": "{{`{{`}}llmResourceLevel{{`}}`}}",
               "refId": "A"
             }
@@ -1850,7 +1850,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "round(sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[$__range])))",
+              "expr": "round(sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range])))",
               "instant": true,
               "legendFormat": "{{`{{`}}useCase{{`}}`}}",
               "range": false,
@@ -1929,7 +1929,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "round(sum by(provider,modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[$__range])))",
+              "expr": "round(sum by(provider,modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range])))",
               "instant": true,
               "legendFormat": "{{`{{`}}provider{{`}}`}} / {{`{{`}}modelType{{`}}`}}",
               "range": false,
@@ -2009,7 +2009,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",status=\"failure\"}[$__range])) / sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",status=~\"success|failure\"}[$__range])) * 100",
+              "expr": "sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"failure\"}[$__range])) / sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=~\"success|failure\"}[$__range])) * 100",
               "instant": true,
               "legendFormat": "{{`{{`}}useCase{{`}}`}}",
               "range": false,
@@ -2089,7 +2089,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(provider,modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",status=\"failure\"}[$__range])) / sum by(provider,modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}[$__range])) * 100",
+              "expr": "sum by(provider,modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"failure\"}[$__range])) / sum by(provider,modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range])) * 100",
               "instant": true,
               "legendFormat": "{{`{{`}}provider{{`}}`}} / {{`{{`}}modelType{{`}}`}}",
               "range": false,
@@ -2105,11 +2105,821 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "Identifies which llmReferenceId is problematic. Use the value to search Kibana (filter by llmReferenceId) and find which node/flow uses it.",
           "gridPos": {
             "h": 1,
             "w": 24,
             "x": 0,
             "y": 78
+          },
+          "id": 3000,
+          "panels": [],
+          "title": "LLM Resource Diagnosis",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "LLM resources ranked by failure rate over the dashboard time range. High values indicate a resource worth investigating in the logs.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 5
+                  },
+                  {
+                    "color": "red",
+                    "value": 20
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Failure %"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "mode": "gradient",
+                      "type": "color-background"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 79
+          },
+          "id": 3001,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Failure %"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "topk(20, (100 * sum by(llmReferenceId, provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"failure\"}[$__range])) / sum by(llmReferenceId, provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range]))) > 0)",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Top LLM Resources by Failure %",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "Value": 3,
+                  "llmReferenceId": 0,
+                  "modelType": 2,
+                  "provider": 1
+                },
+                "renameByName": {
+                  "Value": "Failure %",
+                  "llmReferenceId": "LLM Resource ID",
+                  "modelType": "Model",
+                  "provider": "Provider"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "LLM resources ranked by p95 time-to-first-token. Slow values indicate startup-phase latency (queue, prefill, auth, network). For non-streaming responses TTFT equals total duration.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 2
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "p95 TTFT"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "mode": "gradient",
+                      "type": "color-background"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 79
+          },
+          "id": 3002,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "p95 TTFT"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "topk(20, histogram_quantile(0.95, sum by(le, llmReferenceId, provider, modelType) (rate(llm_providers_ttft_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval]))))",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Top LLM Resources by p95 TTFT",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "Value": 3,
+                  "llmReferenceId": 0,
+                  "modelType": 2,
+                  "provider": 1
+                },
+                "renameByName": {
+                  "Value": "p95 TTFT",
+                  "llmReferenceId": "LLM Resource ID",
+                  "modelType": "Model",
+                  "provider": "Provider"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "LLM resources ranked by request volume. Helps identify the resources most worth investigating when issues surface.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1000
+                  },
+                  {
+                    "color": "blue",
+                    "value": 10000
+                  }
+                ]
+              },
+              "unit": "short"
+            }
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 88
+          },
+          "id": 3003,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Total Requests"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "topk(20, round(sum by(llmReferenceId, provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range]))))",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Top LLM Resources by Request Volume",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "Value": 3,
+                  "llmReferenceId": 0,
+                  "modelType": 2,
+                  "provider": 1
+                },
+                "renameByName": {
+                  "Value": "Total Requests",
+                  "llmReferenceId": "LLM Resource ID",
+                  "modelType": "Model",
+                  "provider": "Provider"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "LLM resources ranked by retry rate (calls that needed at least one retry). High retry rates often correlate with transient provider issues or rate-limit pressure.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 5
+                  },
+                  {
+                    "color": "red",
+                    "value": 20
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Retry %"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "mode": "gradient",
+                      "type": "color-background"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 88
+          },
+          "id": 3004,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Retry %"
+              }
+            ]
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "topk(20, (100 * sum by(llmReferenceId, provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",retryCount!=\"0\"}[$__range])) / sum by(llmReferenceId, provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range]))) > 0)",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Top LLM Resources by Retry %",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "Value": 3,
+                  "llmReferenceId": 0,
+                  "modelType": 2,
+                  "provider": 1
+                },
+                "renameByName": {
+                  "Value": "Retry %",
+                  "llmReferenceId": "LLM Resource ID",
+                  "modelType": "Model",
+                  "provider": "Provider"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "collapsed": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Time-to-first-token, prompt size, and output size. Source metrics: llm_providers_ttft_seconds, llm_providers_prompt_tokens, llm_providers_output_tokens.",
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 97
+          },
+          "id": 3100,
+          "panels": [],
+          "title": "TTFT & Tokens",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Time-to-first-token percentiles. For streaming responses TTFT measures latency until the first chunk arrives from the provider. For non-streaming, TTFT equals total request duration.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "showPoints": "never",
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 98
+          },
+          "id": 3101,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "histogram_quantile(0.50, sum by(le) (rate(llm_providers_ttft_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])))",
+              "legendFormat": "p50",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_ttft_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])))",
+              "legendFormat": "p95",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "histogram_quantile(0.99, sum by(le) (rate(llm_providers_ttft_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])))",
+              "legendFormat": "p99",
+              "refId": "C"
+            }
+          ],
+          "title": "TTFT Percentiles",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "p95 time-to-first-token broken down by provider and model. Lets you spot a single provider/model regressing without needing to pick one filter at a time.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "showPoints": "never",
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 98
+          },
+          "id": 3102,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "histogram_quantile(0.95, sum by(le, provider, modelType) (rate(llm_providers_ttft_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])))",
+              "legendFormat": "{{`{{`}}provider{{`}}`}} - {{`{{`}}modelType{{`}}`}}",
+              "refId": "A"
+            }
+          ],
+          "title": "p95 TTFT by Provider & Model",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Prompt size in tokens (median and p95). A growing prompt size is a leading indicator of unbounded conversation history or RAG context drift.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "showPoints": "never",
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 106
+          },
+          "id": 3103,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "histogram_quantile(0.50, sum by(le) (rate(llm_providers_prompt_tokens_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])))",
+              "legendFormat": "p50",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_prompt_tokens_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])))",
+              "legendFormat": "p95",
+              "refId": "B"
+            }
+          ],
+          "title": "Prompt Tokens (Input)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Output (completion) size in tokens (median and p95). Combined with TTFT and total duration this gives a throughput view per resource.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "showPoints": "never",
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 106
+          },
+          "id": 3104,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "histogram_quantile(0.50, sum by(le) (rate(llm_providers_output_tokens_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])))",
+              "legendFormat": "p50",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_output_tokens_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])))",
+              "legendFormat": "p95",
+              "refId": "B"
+            }
+          ],
+          "title": "Output Tokens (Completion)",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 114
           },
           "id": 16,
           "panels": [],
@@ -2176,7 +2986,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 79
+            "y": 115
           },
           "id": 17,
           "options": {
@@ -2332,7 +3142,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 79
+            "y": 115
           },
           "id": 18,
           "options": {
@@ -2436,7 +3246,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 87
+            "y": 123
           },
           "id": 19,
           "options": {
@@ -2531,7 +3341,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 87
+            "y": 123
           },
           "id": 20,
           "options": {
@@ -2684,6 +3494,31 @@ data:
             "options": [],
             "query": {
               "query": "label_values(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\"}, provider)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "allValue": ".*",
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}, llmReferenceId)",
+            "includeAll": true,
+            "label": "LLM Resource ID",
+            "multi": true,
+            "name": "llmReferenceId",
+            "options": [],
+            "query": {
+              "query": "label_values(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}, llmReferenceId)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 2,

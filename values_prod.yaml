@@ -57,6 +57,9 @@ cognigy-dashboards:
         ## Enable Postgres dashboard for LA and VG products
         postgresql:
           enabled: false
+        ## Enable Azure Load Balancer dashboard (requires Promitor — see below)
+        azure-load-balancer:
+          enabled: false
 
 ## Cognigy Alerts
 cognigy-alerts:
@@ -70,3 +73,27 @@ cognigy-alerts:
     ## Enable Postgres Alerts for LA and VG products
     postgresql:
       enabled: false
+    ## Enable Azure Load Balancer alerts
+    azureLoadBalancer:
+      enabled: false
+
+## Enable for monitoring Azure LB
+## Azure Load Balancer monitoring (Promitor)
+promitorDiscovery:
+  enabled: &promitorEnabled false
+  azureAuthentication:
+    identity:
+      id: &promitorAppId ""
+  azureLandscape:
+    tenantId: &promitorTenantId ""
+    subscriptions:
+      - &promitorSubscriptionId ""
+
+promitorScraper:
+  enabled: *promitorEnabled
+  azureAuthentication:
+    identity:
+      id: *promitorAppId
+  azureMetadata:
+    tenantId: *promitorTenantId
+    subscriptionId: *promitorSubscriptionId

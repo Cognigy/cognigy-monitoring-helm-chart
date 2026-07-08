@@ -1,5 +1,49 @@
 # Release Notes
 
+### 2026.3.0
+**Released** July 8th, 2026
+
+#### Changes
+- Updated Grafana to v13.0.2 and Grafana helm chart to v12.4.7.
+- Introduced Azure Load Balancer monitoring using Promitor (agent scraper and resource discovery).
+- Introduced Sealed Secrets Controller monitoring (ServiceMonitor).
+- Introduced the following new dashboards:
+    - `AI / Deprecated Features Usage`
+    - `AI / LLM Adoption by Customer`
+    - `AI / LLM Gateway`
+    - `AI / Service CXone AWS Gateway`
+    - `AI / Service Logs`
+    - `IN / Transcript Analyzer`
+    - `Serverless / Overview`
+    - `Serverless / Cold Start`
+    - `Services / Alertmanager Overview Global`
+    - `Services / Azure Load Balancer`
+    - `Services / Kubecost Global v2`
+    - `Services / Sealed Secrets Controller`
+    - `VG / Continuous ASR EOU Shadow Mode`
+    - `VG / Media Processor — Resources & Memory`
+    - `VG / Silero VAD — Resources & Memory`
+    - `VG / Silero VAD Shadow Mode`
+- Updated the following dashboards:
+    - `AI / LLM Providers - Requests & Fallbacks` (improved LLM observability).
+    - `AI / Service AI` (added Message Stack Latency panel).
+    - `AI / Service Endpoint` (added API Key Auth Failures, real-time translation failures, inject/notify traffic and Memory Consumption panels).
+    - `VG / FreeSWITCH`, `VG / Health v1` and `VG / Overview v3` (synced with vg-resources).
+- Introduced Prometheus alerts for the Azure Load Balancer (`AzureLBMetricsAbsent`, `AzureLBVipUnavailable`, `AzureLBDipUnavailable`, `AzureLBSnatPortsHighUsage`, `AzureLBSnatExhaustionWarning`, `AzureLBSnatExhaustionHigh`).
+- Introduced serverless Prometheus alerts (execution/cold-start SLOs, routing, reconcile, builder, lock and lifecycle).
+- Introduced LLM Gateway Prometheus alerts (`LlmGatewayHighErrorRate`, `LlmGatewayCriticalErrorRate`, `LlmGatewayHighRequestLatency`, `LlmGatewayCriticalRequestLatency`, `LlmGatewayProviderRateLimitHigh`, `LlmGatewayProviderRateLimitCritical`, `LlmGatewayElevatedFallbackRate`, `LlmGatewayHighTimeToFirstToken`, `LlmGatewayCriticalTimeToFirstToken`).
+- Introduced Service CXone AWS Gateway Prometheus alerts (`CxoneAwsGatewayKinesisConsumptionFailure`, `CxoneAwsGatewayKinesisSubscriptionRateExceeded`, `CxoneAwsGatewayCrossAccountRoleFailure`).
+- Introduced Sealed Secrets Prometheus alerts (`SealedSecretNotSynced`, `SealedSecretUnsealError`, `SealedSecretControllerDown`).
+- Introduced new VG alerts for the new feature-server and FreeSWITCH metrics.
+- Introduced LLM adoption recording rules.
+- Made Velero backup failure alerts auto-resolve.
+- Moved `ServiceHttpRequestLatencyHigh` alert to the aluminum group.
+
+#### Bugfixes
+- Improved performance of `Services / Kubecost Global` dashboard.
+- Reduced `highConversationVolumeDynamic` alert false positives.
+
+
 ### 2026.2.1
 **Released** March 27th, 2026
 

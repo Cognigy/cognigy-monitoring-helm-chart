@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 74,
+  "id": 71,
   "links": [],
   "panels": [
     {
@@ -73,7 +73,7 @@
         "h": 6,
         "w": 5,
         "x": 0,
-        "y": 1
+        "y": 9
       },
       "id": 35,
       "options": {
@@ -83,7 +83,9 @@
         "orientation": "auto",
         "percentChangeColorMode": "standard",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
@@ -111,7 +113,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "Proportion of inbound calls by source type over the selected time range. Shows the overall channel mix at a glance",
       "fieldConfig": {
@@ -134,7 +136,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 0
+        "y": 1
       },
       "id": 59,
       "options": {
@@ -166,7 +168,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -251,7 +253,7 @@
         "h": 6,
         "w": 19,
         "x": 5,
-        "y": 1
+        "y": 9
       },
       "id": 44,
       "options": {
@@ -315,7 +317,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 15
       },
       "id": 18,
       "panels": [
@@ -362,7 +364,9 @@
             "orientation": "auto",
             "percentChangeColorMode": "standard",
             "reduceOptions": {
-              "calcs": ["lastNotNull"],
+              "calcs": [
+                "lastNotNull"
+              ],
               "fields": "",
               "values": false
             },
@@ -514,7 +518,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 16
       },
       "id": 39,
       "panels": [],
@@ -589,7 +593,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 9
+        "y": 17
       },
       "id": 41,
       "options": {
@@ -690,7 +694,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 23
       },
       "id": 40,
       "options": {
@@ -728,12 +732,118 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "Time from SIP INVITE to call answered (200 OK). Shows how quickly calls are being set up. High values indicate slow provisioning or network latency.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 29
+      },
+      "id": 60,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.50, sum(rate(vg_feature_server_call_setup_time_milliseconds_bucket{cluster=\"$cluster\"}[5m])) by (le))",
+          "legendFormat": "p50",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum(rate(vg_feature_server_call_setup_time_milliseconds_bucket{cluster=\"$cluster\"}[5m])) by (le))",
+          "legendFormat": "p95",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Call Setup Time (p50/p95)",
+      "type": "timeseries"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 37
       },
       "id": 51,
       "panels": [],
@@ -803,7 +913,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 22
+        "y": 38
       },
       "id": 52,
       "options": {
@@ -900,7 +1010,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 22
+        "y": 38
       },
       "id": 53,
       "options": {
@@ -998,7 +1108,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 30
+        "y": 46
       },
       "id": 50,
       "options": {
@@ -1023,7 +1133,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.8, sum(rate(vg_feature_server_speech_duration_milliseconds_bucket{cluster=\"$cluster\",type=\"tts\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.8, sum(rate(vg_feature_server_tts_synthesis_duration_milliseconds_bucket{cluster=\"$cluster\"}[5m])) by (le))",
           "hide": false,
           "instant": false,
           "legendFormat": "80th",
@@ -1036,7 +1146,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.90, sum(rate(vg_feature_server_speech_duration_milliseconds_bucket{cluster=\"$cluster\",type=\"tts\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.90, sum(rate(vg_feature_server_tts_synthesis_duration_milliseconds_bucket{cluster=\"$cluster\"}[5m])) by (le))",
           "hide": false,
           "instant": false,
           "legendFormat": "90th ",
@@ -1049,7 +1159,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum(rate(vg_feature_server_speech_duration_milliseconds_bucket{cluster=\"$cluster\",type=\"tts\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(vg_feature_server_tts_synthesis_duration_milliseconds_bucket{cluster=\"$cluster\"}[5m])) by (le))",
           "hide": false,
           "instant": false,
           "legendFormat": "95th",
@@ -1062,7 +1172,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.99, sum(rate(vg_feature_server_speech_duration_milliseconds_bucket{cluster=\"$cluster\",type=\"tts\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(rate(vg_feature_server_tts_synthesis_duration_milliseconds_bucket{cluster=\"$cluster\"}[5m])) by (le))",
           "hide": false,
           "instant": false,
           "legendFormat": "99th",
@@ -1153,7 +1263,9 @@
               "id": "byNames",
               "options": {
                 "mode": "exclude",
-                "names": ["90th"],
+                "names": [
+                  "90th"
+                ],
                 "prefix": "All except:",
                 "readOnly": true
               }
@@ -1220,7 +1332,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 30
+        "y": 46
       },
       "id": 49,
       "options": {
@@ -1245,7 +1357,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.80, sum(rate(vg_feature_server_speech_duration_milliseconds_bucket{cluster=\"$cluster\",type=\"stt\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.80, sum(rate(vg_feature_server_stt_transcription_duration_seconds_bucket{cluster=\"$cluster\"}[5m])) by (le)) * 1000",
           "hide": false,
           "instant": false,
           "legendFormat": "80th",
@@ -1258,7 +1370,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.90, sum(rate(vg_feature_server_speech_duration_milliseconds_bucket{cluster=\"$cluster\",type=\"stt\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.90, sum(rate(vg_feature_server_stt_transcription_duration_seconds_bucket{cluster=\"$cluster\"}[5m])) by (le)) * 1000",
           "hide": false,
           "instant": false,
           "legendFormat": "90th",
@@ -1272,7 +1384,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum(rate(vg_feature_server_speech_duration_milliseconds_bucket{cluster=\"$cluster\",type=\"stt\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(vg_feature_server_stt_transcription_duration_seconds_bucket{cluster=\"$cluster\"}[5m])) by (le)) * 1000",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -1289,7 +1401,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.99, sum(rate(vg_feature_server_speech_duration_milliseconds_bucket{cluster=\"$cluster\",type=\"stt\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(rate(vg_feature_server_stt_transcription_duration_seconds_bucket{cluster=\"$cluster\"}[5m])) by (le)) * 1000",
           "hide": false,
           "instant": false,
           "legendFormat": "99th",
@@ -1301,12 +1413,189 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "TTS synthesis latency by vendor (excludes cached responses). Shows how long vendors take to generate audio.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 54
+      },
+      "id": 61,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.50, sum(rate(vg_feature_server_tts_synthesis_duration_milliseconds_bucket{cluster=\"$cluster\"}[5m])) by (le, vendor))",
+          "legendFormat": "p50 {{vendor}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum(rate(vg_feature_server_tts_synthesis_duration_milliseconds_bucket{cluster=\"$cluster\"}[5m])) by (le, vendor))",
+          "legendFormat": "p95 {{vendor}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "TTS Synthesis Duration (p50/p95)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 54
+      },
+      "id": 62,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(vg_feature_server_speech_fallback{cluster=\"$cluster\"}[5m])) * 60",
+          "legendFormat": "Fallbacks/min",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "description": "Speech vendor fallback events per minute. Triggered when the primary STT/TTS vendor fails and a fallback vendor is used. Yellow: 1+/min, Red: 10+/min.",
+      "title": "🔄 Speech Fallback (per min)",
+      "type": "stat"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 62
       },
       "id": 54,
       "panels": [],
@@ -1378,7 +1667,7 @@
         "h": 7,
         "w": 15,
         "x": 0,
-        "y": 39
+        "y": 63
       },
       "id": 48,
       "options": {
@@ -1418,7 +1707,7 @@
         "type": "prometheus",
         "uid": "$datasource"
       },
-      "description": "Errors while transferring a call via sip:refer or dial\nEach status code received > 400 is counted as error",
+      "description": "Errors while transferring a call via sip:refer or dial.\nCounts only handovers with `category=\"failed\"` (reported by Feature Server), broken down by transfer type and SIP status code.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1478,7 +1767,7 @@
         "h": 7,
         "w": 9,
         "x": 15,
-        "y": 39
+        "y": 63
       },
       "id": 22,
       "options": {
@@ -1503,7 +1792,7 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "sum(increase(vg_feature_server_handover_total{cluster=\"$cluster\", container=\"feature-server\", category!=\"failed\"}[5m])) by (type, status)",
+          "expr": "sum(increase(vg_feature_server_handover_total{cluster=\"$cluster\", container=\"feature-server\", category=\"failed\"}[5m])) by (type, status)",
           "legendFormat": "Type: {{type}} | Status: {{status}}",
           "range": true,
           "refId": "A"
@@ -1518,7 +1807,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 46
+        "y": 70
       },
       "id": 42,
       "panels": [],
@@ -1593,7 +1882,7 @@
         "h": 7,
         "w": 10,
         "x": 0,
-        "y": 47
+        "y": 71
       },
       "id": 43,
       "options": {
@@ -1671,7 +1960,7 @@
         "h": 7,
         "w": 10,
         "x": 10,
-        "y": 47
+        "y": 71
       },
       "id": 47,
       "options": {
@@ -1681,7 +1970,9 @@
         "orientation": "auto",
         "percentChangeColorMode": "standard",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
@@ -1714,7 +2005,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "Number of messages that failed validation in feature-server.",
       "fieldConfig": {
@@ -1778,7 +2069,7 @@
         "h": 7,
         "w": 10,
         "x": 0,
-        "y": 54
+        "y": 78
       },
       "id": 56,
       "options": {
@@ -1799,7 +2090,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -1817,7 +2108,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "Rate of messages that fail validation in feature-server.",
       "fieldConfig": {
@@ -1878,7 +2169,7 @@
         "h": 7,
         "w": 10,
         "x": 10,
-        "y": 54
+        "y": 78
       },
       "id": 55,
       "options": {
@@ -1899,7 +2190,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -1917,7 +2208,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "Total number of SIP messages processed by sbc-inbound that were expecting an ACK but never got one.",
       "fieldConfig": {
@@ -1978,7 +2269,7 @@
         "h": 7,
         "w": 10,
         "x": 0,
-        "y": 61
+        "y": 85
       },
       "id": 57,
       "options": {
@@ -1999,7 +2290,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "expr": "sum(sbc_inbound_missing_ack_total{cluster=\"$cluster\"})",
@@ -2015,7 +2306,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "$datasource"
       },
       "description": "Rate of SIP messages processed by sbc-inbound that were expecting an ACK but never got one.",
       "fieldConfig": {
@@ -2076,7 +2367,7 @@
         "h": 7,
         "w": 10,
         "x": 10,
-        "y": 61
+        "y": 85
       },
       "id": 58,
       "options": {
@@ -2097,7 +2388,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "$datasource"
           },
           "editorMode": "code",
           "expr": "sum(rate(sbc_inbound_missing_ack_total{cluster=\"$cluster\"}[$__rate_interval]))",
@@ -2116,7 +2407,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 68
+        "y": 92
       },
       "id": 20,
       "panels": [],
@@ -2190,7 +2481,7 @@
         "h": 6,
         "w": 8,
         "x": 0,
-        "y": 69
+        "y": 93
       },
       "id": 2,
       "options": {
@@ -2291,7 +2582,7 @@
         "h": 6,
         "w": 8,
         "x": 8,
-        "y": 69
+        "y": 93
       },
       "id": 36,
       "options": {
@@ -2332,7 +2623,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 75
+        "y": 99
       },
       "id": 16,
       "panels": [],
@@ -2390,7 +2681,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 76
+        "y": 100
       },
       "id": 8,
       "options": {
@@ -2485,7 +2776,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 83
+        "y": 107
       },
       "id": 10,
       "options": {
@@ -2593,7 +2884,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 89
+        "y": 113
       },
       "id": 12,
       "options": {
@@ -2631,11 +2922,14 @@
   "preload": false,
   "refresh": "5m",
   "schemaVersion": 41,
-  "tags": ["Cognigy.VG"],
+  "tags": [
+    "Cognigy.VG"
+  ],
   "templating": {
     "list": [
       {
         "current": {
+          "selected": false,
           "text": "",
           "value": ""
         },
@@ -2650,6 +2944,7 @@
       },
       {
         "current": {
+          "selected": false,
           "text": "",
           "value": ""
         },
@@ -2658,6 +2953,7 @@
           "uid": "$datasource"
         },
         "definition": "label_values(cognigy_vg_version, cluster)",
+        "hide": 2,
         "includeAll": false,
         "label": "Cluster",
         "name": "cluster",
@@ -2673,8 +2969,12 @@
       },
       {
         "current": {
-          "text": "",
-          "value": ""
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": {
           "type": "prometheus",
@@ -2704,7 +3004,7 @@
   },
   "timepicker": {},
   "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
-  "title": "VG / Overview v3",
-  "uid": "m6rMMIfVz12",
+  "title": "VG / Overview v4",
+  "uid": "vg-overview-v4",
   "version": 1
 }

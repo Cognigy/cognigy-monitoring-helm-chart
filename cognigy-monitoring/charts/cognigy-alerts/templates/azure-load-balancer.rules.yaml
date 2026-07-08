@@ -1,0 +1,90 @@
+{{- if .Values.rules.azureLoadBalancer.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-cognigy-azure-load-balancer-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+  - name: cognigy.alert.azure-load-balancer
+    rules:
+
+    {{- if .Values.rules.azureLoadBalancer.azureLBMetricsAbsent.enabled }}
+    # Detect that Promitor is no longer exporting Azure LB metrics at all.
+    # Common causes: promitor-scraper pod down, Azure SP missing Monitoring Reader,
+    # resourceDiscovery group 'all-loadbalancers' empty, or network egress blocked.
+    - alert: AzureLBMetricsAbsent
+      expr: absent(azure_lb_vip_availability)
+      for: {{ .Values.rules.azureLoadBalancer.azureLBMetricsAbsent.timeout | default "15m" }}
+      labels:
+        severity: {{ .Values.rules.azureLoadBalancer.azureLBMetricsAbsent.severity | default "warning" }}
+      annotations:
+        summary: Azure Load Balancer metrics are not being scraped (Promitor exporter missing)
+        description: "No samples for azure_lb_vip_availability for longer than the configured period. Check the promitor-scraper Pod status, Azure Service Principal permissions (Monitoring Reader on LB resource groups), and that the resource-discovery group 'all-loadbalancers' returns results.\n  VALUE = {{`{{`}} $value {{`}}`}}"    {{- end }}
+
+    {{- if .Values.rules.azureLoadBalancer.azureLBVipUnavailable.enabled }}
+    # LB frontend (VIP) datapath probes failing — customer-visible inbound impact.
+    - alert: AzureLBVipUnavailable
+      expr: avg_over_time(azure_lb_vip_availability[5m]) < {{ .Values.rules.azureLoadBalancer.azureLBVipUnavailable.threshold | default 90 }}
+      for: {{ .Values.rules.azureLoadBalancer.azureLBVipUnavailable.timeout | default "5m" }}
+      labels:
+        severity: {{ .Values.rules.azureLoadBalancer.azureLBVipUnavailable.severity | default "warning" }}
+      annotations:
+        summary: "Azure LB VIP unavailable: {{`{{`}} $labels.instance_name {{`}}`}} ({{`{{`}} $labels.resource_group {{`}}`}})"
+        description: "Azure Load Balancer frontend (VIP) availability is below {{ .Values.rules.azureLoadBalancer.azureLBVipUnavailable.threshold | default 90 }}% averaged over 5 minutes — LB datapath probes are failing and inbound traffic is degraded.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"    {{- end }}
+
+    {{- if .Values.rules.azureLoadBalancer.azureLBDipUnavailable.enabled }}
+    # LB backend instance health probes failing — one or more AKS nodes are
+    # not reachable from the LB. Threshold is per-LB averaged availability %.
+    - alert: AzureLBDipUnavailable
+      expr: avg_over_time(azure_lb_dip_availability[5m]) < {{ .Values.rules.azureLoadBalancer.azureLBDipUnavailable.threshold | default 80 }}
+      for: {{ .Values.rules.azureLoadBalancer.azureLBDipUnavailable.timeout | default "5m" }}
+      labels:
+        severity: {{ .Values.rules.azureLoadBalancer.azureLBDipUnavailable.severity | default "warning" }}
+      annotations:
+        summary: "Azure LB backend instances unhealthy: {{`{{`}} $labels.instance_name {{`}}`}} ({{`{{`}} $labels.resource_group {{`}}`}})"
+        description: "Azure Load Balancer backend (DIP) availability is below {{ .Values.rules.azureLoadBalancer.azureLBDipUnavailable.threshold | default 80 }}% averaged over 5 minutes — backend health probes are failing for one or more AKS nodes.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"    {{- end }}
+
+    {{- if .Values.rules.azureLoadBalancer.azureLBSnatPortsHighUsage.enabled }}
+    # Predictive: a single AKS node is using a high fraction of its allocated
+    # TCP SNAT ports. Fires BEFORE AzureLBSnatExhaustion so the team has time
+    # to remediate (redistribute Pods, raise outbound_ports_allocated, etc.).
+    # Threshold is a fraction (0.0–1.0). Default 0.8 = 80% of allocated.
+    - alert: AzureLBSnatPortsHighUsage
+      expr: |-
+        (
+          azure_lb_used_snat_ports{protocoltype=~"TCP|Tcp"}
+          /
+          azure_lb_allocated_snat_ports{protocoltype=~"TCP|Tcp"}
+        ) > {{ .Values.rules.azureLoadBalancer.azureLBSnatPortsHighUsage.threshold | default 0.8 }}
+      for: {{ .Values.rules.azureLoadBalancer.azureLBSnatPortsHighUsage.timeout | default "10m" }}
+      labels:
+        severity: {{ .Values.rules.azureLoadBalancer.azureLBSnatPortsHighUsage.severity | default "warning" }}
+      annotations:
+        summary: "Azure LB node approaching SNAT port limit: node {{`{{`}} $labels.backendipaddress {{`}}`}} on {{`{{`}} $labels.instance_name {{`}}`}}"
+        description: "AKS node {{`{{`}} $labels.backendipaddress {{`}}`}} on LB {{`{{`}} $labels.instance_name {{`}}`}} ({{`{{`}} $labels.resource_group {{`}}`}}) is using more than {{ .Values.rules.azureLoadBalancer.azureLBSnatPortsHighUsage.threshold | default 0.8 }} of its allocated TCP SNAT ports. SNAT Exhaustion is imminent unless mitigated. Runbook: redistribute outbound Pods, raise outbound_ports_allocated in Terraform, restart leaking Pods.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"    {{- end }}
+
+    {{- if .Values.rules.azureLoadBalancer.azureLBSnatExhaustionWarning.enabled }}
+    - alert: AzureLBSnatExhaustionWarning
+      expr: sum by (resource_group, instance_name, backendipaddress) (azure_lb_snat_connection_count{connectionstate=~"Pending|Failed"}) > {{ .Values.rules.azureLoadBalancer.azureLBSnatExhaustionWarning.threshold | default 10 }}
+      for: {{ .Values.rules.azureLoadBalancer.azureLBSnatExhaustionWarning.timeout | default "5m" }}
+      labels:
+        severity: {{ .Values.rules.azureLoadBalancer.azureLBSnatExhaustionWarning.severity | default "warning" }}
+      annotations:
+        summary: "SNAT Exhaustion Warning: {{`{{`}} $labels.instance_name {{`}}`}} (node {{`{{`}} $labels.backendipaddress {{`}}`}})"
+        description: "SNAT Exhaustion Warning — Azure LoadBalancer {{`{{`}} $labels.instance_name {{`}}`}} in {{`{{`}} $labels.resource_group {{`}}`}}: SnatConnectionCount with ConnectionState in (Pending, Failed) exceeded {{ .Values.rules.azureLoadBalancer.azureLBSnatExhaustionWarning.threshold | default 10 }} on AKS node {{`{{`}} $labels.backendipaddress {{`}}`}} for the configured duration. Outbound connections from Pods on this node are starting to fail; act before it escalates.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+
+    {{- if .Values.rules.azureLoadBalancer.azureLBSnatExhaustionHigh.enabled }}
+    - alert: AzureLBSnatExhaustionHigh
+      expr: sum by (resource_group, instance_name, backendipaddress) (azure_lb_snat_connection_count{connectionstate=~"Pending|Failed"}) > {{ .Values.rules.azureLoadBalancer.azureLBSnatExhaustionHigh.threshold | default 50 }}
+      for: {{ .Values.rules.azureLoadBalancer.azureLBSnatExhaustionHigh.timeout | default "5m" }}
+      labels:
+        severity: {{ .Values.rules.azureLoadBalancer.azureLBSnatExhaustionHigh.severity | default "critical" }}
+      annotations:
+        summary: "SNAT Exhaustion High: {{`{{`}} $labels.instance_name {{`}}`}} (node {{`{{`}} $labels.backendipaddress {{`}}`}})"
+        description: "SNAT Exhaustion High — Azure LoadBalancer {{`{{`}} $labels.instance_name {{`}}`}} in {{`{{`}} $labels.resource_group {{`}}`}}: SnatConnectionCount with ConnectionState in (Pending, Failed) exceeded {{ .Values.rules.azureLoadBalancer.azureLBSnatExhaustionHigh.threshold | default 50 }} on AKS node {{`{{`}} $labels.backendipaddress {{`}}`}} for the configured duration. Outbound connections from Pods on this node are failing at scale — page and mitigate now.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+
+{{- end -}}
