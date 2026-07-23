@@ -366,7 +366,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "100 - avg(vg_feature_server_freeswitch_media_cpu_idle{cluster=\"$cluster\"})",
+          "expr": "avg(sum(rate(container_cpu_usage_seconds_total{cluster=\"$cluster\", namespace=\"voicegateway\", pod=~\"feature-server-.*\", container=\"freeswitch\"}[5m])) by (pod) / sum(cluster:namespace:pod_cpu:active:kube_pod_container_resource_limits{cluster=\"$cluster\", namespace=\"voicegateway\", pod=~\"feature-server-.*\", container=\"freeswitch\"}) by (pod) * 100)",
           "format": "time_series",
           "legendFormat": "Avg CPU Usage",
           "range": true,
@@ -660,10 +660,10 @@
         },
         "overrides": []
       },
-      "description": "Per-pod FreeSWITCH media CPU usage (100 - idle), as reported by the Feature Server. Static threshold lines indicate 50% (warning) and 80% (critical).",
+      "description": "Per-pod FreeSWITCH container CPU usage as a percentage of its Kubernetes CPU limit (cgroup-aware). 100% means the container is pinned at its CPU limit and is being CFS-throttled. Threshold lines at 50% and 80%. NOTE: this replaces the old `100 - vg_feature_server_freeswitch_media_cpu_idle` query, which reported node-level idle and could not detect cgroup throttling.",
       "gridPos": {
         "h": 8,
-        "w": 24,
+        "w": 12,
         "x": 0,
         "y": 9
       },
@@ -690,7 +690,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "100 - vg_feature_server_freeswitch_media_cpu_idle{cluster=\"$cluster\"}",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{cluster=\"$cluster\", namespace=\"voicegateway\", pod=~\"feature-server-.*\", container=\"freeswitch\"}[5m])) by (pod)\n/\nsum(cluster:namespace:pod_cpu:active:kube_pod_container_resource_limits{cluster=\"$cluster\", namespace=\"voicegateway\", pod=~\"feature-server-.*\", container=\"freeswitch\"}) by (pod)\n* 100",
           "format": "time_series",
           "legendFormat": "{{pod}}",
           "range": true,
@@ -698,6 +698,106 @@
         }
       ],
       "title": "CPU Usage %",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 25
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "description": "Per-pod fraction of CFS scheduler periods in which the FreeSWITCH container was throttled (hit its CPU limit). Sustained values above the 25% line mean the container is starved of CPU and media processing will degrade even though node-level CPU may look idle. This is the signal the old idle-based CPU panel could not see.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 9
+      },
+      "id": 100,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(container_cpu_cfs_throttled_periods_total{cluster=\"$cluster\", namespace=\"voicegateway\", pod=~\"feature-server-.*\", container=\"freeswitch\"}[5m])) by (pod)\n/\nsum(rate(container_cpu_cfs_periods_total{cluster=\"$cluster\", namespace=\"voicegateway\", pod=~\"feature-server-.*\", container=\"freeswitch\"}[5m])) by (pod)\n* 100",
+          "format": "time_series",
+          "legendFormat": "{{pod}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "CPU Throttling %",
       "type": "timeseries"
     },
     {
@@ -2991,7 +3091,7 @@
       },
       "id": 400,
       "panels": [],
-      "title": "Azure TTS / Transcribe (PR #283 — 2026-05-08 NA1 freeze response)",
+      "title": "Azure TTS / Transcribe",
       "type": "row"
     },
     {
@@ -2999,7 +3099,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "Per-second observed outgoing audio fps in mod_azure_tts (FrameRateObserver sampler, one tick/s per active AzureData). Target 50 fps for 20 ms PCM frames. The `0` row lighting up means TTS playout is stuck — distinct from `synthesis was never requested` because the observer only ticks while a session is active.",
+      "description": "⚠️ DEPRECATED — superseded by the unified `vg_freeswitch_tts_frames_per_second{vendor=\"azure\"}` metric shown in the **Unified Frame Rate — All Vendors** section below. Kept for backward compatibility. Per-second observed outgoing audio fps in mod_azure_tts (FrameRateObserver sampler, one tick/s per active AzureData). Target 50 fps for 20 ms PCM frames. The `0` row lighting up means TTS playout is stuck — distinct from `synthesis was never requested` because the observer only ticks while a session is active.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3075,7 +3175,7 @@
           "refId": "A"
         }
       ],
-      "title": "Azure TTS FPS Heatmap (target 50)",
+      "title": "Azure TTS FPS Heatmap (target 50) — DEPRECATED (use unified TTS FPS)",
       "type": "heatmap"
     },
     {
@@ -3083,7 +3183,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "Per-second observed incoming audio fps forwarded to Azure Speech by mod_azure_transcribe. Target 50 fps. The `0` row lighting up means audio is no longer flowing to the recognizer (e.g. media-bug detached, FreeSWITCH stalled).",
+      "description": "⚠️ DEPRECATED — superseded by the unified `vg_freeswitch_stt_frames_per_second{vendor=\"azure\"}` metric shown in the **Unified Frame Rate — All Vendors** section below. Kept for backward compatibility. Per-second observed incoming audio fps forwarded to Azure Speech by mod_azure_transcribe. Target 50 fps. The `0` row lighting up means audio is no longer flowing to the recognizer (e.g. media-bug detached, FreeSWITCH stalled).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3159,7 +3259,7 @@
           "refId": "A"
         }
       ],
-      "title": "Azure Transcribe FPS Heatmap (target 50)",
+      "title": "Azure Transcribe FPS Heatmap (target 50) — DEPRECATED (use unified STT FPS)",
       "type": "heatmap"
     },
     {
@@ -3167,7 +3267,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "Azure TTS synthesis terminal outcomes split by `outcome` and `error_class`. `canceled / auth` is the 2026-05-08 fingerprint — fires on Microsoft Speech SDK CancellationErrorCode::AuthenticationFailure or Forbidden. The credential SID is intentionally not a label; identify the offending customer credential via feature-server logs.",
+      "description": "Azure TTS synthesis terminal outcomes split by `outcome` and `error_class`. `canceled / auth` corresponds to Microsoft Speech SDK CancellationErrorCode::AuthenticationFailure or Forbidden (credential / authentication problems). The credential identifier is intentionally not a label; correlate with service logs to locate the specific credential.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3317,7 +3417,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "Number of mod_azure_tts helper threads currently blocked inside speakSsmlAsync / speakTextAsync (RAII ThreadTracker). Healthy steady-state should be near zero (single-shot synthesis completes in seconds). Sustained growth is the 2026-05-08 freeze precursor — paired alerts page at 32 (warning) and 64 (critical).",
+      "description": "Number of mod_azure_tts helper threads currently blocked inside speakSsmlAsync / speakTextAsync (RAII ThreadTracker). Healthy steady-state should be near zero (single-shot synthesis completes in seconds). Sustained growth indicates synthesis calls not returning and risks helper-thread exhaustion.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3395,7 +3495,7 @@
           "refId": "A"
         }
       ],
-      "title": "Azure TTS Synthesis Threads In-Flight (freeze precursor)",
+      "title": "Azure TTS Synthesis Threads In-Flight",
       "type": "timeseries"
     },
     {
@@ -3403,7 +3503,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "Rate of `canceled / auth` synthesis outcomes per pod. Alert thresholds: >0.5/s sustained 5m (warning), >2/s sustained 5m (critical — page on-call). The `for: 5m` filters brief spikes during rolling credential rotation.",
+      "description": "Rate of `canceled / auth` synthesis outcomes per pod. A sustained non-zero rate indicates credential / authentication failures; brief spikes during rolling credential rotation are normal and are smoothed by the 5m window.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3489,7 +3589,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "STT-side mirror of the TTS auth-failure rate. Often co-fires on the same pod when a customer credential is shared between TTS and STT. Same thresholds as the TTS panel.",
+      "description": "STT-side mirror of the TTS auth-failure rate. It often rises on the same pod when a credential used for both TTS and STT fails. Read the same way as the TTS panel.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3730,7 +3830,7 @@
       },
       "id": 410,
       "panels": [],
-      "title": "AudioPipe<T> WebSocket (PR #283 — STT WS terminal outcomes)",
+      "title": "AudioPipe<T> WebSocket (STT WS terminal outcomes)",
       "type": "row"
     },
     {
@@ -3738,7 +3838,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "Terminal outcomes of jambonz::AudioPipe<T> WebSocket connections — emitted from the four libwebsockets terminal callbacks (CONNECT_FAIL → error, CONNECT_SUCCESS → success, CONNECTION_CLOSED_GRACEFULLY → closed_graceful, CONNECTION_DROPPED → closed_dropped). Together with the pre-existing `jambonz_audiopipe_<provider>audiopipe_instances` gauges this distinguishes `connections cycling normally` from `connections accumulating`. Note: mod_audio_fork's non-templated drachtio::AudioPipe is NOT instrumented here.",
+      "description": "STT audio frame-rate percentiles across all native vendors (`vg_freeswitch_stt_frames_per_second`, target 50 fps). p10 is the early stall signal (the fps below which the worst 10% of per-second samples fall): healthy near 50, below ~40 elevated, below ~25 severe. Traffic-gated to the cluster's own recent peak, so idle/overnight periods show a gap instead of a false drop to 0.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3813,7 +3913,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "Share of AudioPipe terminal outcomes that are `error` or `closed_dropped`, by provider. Alert thresholds: >10% sustained 10m (warning), >25% sustained 5m (critical — likely vendor or regional outage).",
+      "description": "TTS audio frame-rate percentiles across all native vendors (`vg_freeswitch_tts_frames_per_second`, target 50 fps). p10 is the early stall signal (the fps below which the worst 10% of per-second samples fall): healthy near 50, below ~40 elevated, below ~25 severe. Traffic-gated to the cluster's own recent peak, so idle/overnight periods show a gap instead of a false drop to 0.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3893,6 +3993,2357 @@
       ],
       "title": "AudioPipe Drop Rate by Provider (rolling 5m)",
       "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 203
+      },
+      "id": 500,
+      "panels": [],
+      "title": "Custom TTS (mod_custom_tts) — Time to First Byte",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Latency from curl_multi_add_handle (HTTP request dispatched) to the first write_cb delivering PCM audio bytes (after 44-byte WAV header stripped). Captures network + custom TTS provider processing time. p95 > 2 s is a user-visible regression.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 204
+      },
+      "id": 501,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.50, sum(rate(vg_freeswitch_custom_tts_time_to_first_byte_milliseconds_bucket{cluster=\"$cluster\"}[5m])) by (le))",
+          "legendFormat": "p50",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum(rate(vg_freeswitch_custom_tts_time_to_first_byte_milliseconds_bucket{cluster=\"$cluster\"}[5m])) by (le))",
+          "legendFormat": "p95",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.99, sum(rate(vg_freeswitch_custom_tts_time_to_first_byte_milliseconds_bucket{cluster=\"$cluster\"}[5m])) by (le))",
+          "legendFormat": "p99",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "Custom TTS Time-to-First-Byte (p50 / p95 / p99)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Request rate for custom TTS synthesis (total observations per second from the TTFB histogram).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 204
+      },
+      "id": 502,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(vg_freeswitch_custom_tts_time_to_first_byte_milliseconds_count{cluster=\"$cluster\"}[5m]))",
+          "legendFormat": "requests/s",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Custom TTS Request Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Distribution of custom TTS time-to-first-byte. Look for heat shifting up over time (worsening latency) or unexpected long-tail occupancy in the 5 s / 10 s buckets.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "scheme"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 212
+      },
+      "id": 503,
+      "options": {
+        "calculate": false,
+        "cellGap": 1,
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-orange",
+          "mode": "scheme",
+          "reverse": false,
+          "scale": "exponential",
+          "scheme": "Oranges",
+          "steps": 64
+        },
+        "filterValues": {
+          "le": 1E-9
+        },
+        "legend": {
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "auto"
+        },
+        "showValue": "never",
+        "tooltip": {
+          "mode": "single",
+          "showColorScale": false,
+          "yHistogram": true
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false,
+          "unit": "ms"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(vg_freeswitch_custom_tts_time_to_first_byte_milliseconds_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le)",
+          "format": "heatmap",
+          "legendFormat": "{{le}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Custom TTS Time-to-First-Byte Heatmap",
+      "type": "heatmap"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 221
+      },
+      "id": 600,
+      "panels": [],
+      "title": "Unified Frame Rate — All Vendors (STT + TTS) · vg_freeswitch_{stt,tts}_frames_per_second",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Unified per-second observed audio fps across ALL native STT vendors (deepgram, nice, aws, google, cobalt, azure, …) via `vg_freeswitch_stt_frames_per_second`. Replaces the vendor-specific `vg_freeswitch_azure_transcribe_frames_per_second`. Target is 50 fps for L16-at-20ms. The `0` / `1` rows lighting up are stall signals. Note: gRPC-proxy vendors report separately under `vg_freeswitch_grpc_transcribe_frames_per_second`.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "scheme"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 222
+      },
+      "id": 601,
+      "options": {
+        "calculate": false,
+        "cellGap": 1,
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-orange",
+          "mode": "scheme",
+          "reverse": false,
+          "scale": "exponential",
+          "scheme": "Oranges",
+          "steps": 64
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1E-9
+        },
+        "legend": {
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "auto"
+        },
+        "showValue": "never",
+        "tooltip": {
+          "mode": "single",
+          "showColorScale": false,
+          "yHistogram": true
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false,
+          "unit": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(vg_freeswitch_stt_frames_per_second_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le)",
+          "format": "heatmap",
+          "legendFormat": "{{le}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "STT FPS Heatmap — All Vendors (target 50)",
+      "type": "heatmap"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Unified per-second observed audio fps across ALL native TTS vendors (deepgram, nice, aws, google, cobalt, azure, …) via `vg_freeswitch_tts_frames_per_second`. Replaces the vendor-specific `vg_freeswitch_azure_tts_frames_per_second`. Target is 50 fps for 20 ms PCM frames. The `0` / `1` rows lighting up mean playout is stuck. Note: gRPC-proxy vendors report separately under `vg_freeswitch_grpc_tts_frames_per_second`.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "scheme"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 222
+      },
+      "id": 602,
+      "options": {
+        "calculate": false,
+        "cellGap": 1,
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-orange",
+          "mode": "scheme",
+          "reverse": false,
+          "scale": "exponential",
+          "scheme": "Oranges",
+          "steps": 64
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1E-9
+        },
+        "legend": {
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "auto"
+        },
+        "showValue": "never",
+        "tooltip": {
+          "mode": "single",
+          "showColorScale": false,
+          "yHistogram": true
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false,
+          "unit": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(vg_freeswitch_tts_frames_per_second_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le)",
+          "format": "heatmap",
+          "legendFormat": "{{le}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "TTS FPS Heatmap — All Vendors (target 50)",
+      "type": "heatmap"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Fleet-wide STT frame-rate percentiles from `vg_freeswitch_stt_frames_per_second` (target 50 fps for L16 at 20 ms). p10 is the fps below which the worst-behaving 10% of per-second samples fall, so it drops as soon as a meaningful share of sessions start stalling — well before the median moves. Read it as the early stall signal: healthy stays near 50, values below ~40 are elevated and below ~25 are severe. Traffic-gated to the cluster's own recent peak, so idle/overnight periods render a gap instead of a misleading 0. p50/p90 give context (p90 above 50 indicates bursty over-delivery / buffering).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 40
+              },
+              {
+                "color": "green",
+                "value": 45
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 231
+      },
+      "id": 603,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "min"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "asc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.10, sum by (le) (rate(vg_freeswitch_stt_frames_per_second_bucket{cluster=\"$cluster\"}[5m]))) and (sum(rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m])) > 0.1 * max_over_time(sum(rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m]))[1d:5m]))",
+          "legendFormat": "p10 (alert)",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(vg_freeswitch_stt_frames_per_second_bucket{cluster=\"$cluster\"}[5m]))) and (sum(rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m])) > 0.1 * max_over_time(sum(rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m]))[1d:5m]))",
+          "legendFormat": "p50",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.90, sum by (le) (rate(vg_freeswitch_stt_frames_per_second_bucket{cluster=\"$cluster\"}[5m]))) and (sum(rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m])) > 0.1 * max_over_time(sum(rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m]))[1d:5m]))",
+          "legendFormat": "p90",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "STT Frame-Rate Percentiles (p10 / p50 / p90)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Fleet-wide TTS frame-rate percentiles from `vg_freeswitch_tts_frames_per_second` (target 50 fps for 20 ms PCM frames). p10 is the fps below which the worst 10% of per-second samples fall — the early stall signal: healthy near 50, below ~40 elevated, below ~25 severe. Traffic-gated to the cluster's own recent peak, so idle periods render a gap instead of a false 0. p50/p90 for context.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 40
+              },
+              {
+                "color": "green",
+                "value": 45
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 231
+      },
+      "id": 604,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "min"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "asc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.10, sum by (le) (rate(vg_freeswitch_tts_frames_per_second_bucket{cluster=\"$cluster\"}[5m]))) and (sum(rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m])) > 0.1 * max_over_time(sum(rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m]))[1d:5m]))",
+          "legendFormat": "p10 (alert)",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(vg_freeswitch_tts_frames_per_second_bucket{cluster=\"$cluster\"}[5m]))) and (sum(rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m])) > 0.1 * max_over_time(sum(rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m]))[1d:5m]))",
+          "legendFormat": "p50",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.90, sum by (le) (rate(vg_freeswitch_tts_frames_per_second_bucket{cluster=\"$cluster\"}[5m]))) and (sum(rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m])) > 0.1 * max_over_time(sum(rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m]))[1d:5m]))",
+          "legendFormat": "p90",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "TTS Frame-Rate Percentiles (p10 / p50 / p90)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Per-vendor p10 frame rate for STT and TTS — the drill-down for the fleet-wide percentile panels; use it to identify which vendor is stalling. Each line is the fps below which that vendor's worst 10% of per-second samples fall (target 50, reference line at 45). Traffic-gated per vendor, so a vendor with little current traffic drops out instead of flatlining at 0.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 40
+              },
+              {
+                "color": "green",
+                "value": 45
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 239
+      },
+      "id": 605,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "min"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "asc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.10, sum by (vendor, le) (rate(vg_freeswitch_stt_frames_per_second_bucket{cluster=\"$cluster\"}[5m]))) and (sum by (vendor) (rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m])) > 0.1 * max_over_time(sum by (vendor) (rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m]))[1d:5m]))",
+          "legendFormat": "stt — {{vendor}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.10, sum by (vendor, le) (rate(vg_freeswitch_tts_frames_per_second_bucket{cluster=\"$cluster\"}[5m]))) and (sum by (vendor) (rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m])) > 0.1 * max_over_time(sum by (vendor) (rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m]))[1d:5m]))",
+          "legendFormat": "tts — {{vendor}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "p10 Frame Rate by Vendor (STT + TTS) — stall drill-down",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Share of frame-rate observations landing in the `≤1 fps` bucket, per direction — a robust stall signal. Because it is a ratio, a small persistent pool of stuck/zero-fps sessions shows up as a small constant baseline rather than flipping a percentile to 0; during an acute incident a large share of sessions stall at once and this spikes (healthy near 0, elevated above ~0.2, severe above ~0.4). Same traffic gate as the percentile panels, so an idle window containing only stuck sessions is suppressed. A step-change in the baseline that never returns to ~0 is a stuck-session leak, tracked on the panel to the right.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.2
+              },
+              {
+                "color": "red",
+                "value": 0.4
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 247
+      },
+      "id": 606,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(vg_freeswitch_stt_frames_per_second_bucket{cluster=\"$cluster\", le=\"1\"}[5m])) / clamp_min(sum(rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m])), 0.001) and (sum(rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m])) > 0.1 * max_over_time(sum(rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m]))[1d:5m]))",
+          "legendFormat": "stt",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(vg_freeswitch_tts_frames_per_second_bucket{cluster=\"$cluster\", le=\"1\"}[5m])) / clamp_min(sum(rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m])), 0.001) and (sum(rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m])) > 0.1 * max_over_time(sum(rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m]))[1d:5m]))",
+          "legendFormat": "tts",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Stall Rate (share ≤1 fps) by direction",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Approximate count of sessions observing ≤1 fps at any moment, per direction (`rate(_bucket{le=\"1\"}[5m])` — each active session emits ~1 observation/sec, so this reads as concurrent stuck/silent sessions). This is the residual pool visible as the persistent band on the `0` row of the FPS heatmaps. Not traffic-gated: steady-state returns to ~0 once calls end normally, and a flat plateau that never drains indicates leaked/stuck sessions.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 247
+      },
+      "id": 607,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(vg_freeswitch_stt_frames_per_second_bucket{cluster=\"$cluster\", le=\"1\"}[5m]))",
+          "legendFormat": "stt stuck (~sessions)",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(vg_freeswitch_tts_frames_per_second_bucket{cluster=\"$cluster\", le=\"1\"}[5m]))",
+          "legendFormat": "tts stuck (~sessions)",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Stuck Sessions (≤1 fps observations) by direction",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 256
+      },
+      "id": 700,
+      "panels": [],
+      "title": "Audio Quality — Inbound RTP (mod_prometheus, per-call @ hangup) · vg_freeswitch_rtp_audio_in_*",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "FreeSWITCH-estimated inbound MOS (`vg_freeswitch_rtp_audio_in_mos`, range 1–4.5), one observation per call at hangup over a 15m window. **Watch the low tail (p10)** — the average hides bad calls. p10 < 3.5 = the worst 10% of calls are below the acceptability threshold; p10 < 3.0 is serious. Only calls with inbound media are counted, so quantiles need enough calls in the window to be meaningful.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 3
+              },
+              {
+                "color": "green",
+                "value": 3.5
+              }
+            ]
+          },
+          "unit": "none",
+          "min": 1,
+          "max": 4.5
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 257
+      },
+      "id": 701,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "min"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "asc"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.1, sum by (le) (rate(vg_freeswitch_rtp_audio_in_mos_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p10 (alert)",
+          "refId": "A",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(vg_freeswitch_rtp_audio_in_mos_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p50",
+          "refId": "B",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.9, sum by (le) (rate(vg_freeswitch_rtp_audio_in_mos_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p90",
+          "refId": "C",
+          "range": true
+        }
+      ],
+      "title": "Inbound MOS Percentiles (p10 / p50 / p90)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Share of calls whose inbound MOS fell in the ≤3.5 buckets, per codec — the acceptability-threshold miss rate. `sum(rate(mos_bucket{le=\"3.5\"})) / sum(rate(mos_count))` per codec over 15m; robust to a few outliers (it is a ratio). Healthy is a low single-digit %; a sustained rise above ~10%, and especially ~25%, indicates a broad regression. opus vs pcmu have different baselines — a per-codec step-up flags a codec-specific regression.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.1
+              },
+              {
+                "color": "red",
+                "value": 0.25
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 257
+      },
+      "id": 702,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum by (codec) (rate(vg_freeswitch_rtp_audio_in_mos_bucket{cluster=\"$cluster\", le=\"3.5\"}[15m])) / clamp_min(sum by (codec) (rate(vg_freeswitch_rtp_audio_in_mos_count{cluster=\"$cluster\"}[15m])), 0.001)",
+          "legendFormat": "{{codec}}",
+          "refId": "A",
+          "range": true
+        }
+      ],
+      "title": "% Calls below MOS 3.5 (bad-call share) by codec",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Distribution of per-call inbound MOS across the fleet. Look for mass shifting toward the low buckets (1–3) over time, or a bimodal split (a bad codec/route alongside healthy calls).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "scheme"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 265
+      },
+      "id": 703,
+      "options": {
+        "calculate": false,
+        "cellGap": 1,
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-orange",
+          "mode": "scheme",
+          "reverse": false,
+          "scale": "exponential",
+          "scheme": "Oranges",
+          "steps": 64
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1E-9
+        },
+        "legend": {
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "auto"
+        },
+        "showValue": "never",
+        "tooltip": {
+          "mode": "single",
+          "showColorScale": false,
+          "yHistogram": true
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false,
+          "unit": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(vg_freeswitch_rtp_audio_in_mos_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le)",
+          "legendFormat": "{{le}}",
+          "refId": "A",
+          "range": true
+        }
+      ],
+      "title": "Inbound MOS Distribution (heatmap)",
+      "type": "heatmap"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Inbound R-value (`vg_freeswitch_rtp_audio_in_quality_percentage`, 0–100) — the basis MOS is derived from, so it moves earlier/finer than MOS. Track p10 (worst 10% of calls). Rough guide: R ≥ 90 good, 80–90 fair, < 70 poor.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 80
+              },
+              {
+                "color": "green",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "none",
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 265
+      },
+      "id": 704,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "min"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "asc"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.1, sum by (le) (rate(vg_freeswitch_rtp_audio_in_quality_percentage_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p10",
+          "refId": "A",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(vg_freeswitch_rtp_audio_in_quality_percentage_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p50",
+          "refId": "B",
+          "range": true
+        }
+      ],
+      "title": "Inbound R-value / Quality % (p10 / p50)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Inbound RTP packet-loss rate (`vg_freeswitch_rtp_audio_in_loss_rate`, fraction 0–1) per call, p50/p95 over 15m. p95 > 0.05 (5%) is user-audible and hurts STT; > 0.10 is severe. Pair with burstiness — the same loss %% concentrated in bursts is worse than spread out.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.05
+              },
+              {
+                "color": "red",
+                "value": 0.1
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 273
+      },
+      "id": 705,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(vg_freeswitch_rtp_audio_in_loss_rate_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p50",
+          "refId": "A",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(vg_freeswitch_rtp_audio_in_loss_rate_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p95",
+          "refId": "B",
+          "range": true
+        }
+      ],
+      "title": "Inbound Packet Loss Rate (p50 / p95)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Jitter-buffer estimated jitter (`vg_freeswitch_rtp_jb_jitter_est_ms`, milliseconds) p95 over 15m. Above ~50 ms is elevated and above ~120 ms is severe — high jitter forces the buffer to grow (adding latency) or drop packets (adding loss).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "red",
+                "value": 120
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 273
+      },
+      "id": 706,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(vg_freeswitch_rtp_jb_jitter_est_ms_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p95",
+          "refId": "A",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(vg_freeswitch_rtp_jb_jitter_est_ms_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p50",
+          "refId": "B",
+          "range": true
+        }
+      ],
+      "title": "Jitter-buffer Estimated Jitter p95 (ms)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Loss burstiness (`vg_freeswitch_rtp_audio_in_burst_mean_length_packets`): mean loss-burst length × (1−loss), p95 over 15m. **Unit is packets, not a fraction.** ~1 = isolated losses (well concealed); higher = consecutive losses (audible gaps, worse for STT even at the same loss %). p95 above ~5 indicates bursty loss.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 281
+      },
+      "id": 707,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(vg_freeswitch_rtp_audio_in_burst_mean_length_packets_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p95",
+          "refId": "A",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(vg_freeswitch_rtp_audio_in_burst_mean_length_packets_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p50",
+          "refId": "B",
+          "range": true
+        }
+      ],
+      "title": "Loss Burstiness — mean burst length p95 (packets)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Max jitter variance (`vg_freeswitch_rtp_audio_in_jitter_max_variance_ms2`): mean squared deviation of RTP inter-arrival time, p95 over 15m. **Unit is ms² (a variance), not ms** — do not threshold it as milliseconds. Useful as a relative signal: a sharp rise vs. baseline indicates network timing instability. Read alongside the jitter-buffer panel.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 281
+      },
+      "id": 708,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(vg_freeswitch_rtp_audio_in_jitter_max_variance_ms2_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p95",
+          "refId": "A",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(vg_freeswitch_rtp_audio_in_jitter_max_variance_ms2_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p50",
+          "refId": "B",
+          "range": true
+        }
+      ],
+      "title": "Max Jitter Variance p95 (ms²)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Answered-session rate (`freeswitch_session_duration_seconds_count`) vs. calls-with-inbound-media rate (`vg_freeswitch_rtp_audio_in_mos_count`) over 5m. The audio-quality histograms **exclude calls with no inbound media**, so a persistent gap between the two lines is a dead-air / silent-media signal (one-way audio, CNG/DTMF-only, media-bug detached). Also the denominator for whether the quality quantiles above have enough samples to trust.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 289
+      },
+      "id": 709,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "asc"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(freeswitch_session_duration_seconds_count{cluster=\"$cluster\"}[5m]))",
+          "legendFormat": "answered sessions/s",
+          "refId": "A",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(vg_freeswitch_rtp_audio_in_mos_count{cluster=\"$cluster\"}[5m]))",
+          "legendFormat": "calls w/ inbound media/s",
+          "refId": "B",
+          "range": true
+        }
+      ],
+      "title": "Call Volume: answered vs. with inbound media (silent-media gap)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Currently active FreeSWITCH channels (`freeswitch_active_channels`, gauge). Capacity/traffic context for the quality panels. A flat-high plateau that never drains, or a value near known capacity, indicates leaked/stuck channels — correlate with the stuck-session panels above.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 289
+      },
+      "id": 710,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "asc"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "sum(freeswitch_active_channels{cluster=\"$cluster\"})",
+          "legendFormat": "active channels",
+          "refId": "A",
+          "range": true
+        }
+      ],
+      "title": "Active Channels",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Duration of answered sessions (`freeswitch_session_duration_seconds`) p50/p95 over 15m. Traffic-mix context: a collapse in p50 can indicate calls dropping early (often correlated with a quality or media regression above).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 297
+      },
+      "id": 711,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "asc"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(freeswitch_session_duration_seconds_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p50",
+          "refId": "A",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(freeswitch_session_duration_seconds_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p95",
+          "refId": "B",
+          "range": true
+        }
+      ],
+      "title": "Answered Session Duration (p50 / p95)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Jitter-buffer maximum size (`vg_freeswitch_rtp_jb_size_max_ms`, milliseconds) p95 over 15m — the deepest the adaptive buffer grew per call. It is the latency the buffer adds to absorb jitter: a larger buffer trades delay for fewer discards. Read together with the estimated-jitter panel (they move together). **Note:** FreeSWITCH emits this and JB estimated jitter only for the elastic jitter buffer (Opus + `rtp_jitter_buffer_accelerate`); G.711 / fixed-JB calls leave it empty.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "red",
+                "value": 120
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 305
+      },
+      "id": 712,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(vg_freeswitch_rtp_jb_size_max_ms_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p95",
+          "refId": "A",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(vg_freeswitch_rtp_jb_size_max_ms_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p50",
+          "refId": "B",
+          "range": true
+        }
+      ],
+      "title": "Jitter-buffer Max Size p95 (ms)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Per-call inbound flaw count (`vg_freeswitch_rtp_audio_in_flaws`): missing + out-of-order + late packets, p50/p95 over 15m. This is the raw impairment count behind the loss-rate and R-value/MOS — useful for the absolute magnitude per call (a handful of flaws vs. hundreds), which a normalized rate hides. Rises together with packet loss; a p95 spike with a flat p50 means a subset of calls hit heavy impairment.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.05
+              },
+              {
+                "color": "red",
+                "value": 0.1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 305
+      },
+      "id": 713,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(vg_freeswitch_rtp_audio_in_flaws_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p50",
+          "refId": "A",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(vg_freeswitch_rtp_audio_in_flaws_bucket{cluster=\"$cluster\"}[15m])))",
+          "legendFormat": "p95",
+          "refId": "B",
+          "range": true
+        }
+      ],
+      "title": "Inbound Flaws per call (p50 / p95)",
+      "type": "timeseries"
     }
   ],
   "refresh": "30s",
@@ -3950,6 +6401,6 @@
   "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
   "title": "VG / FreeSWITCH v2",
   "uid": "vg-fs-v2",
-  "version": 17,
+  "version": 22,
   "weekStart": ""
 }

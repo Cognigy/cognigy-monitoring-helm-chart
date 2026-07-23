@@ -3586,7 +3586,7 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "FreeSWITCH media CPU idle percentage (averaged across pods). Red when <20% idle \u2014 media processing saturated.",
+          "description": "FreeSWITCH container CPU usage as a percentage of its Kubernetes CPU limit (averaged across pods, cgroup-aware). Red when >80% \u2014 approaching CFS throttling / media saturation. Replaces the old node-level idle metric, which could not detect cgroup throttling.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3599,20 +3599,20 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "red",
+                    "color": "green",
                     "value": null
                   },
                   {
-                    "color": "orange",
-                    "value": 20
-                  },
-                  {
                     "color": "yellow",
-                    "value": 40
+                    "value": 50
                   },
                   {
-                    "color": "green",
-                    "value": 60
+                    "color": "orange",
+                    "value": 70
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
                   }
                 ]
               },
@@ -3648,13 +3648,13 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "avg(vg_feature_server_freeswitch_media_cpu_idle{cluster=\"$cluster\"})",
-              "legendFormat": "CPU Idle %",
+              "expr": "avg(sum(rate(container_cpu_usage_seconds_total{cluster=\"$cluster\", namespace=\"voicegateway\", pod=~\"feature-server-.*\", container=\"freeswitch\"}[5m])) by (pod) / sum(cluster:namespace:pod_cpu:active:kube_pod_container_resource_limits{cluster=\"$cluster\", namespace=\"voicegateway\", pod=~\"feature-server-.*\", container=\"freeswitch\"}) by (pod) * 100)",
+              "legendFormat": "CPU Usage %",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "\ud83e\udde0 FreeSWITCH Media CPU Idle %",
+          "title": "\ud83e\udde0 FreeSWITCH Media CPU Usage %",
           "type": "gauge"
         },
         {
@@ -4682,7 +4682,272 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 217
+            "y": 226
+          },
+          "id": 410,
+          "panels": [],
+          "title": "\ud83c\udf9e\ufe0f Media Frame Rate \u2014 STT + TTS (traffic-gated percentiles)",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "STT audio frame-rate percentiles across all native vendors (`vg_freeswitch_stt_frames_per_second`, target 50 fps). p10 is the early stall signal (the fps below which the worst 10% of per-second samples fall): healthy near 50, below ~40 elevated, below ~25 severe. Traffic-gated to the cluster's own recent peak, so idle/overnight periods show a gap instead of a false drop to 0.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 5,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "line"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 40
+                  },
+                  {
+                    "color": "green",
+                    "value": 45
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 227
+          },
+          "id": 411,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "min"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "asc"
+            }
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.10, sum by (le) (rate(vg_freeswitch_stt_frames_per_second_bucket{cluster=\"$cluster\"}[5m]))) and (sum(rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m])) > 0.1 * max_over_time(sum(rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m]))[1d:5m]))",
+              "legendFormat": "p10 (alert)",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.50, sum by (le) (rate(vg_freeswitch_stt_frames_per_second_bucket{cluster=\"$cluster\"}[5m]))) and (sum(rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m])) > 0.1 * max_over_time(sum(rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m]))[1d:5m]))",
+              "legendFormat": "p50",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.90, sum by (le) (rate(vg_freeswitch_stt_frames_per_second_bucket{cluster=\"$cluster\"}[5m]))) and (sum(rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m])) > 0.1 * max_over_time(sum(rate(vg_freeswitch_stt_frames_per_second_count{cluster=\"$cluster\"}[5m]))[1d:5m]))",
+              "legendFormat": "p90",
+              "range": true,
+              "refId": "C"
+            }
+          ],
+          "title": "\ud83c\udf99\ufe0f STT Frame-Rate Percentiles (p10/p50/p90)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "TTS audio frame-rate percentiles across all native vendors (`vg_freeswitch_tts_frames_per_second`, target 50 fps). p10 is the early stall signal (the fps below which the worst 10% of per-second samples fall): healthy near 50, below ~40 elevated, below ~25 severe. Traffic-gated to the cluster's own recent peak, so idle/overnight periods show a gap instead of a false drop to 0.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 5,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "line"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 40
+                  },
+                  {
+                    "color": "green",
+                    "value": 45
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 227
+          },
+          "id": 412,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "min"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "asc"
+            }
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.10, sum by (le) (rate(vg_freeswitch_tts_frames_per_second_bucket{cluster=\"$cluster\"}[5m]))) and (sum(rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m])) > 0.1 * max_over_time(sum(rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m]))[1d:5m]))",
+              "legendFormat": "p10 (alert)",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.50, sum by (le) (rate(vg_freeswitch_tts_frames_per_second_bucket{cluster=\"$cluster\"}[5m]))) and (sum(rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m])) > 0.1 * max_over_time(sum(rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m]))[1d:5m]))",
+              "legendFormat": "p50",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.90, sum by (le) (rate(vg_freeswitch_tts_frames_per_second_bucket{cluster=\"$cluster\"}[5m]))) and (sum(rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m])) > 0.1 * max_over_time(sum(rate(vg_freeswitch_tts_frames_per_second_count{cluster=\"$cluster\"}[5m]))[1d:5m]))",
+              "legendFormat": "p90",
+              "range": true,
+              "refId": "C"
+            }
+          ],
+          "title": "\ud83d\udd0a TTS Frame-Rate Percentiles (p10/p50/p90)",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 235
           },
           "id": 400,
           "panels": [],
@@ -4769,7 +5034,7 @@ data:
       "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
       "title": "VG / Health v1",
       "uid": "vg-health-v1",
-      "version": 1,
+      "version": 5,
       "weekStart": ""
     }
 {{- end }}

@@ -1,5 +1,22 @@
 # Release Notes
 
+### 2026.3.1
+**Released** July 23rd, 2026
+
+#### Changes
+- Introduced the following new dashboards:
+    - `AI / ChatGuard`
+    - `AI / Functions — Deprecation Tracker`
+- Updated the following dashboards (synced with vg-resources):
+    - `VG / FreeSWITCH` (added inbound RTP audio-quality panels, unified STT/TTS frame-rate section, cgroup-aware CPU usage and throttling panels, and a Custom TTS TTFB section).
+    - `VG / Health v1` (added media frame-rate percentile section and cgroup-aware CPU usage).
+    - `VG / Drachtio Server Monitoring v2` (added a Carrier Registration Health section).
+- Introduced the `FeatureServerESLEventLoopFreeze` critical VG alert.
+- Introduced VG media frame-rate stall alerts (`VGFreeSWITCHSttFrameRateLow`, `VGFreeSWITCHTtsFrameRateLow`) and inbound RTP audio-quality alerts.
+
+#### Bugfixes
+- Fixed Promitor Deployment container names so they satisfy the Kubernetes RFC 1123 label rule.
+
 ### 2026.3.0
 **Released** July 8th, 2026
 

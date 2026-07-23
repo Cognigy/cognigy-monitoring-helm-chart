@@ -550,9 +550,52 @@ rules:
       audioPlayerThreadLeak:
         enabled: true
         timeout: 10m
+      eslEventLoopFreeze:
+        enabled: true
+        timeout: 10m
       analyticsDataErrors:
         enabled: true
         threshold: 5
+      # Media frame-rate stall alerts on the p10 of vg_freeswitch_{stt,tts}_frames_per_second
+      # (target 50 fps). warningThreshold is the p10 fps below which the alert fires;
+      # criticalThreshold is available for a second tier. Each alert is traffic-gated to
+      # minTrafficFraction of the cluster's recent peak so idle windows produce no series.
+      sttFrameRateLow:
+        enabled: true
+        warningThreshold: 40
+        criticalThreshold: 25
+        minTrafficFraction: 0.1
+        timeout: 5m
+      ttsFrameRateLow:
+        enabled: true
+        warningThreshold: 40
+        criticalThreshold: 25
+        minTrafficFraction: 0.1
+        timeout: 5m
+      # Inbound RTP audio-quality alerts on the mod_prometheus per-call histograms. minCalls
+      # gates each alert on call volume so a sparse window cannot trip a quantile. Set enabled
+      # true where thresholds have been aligned to the environment's baseline.
+      audioQuality:
+        lowMos:
+          enabled: false
+          threshold: 3.5
+          minCalls: 20
+          timeout: 10m
+        badCallShare:
+          enabled: false
+          threshold: 0.10
+          minCalls: 20
+          timeout: 15m
+        highLoss:
+          enabled: false
+          threshold: 0.05
+          minCalls: 20
+          timeout: 15m
+        highJitter:
+          enabled: false
+          threshold: 50
+          minCalls: 20
+          timeout: 15m
     cpuThrottlingVGServiceHigh:
       enabled: true
       severity: warning

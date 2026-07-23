@@ -205,5 +205,125 @@ spec:
           summary: "AudioPlayer thread leak detected on pod {{`{{`}} $labels.pod {{`}}`}}"
           description: "AudioPlayer active threads ({{`{{`}} $value {{`}}`}}) exceed 2x active channels. Threads are not being cleaned up. Consider restarting the pod.\n  LABELS = {{`{{`}} $labels }}"
       {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.eslEventLoopFreeze.enabled ) }}
+      - alert: FeatureServerESLEventLoopFreeze
+        expr: |-
+          sum by (pod, namespace) (
+            increase(drachtio_sip_responses_out_total{
+              namespace=~"{{ $targetNamespace }}",
+              pod=~"feature-server-.*",
+              method="CANCEL",
+              code="481"
+            }[15m])
+          ) > 0
+        for: {{ $.Values.rules.vg.featureServer.eslEventLoopFreeze.timeout }}
+        labels:
+          severity: critical
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "Feature-server ESL event loop freeze detected on pod {{`{{`}} $labels.pod {{`}}`}}"
+          description: "Pod {{`{{`}} $labels.pod {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}} is responding 481 (Call/Transaction Does Not Exist) to SIP CANCEL requests. This indicates the Node.js event loop is saturated and drachtio can no longer process SIP transactions — new calls hang indefinitely in createEndpoint() and time out with 408 after 3 minutes. Immediate action: kubectl rollout restart statefulset/feature-server -n {{`{{`}} $labels.namespace {{`}}`}}"
+      {{- end }}
+
+      {{/* Media frame-rate stall alerts on the p10 of vg_freeswitch_{stt,tts}_frames_per_second.
+           p10 is the fps below which the worst 10% of per-second samples fall, so it drops as soon
+           as a meaningful share of sessions stall, before the median moves. Each alert is
+           traffic-gated to minTrafficFraction of the cluster's recent peak
+           (max_over_time(traffic[1d:5m])) so idle windows produce no series. */}}
+      {{- if (.Values.rules.vg.featureServer.sttFrameRateLow.enabled ) }}
+      - alert: VGFreeSWITCHSttFrameRateLow
+        expr: |-
+          (histogram_quantile(0.10, sum by (le) (rate(vg_freeswitch_stt_frames_per_second_bucket[5m]))) < {{ $.Values.rules.vg.featureServer.sttFrameRateLow.warningThreshold }})
+            and
+          (sum(rate(vg_freeswitch_stt_frames_per_second_count[5m])) > {{ $.Values.rules.vg.featureServer.sttFrameRateLow.minTrafficFraction }} * max_over_time(sum(rate(vg_freeswitch_stt_frames_per_second_count[5m]))[1d:5m]))
+        for: {{ $.Values.rules.vg.featureServer.sttFrameRateLow.timeout }}
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "FreeSWITCH inbound STT frame rate degraded (p10 below {{ $.Values.rules.vg.featureServer.sttFrameRateLow.warningThreshold }} fps)"
+          description: "The 10th-percentile inbound STT audio frame rate is below {{ $.Values.rules.vg.featureServer.sttFrameRateLow.warningThreshold }} fps (target 50): the worst 10% of sessions are delivering degraded audio to the recognizer. Check FreeSWITCH CPU / CFS throttling and the per-vendor p10 drill-down on the VG / FreeSWITCH board.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.ttsFrameRateLow.enabled ) }}
+      - alert: VGFreeSWITCHTtsFrameRateLow
+        expr: |-
+          (histogram_quantile(0.10, sum by (le) (rate(vg_freeswitch_tts_frames_per_second_bucket[5m]))) < {{ $.Values.rules.vg.featureServer.ttsFrameRateLow.warningThreshold }})
+            and
+          (sum(rate(vg_freeswitch_tts_frames_per_second_count[5m])) > {{ $.Values.rules.vg.featureServer.ttsFrameRateLow.minTrafficFraction }} * max_over_time(sum(rate(vg_freeswitch_tts_frames_per_second_count[5m]))[1d:5m]))
+        for: {{ $.Values.rules.vg.featureServer.ttsFrameRateLow.timeout }}
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "FreeSWITCH outbound TTS frame rate degraded (p10 below {{ $.Values.rules.vg.featureServer.ttsFrameRateLow.warningThreshold }} fps)"
+          description: "The 10th-percentile outbound TTS audio frame rate is below {{ $.Values.rules.vg.featureServer.ttsFrameRateLow.warningThreshold }} fps (target 50): the worst 10% of sessions have stuttering/stuck playout. Check FreeSWITCH CPU / CFS throttling and the per-vendor p10 drill-down on the VG / FreeSWITCH board.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+      {{- end }}
+
+      {{/* Inbound RTP audio-quality alerts on the mod_prometheus per-call histograms. Metrics are
+           observed once per call at hangup and carry a `codec` label; alert on the low quantile
+           (a few bad calls are the signal) and gate on call volume (increase(_count[w]) > minCalls)
+           so a sparse window cannot trip a quantile. opus and pcmu have different expected
+           baselines, so a per-codec breakdown helps localise a regression. */}}
+      {{- if (.Values.rules.vg.featureServer.audioQuality.lowMos.enabled ) }}
+      - alert: VGFreeSWITCHAudioLowMos
+        expr: |-
+          (histogram_quantile(0.10, sum by (le) (rate(vg_freeswitch_rtp_audio_in_mos_bucket[15m]))) < {{ $.Values.rules.vg.featureServer.audioQuality.lowMos.threshold }})
+            and
+          (sum(increase(vg_freeswitch_rtp_audio_in_mos_count[15m])) > {{ $.Values.rules.vg.featureServer.audioQuality.lowMos.minCalls }})
+        for: {{ $.Values.rules.vg.featureServer.audioQuality.lowMos.timeout }}
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "FreeSWITCH inbound MOS low (p10 below {{ $.Values.rules.vg.featureServer.audioQuality.lowMos.threshold }})"
+          description: "The 10th-percentile inbound MOS is below {{ $.Values.rules.vg.featureServer.audioQuality.lowMos.threshold }} over the last 15m: the worst 10% of calls have poor perceived audio quality (affects STT accuracy). Break down by codec and check packet loss / jitter on the VG / FreeSWITCH board.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.audioQuality.badCallShare.enabled ) }}
+      - alert: VGFreeSWITCHAudioBadCallShare
+        expr: |-
+          (sum(rate(vg_freeswitch_rtp_audio_in_mos_bucket{le="3.5"}[15m])) / clamp_min(sum(rate(vg_freeswitch_rtp_audio_in_mos_count[15m])), 0.001) > {{ $.Values.rules.vg.featureServer.audioQuality.badCallShare.threshold }})
+            and
+          (sum(increase(vg_freeswitch_rtp_audio_in_mos_count[15m])) > {{ $.Values.rules.vg.featureServer.audioQuality.badCallShare.minCalls }})
+        for: {{ $.Values.rules.vg.featureServer.audioQuality.badCallShare.timeout }}
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "FreeSWITCH share of low-MOS calls high (> {{ $.Values.rules.vg.featureServer.audioQuality.badCallShare.threshold }})"
+          description: "More than {{ $.Values.rules.vg.featureServer.audioQuality.badCallShare.threshold }} of inbound calls fell at or below MOS 3.5 over the last 15m. A broad quality regression rather than a few outliers — check for a codec-specific issue, a bad carrier/route, or FreeSWITCH media saturation.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.audioQuality.highLoss.enabled ) }}
+      - alert: VGFreeSWITCHAudioHighLoss
+        expr: |-
+          (histogram_quantile(0.95, sum by (le) (rate(vg_freeswitch_rtp_audio_in_loss_rate_bucket[15m]))) > {{ $.Values.rules.vg.featureServer.audioQuality.highLoss.threshold }})
+            and
+          (sum(increase(vg_freeswitch_rtp_audio_in_loss_rate_count[15m])) > {{ $.Values.rules.vg.featureServer.audioQuality.highLoss.minCalls }})
+        for: {{ $.Values.rules.vg.featureServer.audioQuality.highLoss.timeout }}
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "FreeSWITCH inbound packet loss high (p95 > {{ $.Values.rules.vg.featureServer.audioQuality.highLoss.threshold }})"
+          description: "The 95th-percentile inbound packet-loss rate exceeds {{ $.Values.rules.vg.featureServer.audioQuality.highLoss.threshold }} over the last 15m — user-audible and degrades STT. Correlate with loss burstiness and jitter; bursty loss at the same rate is worse.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.audioQuality.highJitter.enabled ) }}
+      - alert: VGFreeSWITCHAudioHighJitter
+        expr: |-
+          (histogram_quantile(0.95, sum by (le) (rate(vg_freeswitch_rtp_jb_jitter_est_ms_bucket[15m]))) > {{ $.Values.rules.vg.featureServer.audioQuality.highJitter.threshold }})
+            and
+          (sum(increase(vg_freeswitch_rtp_jb_jitter_est_ms_count[15m])) > {{ $.Values.rules.vg.featureServer.audioQuality.highJitter.minCalls }})
+        for: {{ $.Values.rules.vg.featureServer.audioQuality.highJitter.timeout }}
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "FreeSWITCH inbound jitter high (p95 > {{ $.Values.rules.vg.featureServer.audioQuality.highJitter.threshold }} ms)"
+          description: "The 95th-percentile jitter-buffer estimated jitter exceeds {{ $.Values.rules.vg.featureServer.audioQuality.highJitter.threshold }} ms over the last 15m. High jitter forces the jitter buffer to grow (added latency) or drop packets (added loss). Check network path / carrier and FreeSWITCH scheduling.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+      {{- end }}
     {{- end }}
 {{- end -}}
