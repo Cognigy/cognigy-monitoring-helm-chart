@@ -1,7 +1,7 @@
 # Release Notes
 
 ### 2026.3.2
-**Released** August 31th, 2026
+**Released** August 31st, 2026
 
 #### Bugfixes
 - Fixed `Services / Azure Load Balancer` dashboard under-reporting SNAT port panels no longer blend TCP and UDP series together.
