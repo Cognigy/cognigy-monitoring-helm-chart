@@ -268,7 +268,7 @@
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "expr": "max(avg by (backendipaddress) (azure_lb_allocated_snat_ports{cluster=\"$cluster\", resource_group=~\"$resource_group\", instance_name=~\"$load_balancer\", protocoltype=~\"$protocol_type\", backendipaddress=~\"$backend_ip_address\"}))",
+          "expr": "max(avg by (backendipaddress, protocoltype) (azure_lb_allocated_snat_ports{cluster=\"$cluster\", resource_group=~\"$resource_group\", instance_name=~\"$load_balancer\", protocoltype=~\"$protocol_type\", backendipaddress=~\"$backend_ip_address\"}))",
           "legendFormat": "Allocated SNAT ports (TCP, per Node max)",
           "refId": "A"
         }
@@ -540,7 +540,7 @@
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "expr": "sum by (instance_name) (rate(azure_lb_byte_count{cluster=\"$cluster\", resource_group=~\"$resource_group\", instance_name=~\"$load_balancer\"}[5m]))",
+          "expr": "sum by (instance_name) (avg_over_time(azure_lb_byte_count{cluster=\"$cluster\", resource_group=~\"$resource_group\", instance_name=~\"$load_balancer\"}[5m]) / 60)",
           "legendFormat": "{{instance_name}}",
           "refId": "A"
         }
@@ -625,7 +625,7 @@
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "expr": "sum by (instance_name) (rate(azure_lb_packet_count{cluster=\"$cluster\", resource_group=~\"$resource_group\", instance_name=~\"$load_balancer\"}[5m]))",
+          "expr": "sum by (instance_name) (avg_over_time(azure_lb_packet_count{cluster=\"$cluster\", resource_group=~\"$resource_group\", instance_name=~\"$load_balancer\"}[5m]) / 60)",
           "legendFormat": "{{instance_name}}",
           "refId": "A"
         }
@@ -710,7 +710,7 @@
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "expr": "sum by (instance_name) (rate(azure_lb_syn_count{cluster=\"$cluster\", resource_group=~\"$resource_group\", instance_name=~\"$load_balancer\"}[5m]))",
+          "expr": "sum by (instance_name) (avg_over_time(azure_lb_syn_count{cluster=\"$cluster\", resource_group=~\"$resource_group\", instance_name=~\"$load_balancer\"}[5m]) / 60)",
           "legendFormat": "{{instance_name}}",
           "refId": "A"
         }
@@ -895,8 +895,8 @@
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "expr": "avg by (backendipaddress) (azure_lb_allocated_snat_ports{cluster=\"$cluster\", resource_group=~\"$resource_group\", instance_name=~\"$load_balancer\", protocoltype=~\"$protocol_type\", backendipaddress=~\"$backend_ip_address\"})",
-          "legendFormat": "{{backendipaddress}}",
+          "expr": "avg by (backendipaddress, protocoltype) (azure_lb_allocated_snat_ports{cluster=\"$cluster\", resource_group=~\"$resource_group\", instance_name=~\"$load_balancer\", protocoltype=~\"$protocol_type\", backendipaddress=~\"$backend_ip_address\"})",
+          "legendFormat": "{{backendipaddress}} ({{protocoltype}})",
           "refId": "A"
         }
       ],
@@ -982,8 +982,8 @@
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "expr": "avg by (backendipaddress) (azure_lb_used_snat_ports{cluster=\"$cluster\", resource_group=~\"$resource_group\", instance_name=~\"$load_balancer\", protocoltype=~\"$protocol_type\", backendipaddress=~\"$backend_ip_address\"})",
-          "legendFormat": "{{backendipaddress}}",
+          "expr": "avg by (backendipaddress, protocoltype) (azure_lb_used_snat_ports{cluster=\"$cluster\", resource_group=~\"$resource_group\", instance_name=~\"$load_balancer\", protocoltype=~\"$protocol_type\", backendipaddress=~\"$backend_ip_address\"})",
+          "legendFormat": "{{backendipaddress}} ({{protocoltype}})",
           "refId": "A"
         }
       ],
