@@ -1,5 +1,34 @@
 # Release Notes
 
+### 2026.4.0
+**Released** September 16th, 2026
+
+#### Changes
+- Introduced the following new dashboards:
+    - `VG / Operational Diagnostics` (version-change history, speech-error triage, SIP error breakdowns, alert-verification signal-vs-threshold panels, speech vendor failover monitoring, event-loop-lag tracking, and a hypercare post-release health row)
+    - `VG Resource Resolver` (HTTP request rate/latency and cache-operation panels)
+    - `Tempo / Overview`, `Tempo / Reads`, `Tempo / Writes`, `Tempo / Resources`
+    - `AI / Simulator` (evaluation profile metrics)
+- Updated the following dashboards:
+    - `AI / LLM Gateway` (added provider/model dimensions across panels, corrected the fallback-rate description, converted rate-based panels to frequency panels, added overview stat tiles).
+    - `AI / LLM Providers - Comprehensive Monitoring` (added streaming-mode and request-type breakdowns).
+    - `VG / Overview v3` (extended TTS/STT error queries with an account/application/reason breakdown and visual cleanup).
+- Introduced critical-severity alerts for stateful datastores with no existing "is it down" check, and expanded VG pod-not-ready alert coverage to additional pod types.
+- Introduced VG trunk-renegotiation alerts and STT configuration alerts.
+- Introduced VG Resource Resolver alerts.
+- Introduced a MongoDB replica-priority-mismatch alert.
+- Introduced Prometheus alerts for billing CronJob health.
+- Introduced opt-in alerts for Qdrant memory pressure and NLP orchestrator classifier timeouts.
+- Routed pod-restart and OOM-killed alerts to the owning team automatically, and split VG pod-not-ready alerting across two routes for more precise ownership.
+- Re-enabled the serverless router alert rules at warning severity.
+- Introduced an optional Grafana Alloy OTLP trace collector for Tempo tracing, running as an autoscaling Deployment.
+
+#### Bugfixes
+- Fixed `Services / Azure Load Balancer` dashboard SNAT panels: titles now reflect the selected filters and the SNAT Connections stat no longer goes blank on a `NaN` sample.
+- Fixed broken `Services / Qdrant` dashboard panel queries.
+- Fixed `AI / Functions — Deprecation Tracker` dashboard being inaccessible to normal viewers.
+
+
 ### 2026.3.2
 **Released** August 31st, 2026
 

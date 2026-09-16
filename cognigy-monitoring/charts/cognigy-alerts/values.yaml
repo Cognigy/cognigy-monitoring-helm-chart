@@ -9,6 +9,40 @@ rules:
   # Generic kubernetes alert rules for Cognigy products
   kubernetes:
     enabled: true
+    # Routes pod-level alerts (PodManyRestarts, Container*OOMKilled) to the owning
+    # team by joining on the `owner-team` label carried by Cognigy Deployments and
+    # StatefulSets. Requires kube-state-metrics started with
+    #   --metric-labels-allowlist=deployments=[owner-team],statefulsets=[owner-team]
+    # OFF by default: with `enabled: false` this chart renders exactly the same
+    # alert rules it always has, so installs without team routing are unaffected.
+    # `teams` maps an owner-team label value to the Alertmanager `group` label used
+    # to route it. Enabling with an empty `teams` map fails the render.
+    ownerTeamRouting:
+      enabled: false
+      teams: {}
+    # Additive high-urgency alerts, scoped to stateful datastore workloads via
+    # `pattern` below, layered on top of the generic rules without changing
+    # them. Those rules are `severity: warning` by default, and
+    # KubePodCrashLooping only fires while a container is in `waiting` state -
+    # a crash loop that spends most of its cycle `Running` before being killed
+    # never satisfies that for long enough.
+    criticalDatastores:
+      enabled: true
+      # Regex matched against container/pod/statefulset name. Limited to
+      # datastores with no dedicated critical "is it down" alert of their own:
+      # mongodb/redis/postgres/rabbitmq already have MongodbDown/RedisDown/
+      # PostgresqlDown/RabbitmqHighWatermarkCrossed at severity critical, so
+      # adding them here would just duplicate paging.
+      pattern: "qdrant.*|mysql.*"
+      severity: critical
+      statefulSetReplicasMismatch:
+        timeout: 5m
+      podManyRestarts:
+        timeout: 5m
+        restartsPerHour: 3
+        restartsTotal: 10
+      podNotReady:
+        timeout: 5m
     kubePodCrashLooping:
       enabled: true
       severity: critical
@@ -188,6 +222,12 @@ rules:
       enabled: true
     mongodbVirtualMemoryUsage:
       enabled: false
+    mongodbReplicaPriorityMismatch:
+      enabled: true
+      severity: warning
+      timeout: 1h
+      # Max tolerated priority spread (max - min) across replica-set members
+      threshold: 0
 
   # Velero alert rules
   velero:
@@ -442,9 +482,20 @@ rules:
       # p95 time-to-first-token critical threshold in seconds
       criticalThreshold: 10
 
+  # Qdrant vector DB alert rules
+  # Off by default to match the cognigy-ai chart's qdrant.enabled: false default
+  qdrant:
+    enabled: false
+    memoryNearLimit:
+      enabled: true
+      severity: warning
+      # % of the configured memory limit at which the alert fires
+      threshold: 90
+      timeout: 5m
+
   # Serverless router alert rules
   serverless:
-    enabled: false
+    enabled: true
     executionSlo:
       enabled: true
       # p95 stream duration warning threshold in seconds
@@ -506,6 +557,12 @@ rules:
       enabled: true
     serviceNlpMatcher:
       enabled: true
+    serviceNlpOrchestrator:
+      enabled: false
+      scoreClassifierTimeoutCounter:
+        threshold: 0
+        severity: warning
+        timeout: 1m
     servicePlaybookExecution:
       enabled: true
     serviceSessionStateManager:
@@ -528,6 +585,31 @@ rules:
       unhandledRejections:
         enabled: true
         threshold: 5
+      # Dial Transfer connects but carries no audio when the two legs disagree on
+      # codec. failureRateHigh ships disabled until a baseline is measured.
+      #
+      # There is deliberately no fallbackFailed alert: the anchored-media fallback
+      # path no longer exists in the feature server, so
+      # reason="renegotiate-anchored-media-fallback" is never emitted and such an
+      # alert could never fire.
+      dialTransferRenegotiation:
+        primaryFailed:
+          enabled: true
+          threshold: 0
+          timeout: 0m
+        # Fires when FeatureServer keeps the anchor repeatedly. This should
+        # normally be near zero, so a sustained rate is the leading indicator
+        # that a codec-accept pin is manufacturing a mismatch again. Threshold is
+        # deliberately above 0: an occasional genuine mismatch is normal.
+        attemptsUnexpected:
+          enabled: true
+          threshold: 20
+          timeout: 10m
+        failureRateHigh:
+          enabled: false
+          threshold: 0.5
+          minAttempts: 3
+          timeout: 5m
       wsMaxReconnectsExceeded:
         enabled: true
       wsConnectionTimeouts:
@@ -541,6 +623,10 @@ rules:
       speechFallback:
         enabled: true
         threshold: 5
+      sttMissingVendor:
+        enabled: true
+      sttLanguageFallback:
+        enabled: true
       callSetupTimeSlow:
         enabled: true
         threshold: 5000
@@ -553,6 +639,27 @@ rules:
       eslEventLoopFreeze:
         enabled: true
         timeout: 10m
+      # Longest single event-loop block, from nodejs_eventloop_lag_max_seconds.
+      # NOT the unsuffixed nodejs_eventloop_lag_seconds gauge — that one measures
+      # the cost of its own scrape and grows with pod uptime.
+      # 0.5 sits above the metric-serialization cost of a high-cardinality pod.
+      # Tighten it once the feature server's metric cardinality is reduced and
+      # metricsCardinalityHigh has gone quiet.
+      eventLoopLagHigh:
+        enabled: true
+        threshold: 0.5
+        timeout: 10m
+      # prom-client never evicts label sets, so series count grows with the number
+      # of tenants a pod has ever served and only resets on restart. Each scrape
+      # blocks the event loop at ~12ns per byte of payload.
+      # 25000 flags a pod whose payload is already large enough to cost tens of
+      # milliseconds of event-loop time per scrape, while leaving pods with a
+      # merely elevated series count quiet. Lower it to 15000 once the feature
+      # server emits fewer per-tenant series.
+      metricsCardinalityHigh:
+        enabled: true
+        threshold: 25000
+        timeout: 30m
       analyticsDataErrors:
         enabled: true
         threshold: 5
@@ -596,6 +703,64 @@ rules:
           threshold: 50
           minCalls: 20
           timeout: 15m
+    resourceResolver:
+      enabled: true
+      # Two linked AI clusters both claimed the same call, so the answer was
+      # decided by a race: the same request can resolve to a DIFFERENT tenant's
+      # configuration run to run. Should be zero forever; any occurrence is real.
+      doubleClaims:
+        enabled: true
+        severity: warning
+        priority: P5
+        timeout: 0m
+      # An account allowlisted to the runtime arm that every linked AI cluster
+      # disclaimed. The runtime arm does not fall back to legacy, so each one is a
+      # rejected call -- a steady rate is a total outage for that tenant.
+      allowlistedButUnclaimed:
+        enabled: true
+        severity: warning
+        priority: P5
+        threshold: 0
+        timeout: 5m
+      # Requests the tenancy flag routed to the runtime path while no
+      # vg-runtime-api passthrough is wired. Each one fails closed with a 502.
+      unconfiguredRejections:
+        enabled: true
+        severity: warning
+        priority: P5
+        threshold: 0
+        timeout: 5m
+      # A linked AI cluster rejected this cluster's credential. Usually a cluster
+      # name that does not match the trust-list key on that side, or a key rotated
+      # in before its next refresh.
+      targetUnauthorized:
+        enabled: true
+        severity: warning
+        priority: P5
+        threshold: 0
+        timeout: 5m
+      # Share of calls into vg-runtime-api that failed, including fail-closed 502s.
+      upstreamErrorRate:
+        enabled: true
+        severity: warning
+        priority: P5
+        threshold: 0.05
+        timeout: 10m
+      # This call sits on the call-admission path, so its latency is added to
+      # every resolve that reaches the runtime arm.
+      upstreamLatencySlow:
+        enabled: true
+        severity: warning
+        priority: P5
+        threshold: 1
+        timeout: 10m
+      # resolveCallAdmission raising errors rather than returning a decision.
+      admissionErrors:
+        enabled: true
+        severity: warning
+        priority: P5
+        threshold: 0
+        timeout: 5m
     cpuThrottlingVGServiceHigh:
       enabled: true
       severity: warning
@@ -604,6 +769,17 @@ rules:
       enabled: true
       severity: critical
       timeout: 5m
+      # Pods whose outage blocks call processing entirely. postgres and influxdb
+      # are deliberately excluded - they only affect debugging/reporting (SIP
+      # message and media-report storage), not live calls. redis is excluded too:
+      # losing a single replica doesn't affect calls as long as the cluster stays
+      # available, which this pod-level pending check can't distinguish.
+      podSelector: "^sbc-inbound.*|^sbc-outbound.*|^sbc-sip.*|^sbc-rtp.*|^feature-server.*|^api-server.*|^sbc-call-router.*"
+      # Optional subset of podSelector to alert on separately. Matching pods are
+      # emitted as a second rule that carries no `group` label, so no group-based
+      # Alertmanager route matches them and they follow the default route instead.
+      # Set to "" to emit a single rule covering all of podSelector.
+      defaultRoutePods: "^sbc-sip.*|^sbc-rtp.*"
 
   # Cognigy Live Agent alert rules
   la:
@@ -621,3 +797,34 @@ rules:
       enabled: true
       processedVsStored:
         threshold: 100
+  billing:
+    enabled: false
+    namespace: "billing-app"
+    usageAggregation:
+      cronjobName: usage-aggregation
+      failure:
+        enabled: true
+        severity: warning
+        lookbackHours: 24
+      duration:
+        enabled: true
+        severity: warning
+        thresholdHours: 4
+      neverRan:
+        enabled: true
+        severity: warning
+        graceMinutes: 60 
+    niceBillingDailyReport:
+      cronjobName: nice-billing-daily-report
+      failure:
+        enabled: true
+        severity: warning
+        lookbackHours: 24
+      duration:
+        enabled: true
+        severity: warning
+        thresholdHours: 4
+      neverRan:
+        enabled: true
+        severity: warning
+        graceMinutes: 60

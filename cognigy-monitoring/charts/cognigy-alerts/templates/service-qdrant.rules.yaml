@@ -1,0 +1,27 @@
+{{- if .Values.rules.qdrant.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-service-qdrant-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+  {{- if .Values.rules.qdrant.memoryNearLimit.enabled }}
+  - name: cognigy.alert.qdrant
+    rules:
+    - alert: QdrantMemoryNearLimit
+      annotations:
+        summary: Qdrant instance is close to its memory limit (cluster {{`{{`}} $labels.cluster }})
+        description: "Qdrant pod {{`{{`}} $labels.pod }} in cluster {{`{{`}} $labels.cluster }} is using {{`{{`}} $value | humanizePercentage {{`}}`}} of its memory limit.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+      expr: |-
+        max(container_memory_working_set_bytes{pod=~"qdrant.*", container=~"qdrant.*"}) by (cluster, pod)
+          /
+        max(kube_pod_container_resource_limits{pod=~"qdrant.*", container=~"qdrant.*", resource="memory"}) by (cluster, pod)
+          > ( {{ .Values.rules.qdrant.memoryNearLimit.threshold }} / 100 )
+      for: {{ .Values.rules.qdrant.memoryNearLimit.timeout }}
+      labels:
+        severity: {{ .Values.rules.qdrant.memoryNearLimit.severity }}
+        group: ai-custom-alert-rules-carbon
+  {{- end }}
+{{- end -}}

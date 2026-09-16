@@ -106,6 +106,187 @@ The chart can optionally deploy [Promitor](https://promitor.io/) to pull Azure M
    ```
 4. In Prometheus, confirm the `promitor-scraper` target is **UP** under **Status → Targets**.
 
+## Distributed Tracing (Grafana Alloy)
+
+The chart can optionally deploy [Grafana Alloy](https://grafana.com/docs/alloy/latest/) as the
+per-cluster OTLP edge collector for the regional Grafana Tempo tracing rollout. It receives OTLP
+traces from product services, enriches them with Kubernetes and cluster identity, tail-samples
+them, and forwards the result to the cluster's regional Tempo — buffering to a disk queue so a
+Tempo outage doesn't drop spans while the pod is alive. That queue is pod-local (`emptyDir`), not
+durable: it does not survive a pod restart, reschedule, or scale-down. See [Scaling](#scaling)
+below.
+
+Two subcharts are involved, both disabled by default:
+- `alloy` — the vendored upstream chart. Owns the workload (Deployment, HPA, Services, RBAC,
+  ServiceMonitor).
+- `cognigy-alloy` — in-house. Owns only the rendered Alloy configuration (the ConfigMap).
+
+### Prerequisites
+1. `docker.io/grafana/alloy:v1.19.2` must be mirrored to `cognigy.azurecr.io/grafana-alloy:v1.19.2`
+   (flat repository name, not upstream's `grafana/alloy` path) — every other image in this chart is
+   pulled from Cognigy's registry, and this collector is no exception. The config reloader sidecar
+   needs no separate mirror; it's pinned to the tag already pulled by the vendored
+   kube-prometheus-stack (`v0.83.0`).
+2. A regional Tempo OTLP gRPC endpoint reachable from the cluster.
+
+### Enable in monitoring stack
+1. In `YOUR_VALUES_FILE.yaml`, enable both subcharts and set the two required values:
+   ```yaml
+   alloy:
+     enabled: true
+   cognigy-alloy:
+     enabled: true
+     clusterName: "<your-flux-cluster-name>"        # e.g. "foo-corp-dev"
+     tempo:
+       endpoint: "<tempo-host>:4317"                # e.g. "tempo-prod-eu.internal:4317"
+   ```
+   All other collector behavior — sampling policies, batch sizes, queue sizing — has sane
+   defaults in `cognigy-monitoring/charts/cognigy-alloy/values.yaml`; override there only if a
+   cluster needs something different (e.g. a higher baseline sampling rate than the 10% default).
+   That also includes `clusterAttribute` (default `"cluster"`), the resource attribute key
+   `clusterName` is written to on every span — override it only to match a `tempo-query`
+   `routing.clusterAttribute` (`resource.<this value>`) that was already deployed with a
+   different key.
+2. Install / upgrade the Helm release (see step 5 under [Installation](#installation)).
+3. Verify the collector:
+   ```shell
+   kubectl -n monitoring rollout status deployment/cognigy-alloy
+   kubectl -n monitoring logs -l app.kubernetes.io/name=alloy -c alloy --tail=200 | grep -i error
+   ```
+   A healthy pod logs no `error` lines beyond transient startup warnings on first boot (DNS for
+   the clustering headless Service not yet populated resolves within the same second).
+4. Send a test trace and confirm it reaches Tempo:
+   ```shell
+   kubectl -n monitoring exec -it deploy/some-test-client -- \
+     telemetrygen traces --otlp-endpoint=cognigy-alloy:4317 --otlp-insecure --duration=5s
+   ```
+   At more than one replica, confirm the trace-ID load-balancing hop is spreading traffic:
+   `otelcol_receiver_accepted_spans{component_id=~".*internal.*"}` should be non-zero on more than
+   one pod.
+
+### Authenticating to a remote Tempo
+
+The `X-Scope-OrgID` tenant header above is always sent, but it's multi-tenancy routing, not
+authentication. A **remote** Tempo cluster needs real credentials, and those must come from a
+Kubernetes Secret — never from `values.yaml`. Set `cognigy-alloy.tempo.auth.type` to select the
+mechanism, then wire the actual Secret into the vendored `alloy` chart's own generic knobs
+(`extraEnv` / a Secret volume) using the **exact** env var names or mount path below — this chart's
+template reads fixed names, it doesn't take a secret name as a value:
+
+| `tempo.auth.type` | Secret keys (create the Secret yourself) | What to add to `YOUR_VALUES_FILE.yaml` |
+|---|---|---|
+| `basic` | `username`, `password` (matches `kubernetes.io/basic-auth`) | `alloy.alloy.extraEnv` with two `valueFrom.secretKeyRef` entries → env vars `TEMPO_AUTH_USERNAME`, `TEMPO_AUTH_PASSWORD` |
+| `bearer` | `token` | `alloy.alloy.extraEnv` with one `valueFrom.secretKeyRef` → env var `TEMPO_AUTH_TOKEN` |
+| `mtls` | `tls.crt`, `tls.key` (matches `kubernetes.io/tls`) | `alloy.controller.volumes.extra` (a Secret volume) + `alloy.alloy.mounts.extra` (mounted at `/etc/alloy-secrets/tempo-mtls`) |
+
+Example for `basic`:
+```yaml
+cognigy-alloy:
+  tempo:
+    auth:
+      type: basic
+
+alloy:
+  alloy:
+    extraEnv:
+      - name: TEMPO_AUTH_USERNAME
+        valueFrom: { secretKeyRef: { name: tempo-remote-credentials, key: username } }
+      - name: TEMPO_AUTH_PASSWORD
+        valueFrom: { secretKeyRef: { name: tempo-remote-credentials, key: password } }
+```
+Example for `mtls`:
+```yaml
+cognigy-alloy:
+  tempo:
+    auth:
+      type: mtls
+
+alloy:
+  controller:
+    volumes:
+      extra:
+        # `extra` REPLACES the whole list — include alloy-data (the queue
+        # volume already set in values.yaml) or you'll silently drop it.
+        - name: alloy-data
+          emptyDir: { sizeLimit: 10Gi }
+        - name: tempo-mtls
+          secret: { secretName: tempo-remote-client-cert }
+  alloy:
+    mounts:
+      extra:
+        - name: alloy-data
+          mountPath: /var/lib/alloy
+        - name: tempo-mtls
+          mountPath: /etc/alloy-secrets/tempo-mtls
+          readOnly: true
+```
+Server-CA verification is the separate, pre-existing `tempo.tls.caFile` knob — mTLS only adds the
+*client* certificate.
+
+**Helm cannot catch a mismatch here** — `cognigy-alloy.tempo.auth.type` and the `alloy.*` env/volume
+wiring live in two different subcharts' values, invisible to each other at render time, the same
+way `alloy.fullnameOverride` and `cognigy-alloy.alloyFullname` must be kept in sync manually.
+Verified in a real cluster: if you enable `basic`/`bearer` but forget the matching `extraEnv`, the
+collector does **not** start and silently send empty credentials — `otelcol.auth.basic`/`.bearer`
+validate at config-load time and refuse to build with an empty value (`sys.env()` on an unset
+variable is `""`, and the component then fails with `no credential source provided`), which is a
+fatal config-load error for the whole collector — the pod goes into `CrashLoopBackOff`, loudly, not
+a silent security hole. That's the safe failure mode; it's called out here so the crash makes
+sense instead of looking like an unrelated bug.
+
+**Also verified**: `basic`/`bearer` auth over `tempo.tls.insecure: true` fails outright with
+`grpc: the credentials require transport level security` — gRPC's own guard against sending
+credentials in cleartext. This is a non-issue against a real remote Tempo (which uses TLS anyway),
+but it means `auth.type: basic|bearer` and `tempo.tls.insecure: true` cannot be combined, including
+in test setups — use `insecureSkipVerify: true` against a self-signed endpoint instead of
+`insecure: true` if you need to skip certificate validation while testing.
+
+### Routing traces to a different destination
+
+By default every trace goes to the one Tempo endpoint above. Some traces need to go somewhere
+else instead — for example, internal application-level traces that should land on an in-cluster
+OpenTelemetry-compatible collector rather than the shared platform Tempo. Add an entry to
+`cognigy-alloy.routes` in `YOUR_VALUES_FILE.yaml`:
+```yaml
+cognigy-alloy:
+  routes:
+    - name: app_traces                                             # [a-z][a-z0-9_]*, not "default"
+      match: 'resource.attributes["cognigy.trace.route"] == "app"'  # raw OTTL boolean expression
+      tempo:
+        endpoint: "app-otel-collector.cognigy-ai.svc.cluster.local:4317"
+        tls: {insecure: true}
+```
+A trace matching a route's condition goes to that route's endpoint **instead of** the default
+Tempo — never both. Routes are simpler than the default chain: everything that matches is kept
+as-is (no tail-sampling) with an in-memory-only queue, not the disk-backed one.
+
+`match` is a raw OTTL boolean expression, evaluated per-span (`context = "span"`) — it can
+reference resource attributes like `k8s.namespace.name` or `cluster` (the attribute key configured
+via `clusterAttribute`, default `"cluster"` — see below) via the `resource.`
+prefix (both are already set on every span by the time routing happens), or span-level fields
+directly. **A malformed expression is a collector-wide startup failure at the Alloy level, not a
+`helm template` error** — always validate a new or changed route with `alloy fmt` (and ideally
+`alloy run` against the rendered config) before rolling it out; see the plan / PR description for
+the exact commands used to develop this feature.
+
+### Scaling
+
+The collector runs as a Deployment behind a CPU-based HPA, `alloy.controller.autoscaling.horizontal`,
+default `minReplicas: 1` / `maxReplicas: 3` / `targetCPUUtilizationPercentage: 80` — override per
+cluster, or set `enabled: false` and use `alloy.controller.replicas` for a fixed count.
+
+Things worth knowing before enabling this in a non-loadtest cluster:
+- `alloy.alloy.resources.requests.cpu` (200m) is the utilization denominator and has no CPU limit,
+  so under real traffic the HPA behaves as an on/off switch to `maxReplicas` rather than a
+  proportional scaler. This is expected to also trip the existing `HPAMaxReplicasReached` alert —
+  that's a known, accepted consequence, not a bug.
+- Each scale event reshuffles the trace-ID load-balancing ring for one `sampling.decisionWait`
+  window, splitting in-flight traces across old and new ring members.
+- Scale-down discards the departing replica's queue backlog (see the durability note above).
+- `minReplicas: 1` means a node drain or pod eviction is a full trace outage until the replacement
+  pod is ready — there's no PodDisruptionBudget. Move to `minReplicas: 2` + a PDB before relying on
+  this in a non-loadtest cluster.
+
 ## Upgrading Chart
 
 ```console

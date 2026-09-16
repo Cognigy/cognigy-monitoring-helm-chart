@@ -166,7 +166,7 @@
         "type": "prometheus",
         "uid": "$datasource"
       },
-      "description": "SNAT connections in the selected Connection State (default: Pending/Failed). Per the SNAT Exhaustion runbook, any value > 0 indicates SNAT port allocation exhaustion on one or more backend nodes.",
+      "description": "SNAT connections in the selected Connection State. When filtered to Pending/Failed, any value > 0 indicates SNAT port allocation exhaustion on one or more backend nodes.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -210,12 +210,12 @@
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "expr": "sum(azure_lb_snat_connection_count{cluster=\"$cluster\", resource_group=~\"$resource_group\", instance_name=~\"$load_balancer\", connectionstate=~\"$connection_state\", backendipaddress=~\"$backend_ip_address\"})",
-          "legendFormat": "SNAT connections (Pending/Failed)",
+          "expr": "sum(azure_lb_snat_connection_count{cluster=\"$cluster\", resource_group=~\"$resource_group\", instance_name=~\"$load_balancer\", connectionstate=~\"$connection_state\", backendipaddress=~\"$backend_ip_address\"} > -Inf)",
+          "legendFormat": "SNAT connections (${connection_state:text})",
           "refId": "A"
         }
       ],
-      "title": "SNAT Connections (Pending/Failed)",
+      "title": "SNAT Connections (${connection_state:text})",
       "type": "stat"
     },
     {
@@ -223,7 +223,7 @@
         "type": "prometheus",
         "uid": "$datasource"
       },
-      "description": "Maximum allocated SNAT ports for a single AKS node (TCP, filtered + averaged per Backend IP Address, per the runbook). Default Azure pool = 1024 per node per protocol; VG max raised to 4096; AI max raised to 2048.",
+      "description": "Maximum allocated SNAT ports for a single AKS node in the selected Protocol Type, averaged per Backend IP Address. Each protocol has its own independent port pool. Default Azure pool = 1024 per node per protocol; VG max raised to 4096; AI max raised to 2048.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -269,11 +269,11 @@
             "uid": "$datasource"
           },
           "expr": "max(avg by (backendipaddress, protocoltype) (azure_lb_allocated_snat_ports{cluster=\"$cluster\", resource_group=~\"$resource_group\", instance_name=~\"$load_balancer\", protocoltype=~\"$protocol_type\", backendipaddress=~\"$backend_ip_address\"}))",
-          "legendFormat": "Allocated SNAT ports (TCP, per Node max)",
+          "legendFormat": "Allocated SNAT ports (${protocol_type:text}, per Node max)",
           "refId": "A"
         }
       ],
-      "title": "Allocated SNAT Ports (TCP, per Node max)",
+      "title": "Allocated SNAT Ports (${protocol_type:text}, per Node max)",
       "type": "stat"
     },
     {
@@ -736,7 +736,7 @@
         "type": "prometheus",
         "uid": "$datasource"
       },
-      "description": "Pending/Failed SNAT connections per AKS node (Backend IP). Per the runbook, any line above 0 means that node is experiencing SNAT port allocation exhaustion. Use this to pinpoint the affected node(s) to remediate.",
+      "description": "SNAT connections per AKS node (Backend IP) in the selected Connection State. When filtered to Pending/Failed, any line above 0 means that node is experiencing SNAT port allocation exhaustion. Use this to pinpoint the affected node(s) to remediate.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -813,7 +813,7 @@
           "refId": "A"
         }
       ],
-      "title": "SNAT Connections (Pending/Failed) by Backend IP",
+      "title": "SNAT Connections (${connection_state:text}) by Backend IP",
       "type": "timeseries"
     },
     {
@@ -821,7 +821,7 @@
         "type": "prometheus",
         "uid": "$datasource"
       },
-      "description": "Allocated SNAT ports per AKS node (TCP). Compare against the per-node limit configured via outbound_ports_allocated in Terraform (default 1024, AI max 2048, VG max 4096). Aggregation Avg + filter Protocol=TCP per the runbook to avoid the misleading TCP+UDP x2 double-count.",
+      "description": "Allocated SNAT ports per AKS node in the selected Protocol Type, split by protocol so TCP and UDP are never averaged together — each has its own independent port pool. Compare against the per-node limit configured via outbound_ports_allocated (default 1024, AI max 2048, VG max 4096).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -900,7 +900,7 @@
           "refId": "A"
         }
       ],
-      "title": "Allocated SNAT Ports per Node (TCP)",
+      "title": "Allocated SNAT Ports per Node (${protocol_type:text})",
       "type": "timeseries"
     },
     {
@@ -908,7 +908,7 @@
         "type": "prometheus",
         "uid": "$datasource"
       },
-      "description": "Used SNAT ports per AKS node (TCP). The clearest signal that a node is hitting its allocated-ports ceiling — a line approaching the per-node limit predicts SNAT exhaustion before it triggers the alert. Add splitting on Backend IP per the runbook.",
+      "description": "Used SNAT ports per AKS node in the selected Protocol Type, split by Backend IP and protocol. The clearest signal that a node is hitting its allocated-ports ceiling — a line approaching the per-node limit predicts SNAT exhaustion before it triggers the alert.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -987,7 +987,7 @@
           "refId": "A"
         }
       ],
-      "title": "Used SNAT Ports per Node (TCP)",
+      "title": "Used SNAT Ports per Node (${protocol_type:text})",
       "type": "timeseries"
     }
   ],

@@ -125,10 +125,19 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Percentage of requests that failed across all operations",
+      "description": "Percentage of requests that failed, broken down by operation",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
+          "custom": {
+            "axisLabel": "%",
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": true
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -145,7 +154,35 @@
       "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
       "id": 104,
       "options": {
-        "colorMode": "background",
+        "legend": { "calcs": ["lastNotNull"], "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "expr": "100 * sum(rate(llm_gateway_requests_total{cluster=\"$cluster\", namespace=\"$namespace\", status=\"failure\"}[5m])) by (operation) / sum(rate(llm_gateway_requests_total{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (operation)",
+          "legendFormat": "{{operation}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Error Rate by Operation",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "Raw total number of requests across all operations, over the selected dashboard time range (not a rate).",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "fixedColor": "blue", "mode": "fixed" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 5 },
+      "id": 105,
+      "options": {
+        "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
@@ -154,12 +191,108 @@
       },
       "targets": [
         {
-          "expr": "100 * sum(rate(llm_gateway_requests_total{cluster=\"$cluster\", namespace=\"$namespace\", status=\"failure\"}[5m])) / sum(rate(llm_gateway_requests_total{cluster=\"$cluster\", namespace=\"$namespace\"}[5m]))",
-          "legendFormat": "Error Rate",
+          "expr": "sum(increase(llm_gateway_requests_total{cluster=\"$cluster\", namespace=\"$namespace\"}[$__range]))",
+          "legendFormat": "Total",
           "refId": "A"
         }
       ],
-      "title": "Error Rate",
+      "title": "Total Requests (Total)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "Raw total number of successful prompt and stream requests, over the selected dashboard time range (not a rate).",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "fixedColor": "green", "mode": "fixed" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 5 },
+      "id": 106,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(llm_gateway_requests_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\", status=\"success\"}[$__range]))",
+          "legendFormat": "Total",
+          "refId": "A"
+        }
+      ],
+      "title": "Prompt & Stream Requests (Total)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "Raw total number of successful embedding requests, over the selected dashboard time range (not a rate).",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "fixedColor": "purple", "mode": "fixed" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "purple", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 5 },
+      "id": 107,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(llm_gateway_requests_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"embedding\", status=\"success\"}[$__range]))",
+          "legendFormat": "Total",
+          "refId": "A"
+        }
+      ],
+      "title": "Embedding Requests (Total)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "Raw total number of failed requests across all operations, over the selected dashboard time range (not a rate).",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "fixedColor": "red", "mode": "fixed" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 5 },
+      "id": 108,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(llm_gateway_requests_total{cluster=\"$cluster\", namespace=\"$namespace\", status=\"failure\"}[$__range]))",
+          "legendFormat": "Total",
+          "refId": "A"
+        }
+      ],
+      "title": "Error Count (Total)",
       "type": "stat"
     },
     {
@@ -198,7 +331,7 @@
           }
         ]
       },
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 5 },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 9 },
       "id": 111,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
@@ -260,7 +393,7 @@
           }
         ]
       },
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 5 },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 9 },
       "id": 112,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
@@ -314,7 +447,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 5 },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 9 },
       "id": 113,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
@@ -333,7 +466,7 @@
     {
       "collapsed": false,
       "datasource": null,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 13 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 17 },
       "id": 200,
       "panels": [],
       "title": "Prompt & Streaming",
@@ -341,44 +474,45 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Successful prompt and stream request rate split by provider",
+      "description": "Prompt and stream request count per 5-minute bucket over time, broken down by provider, model, and status (not a per-second rate)",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
           "custom": {
-            "axisLabel": "req/s",
+            "axisLabel": "requests / 5m",
             "drawStyle": "line",
-            "fillOpacity": 15,
-            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
             "lineWidth": 1,
             "showPoints": "never",
-            "spanNulls": true
+            "spanNulls": false,
+            "stacking": { "mode": "normal", "group": "A" }
           },
           "mappings": [],
           "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
-          "unit": "reqps"
+          "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 14 },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 18 },
       "id": 201,
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "legend": { "calcs": ["sum", "lastNotNull"], "displayMode": "table", "placement": "bottom" },
         "tooltip": { "mode": "multi" }
       },
       "targets": [
         {
-          "expr": "sum(rate(llm_gateway_requests_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\", status=\"success\"}[5m])) by (provider)",
-          "legendFormat": "{{provider}}",
+          "expr": "sum(increase(llm_gateway_requests_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\"}[5m])) by (provider, model, status)",
+          "legendFormat": "{{provider}} / {{model}} / {{status}}",
           "refId": "A"
         }
       ],
-      "title": "Request Rate by Provider",
+      "title": "Request Frequency by Provider, Model & Status",
       "type": "timeseries"
     },
     {
       "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "End-to-end prompt and stream request latency percentiles by operation",
+      "description": "End-to-end prompt and stream request latency percentiles by operation, provider, and model",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -397,7 +531,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 14 },
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 18 },
       "id": 202,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "right" },
@@ -405,69 +539,27 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(rate(llm_gateway_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\", status=\"success\"}[5m])) by (le, operation))",
-          "legendFormat": "p50 {{operation}}",
+          "expr": "histogram_quantile(0.50, sum(rate(llm_gateway_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\", status=\"success\"}[5m])) by (le, operation, provider, model))",
+          "legendFormat": "p50 {{operation}} / {{provider}} / {{model}}",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, sum(rate(llm_gateway_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\", status=\"success\"}[5m])) by (le, operation))",
-          "legendFormat": "p95 {{operation}}",
+          "expr": "histogram_quantile(0.95, sum(rate(llm_gateway_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\", status=\"success\"}[5m])) by (le, operation, provider, model))",
+          "legendFormat": "p95 {{operation}} / {{provider}} / {{model}}",
           "refId": "B"
         },
         {
-          "expr": "histogram_quantile(0.99, sum(rate(llm_gateway_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\", status=\"success\"}[5m])) by (le, operation))",
-          "legendFormat": "p99 {{operation}}",
+          "expr": "histogram_quantile(0.99, sum(rate(llm_gateway_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\", status=\"success\"}[5m])) by (le, operation, provider, model))",
+          "legendFormat": "p99 {{operation}} / {{provider}} / {{model}}",
           "refId": "C"
         }
       ],
-      "title": "Request Latency by Operation (p50/p95/p99)",
+      "title": "Request Latency by Operation, Provider & Model (p50/p95/p99)",
       "type": "timeseries"
     },
     {
       "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "End-to-end prompt and stream request latency percentiles by provider",
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "custom": {
-            "axisLabel": "Duration (s)",
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "showPoints": "never",
-            "spanNulls": true
-          },
-          "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 14 },
-      "id": 203,
-      "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "right" },
-        "tooltip": { "mode": "multi" }
-      },
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.95, sum(rate(llm_gateway_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\", status=\"success\"}[5m])) by (le, provider))",
-          "legendFormat": "p95 {{provider}}",
-          "refId": "A"
-        },
-        {
-          "expr": "histogram_quantile(0.99, sum(rate(llm_gateway_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\", status=\"success\"}[5m])) by (le, provider))",
-          "legendFormat": "p99 {{provider}}",
-          "refId": "B"
-        }
-      ],
-      "title": "Request Latency by Provider (p95/p99)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Input and output token throughput rate for prompt and stream operations by provider",
+      "description": "Input and output token throughput for prompt and stream operations broken down by provider and model",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -486,7 +578,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 22 },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 26 },
       "id": 204,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
@@ -494,22 +586,22 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(llm_gateway_input_tokens_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\"}[5m])) by (provider)",
-          "legendFormat": "in / {{provider}}",
+          "expr": "sum(rate(llm_gateway_input_tokens_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\"}[5m])) by (provider, model)",
+          "legendFormat": "in / {{provider}} / {{model}}",
           "refId": "A"
         },
         {
-          "expr": "sum(rate(llm_gateway_output_tokens_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\"}[5m])) by (provider)",
-          "legendFormat": "out / {{provider}}",
+          "expr": "sum(rate(llm_gateway_output_tokens_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\"}[5m])) by (provider, model)",
+          "legendFormat": "out / {{provider}} / {{model}}",
           "refId": "B"
         }
       ],
-      "title": "Token Throughput by Provider",
+      "title": "Token Throughput by Provider & Model",
       "type": "timeseries"
     },
     {
       "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Output-to-input token ratio for prompt and stream operations — higher values indicate more generative output per token of context",
+      "description": "Output-to-input token ratio for prompt and stream operations by provider and model — higher values indicate more generative output per token of context",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -528,7 +620,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 22 },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 26 },
       "id": 205,
       "options": {
         "legend": { "calcs": ["mean"], "displayMode": "table", "placement": "bottom" },
@@ -536,17 +628,17 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(llm_gateway_output_tokens_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\"}[5m])) by (provider) / sum(rate(llm_gateway_input_tokens_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\"}[5m])) by (provider)",
-          "legendFormat": "{{provider}}",
+          "expr": "sum(rate(llm_gateway_output_tokens_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\"}[5m])) by (provider, model) / sum(rate(llm_gateway_input_tokens_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\"}[5m])) by (provider, model)",
+          "legendFormat": "{{provider}} / {{model}}",
           "refId": "A"
         }
       ],
-      "title": "Output/Input Token Ratio",
+      "title": "Output/Input Token Ratio by Provider & Model",
       "type": "timeseries"
     },
     {
       "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Reasoning token throughput — non-zero only for models that expose chain-of-thought token counts",
+      "description": "Reasoning token throughput by provider and model — non-zero only for models that expose chain-of-thought token counts",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -565,7 +657,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 22 },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 26 },
       "id": 206,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
@@ -573,102 +665,29 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(llm_gateway_reasoning_tokens_total{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (provider)",
-          "legendFormat": "{{provider}}",
+          "expr": "sum(rate(llm_gateway_reasoning_tokens_total{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (provider, model)",
+          "legendFormat": "{{provider}} / {{model}}",
           "refId": "A"
         }
       ],
-      "title": "Reasoning Token Rate",
+      "title": "Reasoning Token Rate by Provider & Model",
       "type": "timeseries"
     },
     {
       "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Successful prompt and stream request rate broken down by model",
+      "description": "Count of LLM finish reasons per 5-minute bucket over time for prompt and stream operations, broken down by provider, model, and request type (not a per-second rate)",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
           "custom": {
-            "axisLabel": "req/s",
+            "axisLabel": "requests / 5m",
             "drawStyle": "line",
-            "fillOpacity": 15,
-            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
             "lineWidth": 1,
             "showPoints": "never",
-            "spanNulls": true
-          },
-          "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
-          "unit": "reqps"
-        },
-        "overrides": []
-      },
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 30 },
-      "id": 207,
-      "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi" }
-      },
-      "targets": [
-        {
-          "expr": "sum(rate(llm_gateway_requests_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\", status=\"success\"}[5m])) by (model)",
-          "legendFormat": "{{model}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Request Rate by Model",
-      "type": "timeseries"
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Distribution of LLM finish reasons for prompt and stream operations",
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "custom": {
-            "axisLabel": "req/s",
-            "drawStyle": "line",
-            "fillOpacity": 15,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "showPoints": "never",
-            "spanNulls": true
-          },
-          "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
-          "unit": "reqps"
-        },
-        "overrides": []
-      },
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 30 },
-      "id": 208,
-      "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi" }
-      },
-      "targets": [
-        {
-          "expr": "sum(rate(llm_gateway_requests_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\", status=\"success\"}[5m])) by (finish_reason)",
-          "legendFormat": "{{finish_reason}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Finish Reason Distribution",
-      "type": "timeseries"
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Input and output token throughput for prompt and stream operations broken down by model",
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "custom": {
-            "axisLabel": "tokens/s",
-            "drawStyle": "line",
-            "fillOpacity": 15,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "showPoints": "never",
-            "spanNulls": true
+            "spanNulls": false,
+            "stacking": { "mode": "normal", "group": "A" }
           },
           "mappings": [],
           "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
@@ -676,31 +695,149 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 30 },
-      "id": 209,
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 34 },
+      "id": 208,
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "legend": { "calcs": ["sum", "lastNotNull"], "displayMode": "table", "placement": "bottom" },
         "tooltip": { "mode": "multi" }
       },
       "targets": [
         {
-          "expr": "sum(rate(llm_gateway_input_tokens_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\"}[5m])) by (model)",
-          "legendFormat": "in / {{model}}",
+          "expr": "sum(increase(llm_gateway_requests_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\", status=\"success\"}[5m])) by (finish_reason, provider, model, operation)",
+          "legendFormat": "{{finish_reason}} / {{provider}} / {{model}} / {{operation}}",
           "refId": "A"
-        },
-        {
-          "expr": "sum(rate(llm_gateway_output_tokens_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\"}[5m])) by (model)",
-          "legendFormat": "out / {{model}}",
-          "refId": "B"
         }
       ],
-      "title": "Token Throughput by Model",
+      "title": "Finish Reason Frequency",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "Config-set failure count per 5-minute bucket over time for prompt and stream operations, broken down by provider, model, operation, and error classification (not a per-second rate)",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisLabel": "failures / 5m",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "mode": "normal", "group": "A" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 42 },
+      "id": 209,
+      "options": {
+        "legend": { "calcs": ["sum", "lastNotNull"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(llm_gateway_config_set_failures_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\"}[5m])) by (provider, model, operation, error_type)",
+          "legendFormat": "{{provider}} / {{model}} / {{operation}} / {{error_type}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Config-Set Failure Frequency by Provider, Model & Error Type",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "Count of prompt/stream requests whose primary provider/model failed and a fallback config-set was queued to be tried next, per 5-minute bucket over time (not a per-second rate).",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisLabel": "activations / 5m",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "mode": "normal", "group": "A" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 42 },
+      "id": 210,
+      "options": {
+        "legend": { "calcs": ["sum", "lastNotNull"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(llm_gateway_fallback_activations_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\"}[5m])) by (primary_provider, primary_model, operation)",
+          "legendFormat": "{{primary_provider}} / {{primary_model}} / {{operation}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Fallback Activation Frequency",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "Success/failure count of prompt/stream requests actually routed through a fallback config-set, per 5-minute bucket over time (not a per-second rate).",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisLabel": "requests / 5m",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "mode": "normal", "group": "A" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byRegexp", "options": ".*failure.*" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+          },
+          {
+            "matcher": { "id": "byRegexp", "options": ".*success.*" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 42 },
+      "id": 211,
+      "options": {
+        "legend": { "calcs": ["sum", "lastNotNull"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(llm_gateway_fallback_usage_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=~\"prompt|stream\"}[5m])) by (primary_provider, primary_model, fallback_provider, fallback_model, operation, status)",
+          "legendFormat": "{{primary_provider}}/{{primary_model}} → {{fallback_provider}}/{{fallback_model}} / {{operation}} / {{status}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Fallback Usage Frequency by Provider Pair & Status",
       "type": "timeseries"
     },
     {
       "collapsed": false,
       "datasource": null,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 38 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 50 },
       "id": 300,
       "panels": [],
       "title": "LLM Performance",
@@ -708,7 +845,7 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Time from request to first streamed token by provider (streaming operations only)",
+      "description": "Time from request to first streamed token by provider and model (streaming operations only)",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -727,7 +864,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 39 },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 51 },
       "id": 301,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "right" },
@@ -735,22 +872,22 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(rate(llm_gateway_time_to_first_token_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (le, provider))",
-          "legendFormat": "p50 {{provider}}",
+          "expr": "histogram_quantile(0.50, sum(rate(llm_gateway_time_to_first_token_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (le, provider, model))",
+          "legendFormat": "p50 {{provider}} / {{model}}",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, sum(rate(llm_gateway_time_to_first_token_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (le, provider))",
-          "legendFormat": "p95 {{provider}}",
+          "expr": "histogram_quantile(0.95, sum(rate(llm_gateway_time_to_first_token_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (le, provider, model))",
+          "legendFormat": "p95 {{provider}} / {{model}}",
           "refId": "B"
         }
       ],
-      "title": "TTFT (p50/p95)",
+      "title": "TTFT by Provider & Model (p50/p95)",
       "type": "timeseries"
     },
     {
       "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Streaming token generation throughput by provider (streaming operations only)",
+      "description": "Streaming token generation throughput by provider and model (streaming operations only)",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -769,7 +906,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 39 },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 51 },
       "id": 302,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "right" },
@@ -777,22 +914,22 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(rate(llm_gateway_tokens_per_second_bucket{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (le, provider))",
-          "legendFormat": "p50 {{provider}}",
+          "expr": "histogram_quantile(0.50, sum(rate(llm_gateway_tokens_per_second_bucket{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (le, provider, model))",
+          "legendFormat": "p50 {{provider}} / {{model}}",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, sum(rate(llm_gateway_tokens_per_second_bucket{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (le, provider))",
-          "legendFormat": "p95 {{provider}}",
+          "expr": "histogram_quantile(0.95, sum(rate(llm_gateway_tokens_per_second_bucket{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (le, provider, model))",
+          "legendFormat": "p95 {{provider}} / {{model}}",
           "refId": "B"
         }
       ],
-      "title": "TPS (p50/p95)",
+      "title": "TPS by Provider & Model (p50/p95)",
       "type": "timeseries"
     },
     {
       "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Inter-token latency by provider, derived as 1/TPS (streaming operations only). p50 ITL ≈ 1/p50 TPS.",
+      "description": "Inter-token latency by provider and model, derived as 1/TPS (streaming operations only). p50 ITL ≈ 1/p50 TPS.",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -811,7 +948,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 39 },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 51 },
       "id": 303,
       "options": {
         "legend": { "calcs": ["mean", "min"], "displayMode": "table", "placement": "right" },
@@ -819,23 +956,23 @@
       },
       "targets": [
         {
-          "expr": "1000 / histogram_quantile(0.50, sum(rate(llm_gateway_tokens_per_second_bucket{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (le, provider))",
-          "legendFormat": "p50 {{provider}}",
+          "expr": "1000 / histogram_quantile(0.50, sum(rate(llm_gateway_tokens_per_second_bucket{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (le, provider, model))",
+          "legendFormat": "p50 {{provider}} / {{model}}",
           "refId": "A"
         },
         {
-          "expr": "1000 / histogram_quantile(0.95, sum(rate(llm_gateway_tokens_per_second_bucket{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (le, provider))",
-          "legendFormat": "p95 {{provider}}",
+          "expr": "1000 / histogram_quantile(0.95, sum(rate(llm_gateway_tokens_per_second_bucket{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (le, provider, model))",
+          "legendFormat": "p95 {{provider}} / {{model}}",
           "refId": "B"
         }
       ],
-      "title": "ITL (p50/p95)",
+      "title": "ITL by Provider & Model (p50/p95)",
       "type": "timeseries"
     },
     {
       "collapsed": false,
       "datasource": null,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 47 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 59 },
       "id": 400,
       "panels": [],
       "title": "Embeddings",
@@ -843,44 +980,45 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Embedding request rate broken down by model and status",
+      "description": "Embedding request count per 5-minute bucket over time, broken down by provider, model, and status (not a per-second rate)",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
           "custom": {
-            "axisLabel": "req/s",
+            "axisLabel": "requests / 5m",
             "drawStyle": "line",
-            "fillOpacity": 15,
-            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
             "lineWidth": 1,
             "showPoints": "never",
-            "spanNulls": true
+            "spanNulls": false,
+            "stacking": { "mode": "normal", "group": "A" }
           },
           "mappings": [],
           "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
-          "unit": "reqps"
+          "unit": "short"
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 48 },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 60 },
       "id": 401,
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "legend": { "calcs": ["sum", "lastNotNull"], "displayMode": "table", "placement": "bottom" },
         "tooltip": { "mode": "multi" }
       },
       "targets": [
         {
-          "expr": "sum(rate(llm_gateway_requests_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"embedding\"}[5m])) by (model, status)",
-          "legendFormat": "{{model}} / {{status}}",
+          "expr": "sum(increase(llm_gateway_requests_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"embedding\"}[5m])) by (provider, model, status)",
+          "legendFormat": "{{provider}} / {{model}} / {{status}}",
           "refId": "A"
         }
       ],
-      "title": "Embedding Request Rate by Model",
+      "title": "Embedding Request Frequency by Provider & Model",
       "type": "timeseries"
     },
     {
       "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Embedding request latency percentiles by model",
+      "description": "Embedding request latency percentiles by provider and model",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -899,7 +1037,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 48 },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 60 },
       "id": 402,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "right" },
@@ -907,22 +1045,22 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(llm_gateway_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"embedding\"}[5m])) by (le, model))",
-          "legendFormat": "p95 {{model}}",
+          "expr": "histogram_quantile(0.95, sum(rate(llm_gateway_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"embedding\"}[5m])) by (le, provider, model))",
+          "legendFormat": "p95 {{provider}} / {{model}}",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.99, sum(rate(llm_gateway_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"embedding\"}[5m])) by (le, model))",
-          "legendFormat": "p99 {{model}}",
+          "expr": "histogram_quantile(0.99, sum(rate(llm_gateway_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"embedding\"}[5m])) by (le, provider, model))",
+          "legendFormat": "p99 {{provider}} / {{model}}",
           "refId": "B"
         }
       ],
-      "title": "Embedding Latency by Model (p95/p99)",
+      "title": "Embedding Latency by Provider & Model (p95/p99)",
       "type": "timeseries"
     },
     {
       "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Input token throughput for embedding operations by model",
+      "description": "Input token throughput for embedding operations by provider and model",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -941,7 +1079,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 48 },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 60 },
       "id": 403,
       "options": {
         "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
@@ -949,74 +1087,29 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(llm_gateway_input_tokens_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"embedding\"}[5m])) by (model)",
-          "legendFormat": "{{model}}",
+          "expr": "sum(rate(llm_gateway_input_tokens_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"embedding\"}[5m])) by (provider, model)",
+          "legendFormat": "{{provider}} / {{model}}",
           "refId": "A"
         }
       ],
-      "title": "Embedding Input Token Throughput by Model",
-      "type": "timeseries"
-    },
-    {
-      "collapsed": false,
-      "datasource": null,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 56 },
-      "id": 500,
-      "panels": [],
-      "title": "Failures & Fallbacks",
-      "type": "row"
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Config-set failure rate broken down by error classification, provider, and operation",
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "custom": {
-            "axisLabel": "failures/s",
-            "drawStyle": "line",
-            "fillOpacity": 15,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "showPoints": "never",
-            "spanNulls": true
-          },
-          "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
-          "unit": "reqps"
-        },
-        "overrides": []
-      },
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 57 },
-      "id": 501,
-      "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi" }
-      },
-      "targets": [
-        {
-          "expr": "sum(rate(llm_gateway_config_set_failures_total{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (operation, error_type, provider)",
-          "legendFormat": "{{operation}} / {{provider}} / {{error_type}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Config-Set Failure Rate by Operation, Type & Provider",
+      "title": "Embedding Input Token Throughput by Provider & Model",
       "type": "timeseries"
     },
     {
       "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Rate of fallback activations — spikes indicate primary provider instability",
+      "description": "Config-set failure count per 5-minute bucket over time for embedding operations, broken down by provider, model, and error classification (not a per-second rate)",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
           "custom": {
-            "axisLabel": "activations/s",
+            "axisLabel": "failures / 5m",
             "drawStyle": "line",
-            "fillOpacity": 20,
-            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
             "lineWidth": 1,
             "showPoints": "never",
-            "spanNulls": true
+            "spanNulls": false,
+            "stacking": { "mode": "normal", "group": "A" }
           },
           "mappings": [],
           "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
@@ -1024,40 +1117,79 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 57 },
-      "id": 502,
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 68 },
+      "id": 404,
       "options": {
-        "legend": { "calcs": ["mean", "sum"], "displayMode": "table", "placement": "bottom" },
+        "legend": { "calcs": ["sum", "lastNotNull"], "displayMode": "table", "placement": "bottom" },
         "tooltip": { "mode": "multi" }
       },
       "targets": [
         {
-          "expr": "sum(rate(llm_gateway_fallback_activations_total{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (primary_provider, primary_model)",
-          "legendFormat": "{{primary_provider}} / {{primary_model}}",
+          "expr": "sum(increase(llm_gateway_config_set_failures_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"embedding\"}[5m])) by (provider, model, error_type)",
+          "legendFormat": "{{provider}} / {{model}} / {{error_type}}",
           "refId": "A"
         }
       ],
-      "title": "Fallback Activation Rate",
+      "title": "Config-Set Failure Frequency by Provider & Model",
       "type": "timeseries"
     },
     {
       "datasource": { "type": "prometheus", "uid": "$datasource" },
-      "description": "Success/failure rate of requests routed through a fallback config-set",
+      "description": "Count of embedding requests whose primary provider/model failed and a fallback config-set was queued to be tried next, per 5-minute bucket over time (not a per-second rate).",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
           "custom": {
-            "axisLabel": "req/s",
+            "axisLabel": "activations / 5m",
             "drawStyle": "line",
-            "fillOpacity": 15,
-            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
             "lineWidth": 1,
             "showPoints": "never",
-            "spanNulls": true
+            "spanNulls": false,
+            "stacking": { "mode": "normal", "group": "A" }
           },
           "mappings": [],
           "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
-          "unit": "reqps"
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 68 },
+      "id": 405,
+      "options": {
+        "legend": { "calcs": ["sum", "lastNotNull"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(llm_gateway_fallback_activations_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"embedding\"}[5m])) by (primary_provider, primary_model)",
+          "legendFormat": "{{primary_provider}} / {{primary_model}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Fallback Activation Frequency",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "Success/failure count of embedding requests actually routed through a fallback config-set, per 5-minute bucket over time (not a per-second rate).",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisLabel": "requests / 5m",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "mode": "normal", "group": "A" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
         },
         "overrides": [
           {
@@ -1070,20 +1202,20 @@
           }
         ]
       },
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 57 },
-      "id": 503,
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 68 },
+      "id": 406,
       "options": {
-        "legend": { "calcs": ["mean"], "displayMode": "table", "placement": "bottom" },
+        "legend": { "calcs": ["sum", "lastNotNull"], "displayMode": "table", "placement": "bottom" },
         "tooltip": { "mode": "multi" }
       },
       "targets": [
         {
-          "expr": "sum(rate(llm_gateway_fallback_usage_total{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (primary_provider, fallback_provider, status)",
-          "legendFormat": "{{primary_provider}} → {{fallback_provider}} / {{status}}",
+          "expr": "sum(increase(llm_gateway_fallback_usage_total{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"embedding\"}[5m])) by (primary_provider, primary_model, fallback_provider, fallback_model, status)",
+          "legendFormat": "{{primary_provider}}/{{primary_model}} → {{fallback_provider}}/{{fallback_model}} / {{status}}",
           "refId": "A"
         }
       ],
-      "title": "Fallback Usage by Provider Pair & Status",
+      "title": "Fallback Usage Frequency by Provider Pair & Status",
       "type": "timeseries"
     }
   ],

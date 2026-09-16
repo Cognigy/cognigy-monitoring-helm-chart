@@ -2086,6 +2086,356 @@
         ],
         "title": "Playbook Execution",
         "type": "row"
+      },
+      {
+        "collapsed": true,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "$datasource"
+        },
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 45
+        },
+        "id": 22,
+        "panels": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "custom": {
+                  "hideFrom": {
+                    "tooltip": false,
+                    "viz": false,
+                    "legend": false
+                  }
+                },
+                "mappings": [],
+                "color": {
+                  "mode": "palette-classic"
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 6,
+              "x": 0,
+              "y": 46
+            },
+            "id": 23,
+            "options": {
+              "legend": {
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "pieType": "pie",
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "pluginVersion": "12.0.2",
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "$datasource"
+                },
+                "editorMode": "code",
+                "expr": "sum(cognigy_playbook_execution_evaluation_profiles_total{cluster=\"$cluster\"}) by (status)",
+                "legendFormat": "{{status}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "Evaluation Profiles Status",
+            "type": "piechart"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "custom": {
+                  "lineWidth": 1,
+                  "fillOpacity": 0,
+                  "showPoints": "auto",
+                  "pointSize": 5
+                },
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 9,
+              "x": 6,
+              "y": 46
+            },
+            "id": 24,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "pluginVersion": "12.0.2",
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "$datasource"
+                },
+                "editorMode": "code",
+                "expr": "histogram_quantile(0.50, sum(rate(cognigy_playbook_execution_evaluation_profile_duration_bucket{cluster=\"$cluster\"}[5m])) by (le))",
+                "legendFormat": "p50",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "$datasource"
+                },
+                "editorMode": "code",
+                "expr": "histogram_quantile(0.95, sum(rate(cognigy_playbook_execution_evaluation_profile_duration_bucket{cluster=\"$cluster\"}[5m])) by (le))",
+                "legendFormat": "p95",
+                "range": true,
+                "refId": "B"
+              }
+            ],
+            "title": "Evaluation Profile Duration (p50/p95)",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "custom": {
+                  "lineWidth": 1,
+                  "fillOpacity": 0,
+                  "showPoints": "auto",
+                  "pointSize": 5
+                },
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 9,
+              "x": 15,
+              "y": 46
+            },
+            "id": 25,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "pluginVersion": "12.0.2",
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "$datasource"
+                },
+                "editorMode": "code",
+                "expr": "histogram_quantile(0.95, sum(rate(cognigy_playbook_execution_evaluation_batch_duration_bucket{cluster=\"$cluster\"}[5m])) by (le))",
+                "legendFormat": "p95",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "Evaluation Batch Duration (p95)",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "custom": {
+                  "lineWidth": 1,
+                  "fillOpacity": 0,
+                  "showPoints": "auto",
+                  "pointSize": 5
+                },
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 54
+            },
+            "id": 26,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "pluginVersion": "12.0.2",
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "$datasource"
+                },
+                "editorMode": "code",
+                "expr": "sum(increase(cognigy_playbook_execution_evaluation_criteria_total{cluster=\"$cluster\"}[5m])) by (criterion_type)",
+                "legendFormat": "{{criterion_type}}",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "Evaluation Criteria by Type",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "custom": {
+                  "lineWidth": 1,
+                  "fillOpacity": 0,
+                  "showPoints": "auto",
+                  "pointSize": 5
+                },
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 54
+            },
+            "id": 27,
+            "options": {
+              "legend": {
+                "calcs": ["sum"],
+                "displayMode": "table",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "pluginVersion": "12.0.2",
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "$datasource"
+                },
+                "editorMode": "code",
+                "expr": "sum(increase(cognigy_playbook_execution_evaluation_tokens_total{cluster=\"$cluster\"}[5m])) by ()",
+                "legendFormat": "Total Tokens",
+                "range": true,
+                "refId": "A"
+              }
+            ],
+            "title": "Evaluation Token Spend",
+            "type": "timeseries"
+          }
+        ],
+        "title": "Evaluation Profiles",
+        "type": "row"
       }
     ],
     "preload": false,

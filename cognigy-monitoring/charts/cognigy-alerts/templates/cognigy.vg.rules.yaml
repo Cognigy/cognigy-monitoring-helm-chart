@@ -37,23 +37,49 @@ spec:
           group: vg-custom-alert-rules
       {{- end }}
       {{- if (.Values.rules.vg.kubeVgPodNotReady.enabled ) }}
+      {{- $vgpnr := .Values.rules.vg.kubeVgPodNotReady }}
+      {{- /* podSelector minus defaultRoutePods. Carries the `group` label so a
+           group-based Alertmanager route can match it. */}}
       - alert: KubeVGPodNotReady
         annotations:
           description: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} for selected services has been in a non-ready state for more than 5 minutes.
-          runbook_url: {{ .Values.runbookUrl }}alert-name-kubepodnotready-selected
-          summary: Pod for sbc-sip, sbc-rtp, feature-server, sbc-inbound, sbc-outbound pod has been in a non-ready state for more than 5 minutes.
+          runbook_url: {{ $.Values.runbookUrl }}alert-name-kubepodnotready-selected
+          summary: Pod for a critical VG component has been in a non-ready state for more than 5 minutes.
         expr: |
           sum by (namespace, pod) (
             max by(namespace, pod) (
               kube_pod_status_phase{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}", phase=~"Pending|Unknown"}
             ) * on(namespace, pod) group_left(owner_kind) topk by(namespace, pod) (
-              1, max by(namespace, pod) (kube_pod_owner{pod=~"^sbc-inbound.*|^sbc-outbound.*|^sbc-sip.*|^sbc-rtp.*|^feature-server.*"})
+              1, max by(namespace, pod) (kube_pod_owner{pod=~"{{ $vgpnr.podSelector }}"{{ if $vgpnr.defaultRoutePods }}, pod!~"{{ $vgpnr.defaultRoutePods }}"{{ end }}})
             )
           ) > 0
-        for: {{ .Values.rules.vg.kubeVgPodNotReady.timeout }}
+        for: {{ $vgpnr.timeout }}
         labels:
-          severity: {{ .Values.rules.vg.kubeVgPodNotReady.severity }}
+          severity: {{ $vgpnr.severity }}
           group: vg-custom-alert-rules
+      {{- if $vgpnr.defaultRoutePods }}
+      {{- /* The defaultRoutePods subset. Omitting the `group` label is deliberate:
+           with no `group`, no group-based route matches and the alert follows the
+           Alertmanager default route. The pod matcher is the exact complement of
+           the rule above (pod=~ vs pod!~ over the same defaultRoutePods), so the
+           two rules can never both fire for the same pod. */}}
+      - alert: KubeVGPodNotReady
+        annotations:
+          description: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} for selected services has been in a non-ready state for more than 5 minutes.
+          runbook_url: {{ $.Values.runbookUrl }}alert-name-kubepodnotready-selected
+          summary: Pod for a critical VG component has been in a non-ready state for more than 5 minutes.
+        expr: |
+          sum by (namespace, pod) (
+            max by(namespace, pod) (
+              kube_pod_status_phase{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}", phase=~"Pending|Unknown"}
+            ) * on(namespace, pod) group_left(owner_kind) topk by(namespace, pod) (
+              1, max by(namespace, pod) (kube_pod_owner{pod=~"{{ $vgpnr.podSelector }}", pod=~"{{ $vgpnr.defaultRoutePods }}"})
+            )
+          ) > 0
+        for: {{ $vgpnr.timeout }}
+        labels:
+          severity: {{ $vgpnr.severity }}
+      {{- end }}
       {{- end }}
     # feature-server rules
     {{- if (.Values.rules.vg.featureServer.enabled ) }}
@@ -105,6 +131,59 @@ spec:
         annotations:
           summary: feature-server had unhandled promise rejections
           description: "feature-server unhandled rejections exceeded threshold: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.dialTransferRenegotiation.primaryFailed.enabled ) }}
+      - alert: VgTrunkRenegotiationFailed
+        expr: sum(increase(vg_feature_server_sip_reinvite_total{reason="renegotiate-anchored-media", status="failed"}[10m])) by (namespace) > {{ $.Values.rules.vg.featureServer.dialTransferRenegotiation.primaryFailed.threshold }}
+        for: {{ $.Values.rules.vg.featureServer.dialTransferRenegotiation.primaryFailed.timeout }}
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+          priority: P5
+        annotations:
+          summary: "Dial Transfer trunk-leg re-INVITE failing ({{`{{`}} $value {{`}}`}} in 10m)"
+          description: "FeatureServer's release-media re-INVITE to the trunk failed on a codec-mismatched Dial Transfer — the call likely connected with no audio. Check the destination trunk's SIP response and whether it needs a plain (non-WebRTC-shaped) offer.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+      {{- end }}
+
+      {{/* The keep-anchor renegotiation should be RARE. Once the codec-accept
+           pin no longer manufactures a mismatch (either a feature-server fix, or
+           a FreeSWITCH --codec-list leading with a non-G.711 codec), FeatureServer
+           stops entering this path at all, so a sustained attempt rate means the
+           pin is back. Alerting on attempts catches that even on the builds where
+           the re-INVITE happens to succeed, which failure-only alerting
+           cannot. */}}
+      {{- if (.Values.rules.vg.featureServer.dialTransferRenegotiation.attemptsUnexpected.enabled ) }}
+      - alert: VgTrunkRenegotiationAttemptsUnexpected
+        expr: sum(increase(vg_feature_server_sip_reinvite_total{reason="renegotiate-anchored-media"}[30m])) by (namespace) > {{ $.Values.rules.vg.featureServer.dialTransferRenegotiation.attemptsUnexpected.threshold }}
+        for: {{ $.Values.rules.vg.featureServer.dialTransferRenegotiation.attemptsUnexpected.timeout }}
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+          priority: P5
+        annotations:
+          summary: "Dial Transfer keep-anchor renegotiation happening repeatedly ({{`{{`}} $value {{`}}`}} in 30m)"
+          description: "FeatureServer is repeatedly keeping the FreeSWITCH anchor on codec-mismatched Dial Transfers. This should normally be near zero: a sustained rate means a codec-accept pin is manufacturing a mismatch that does not exist on the wire. Check the cluster's FreeSWITCH --codec-list and whether the outbound offer leads with PCMU.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.dialTransferRenegotiation.failureRateHigh.enabled ) }}
+      - alert: VgTrunkRenegotiationFailureRateHigh
+        expr: |-
+          (
+            sum(increase(vg_feature_server_sip_reinvite_total{reason="renegotiate-anchored-media", status="failed"}[15m]))
+              /
+            sum(increase(vg_feature_server_sip_reinvite_total{reason="renegotiate-anchored-media"}[15m]))
+          ) > {{ $.Values.rules.vg.featureServer.dialTransferRenegotiation.failureRateHigh.threshold }}
+            and
+          (sum(increase(vg_feature_server_sip_reinvite_total{reason="renegotiate-anchored-media"}[15m])) > {{ $.Values.rules.vg.featureServer.dialTransferRenegotiation.failureRateHigh.minAttempts }})
+        for: {{ $.Values.rules.vg.featureServer.dialTransferRenegotiation.failureRateHigh.timeout }}
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+          priority: P5
+        annotations:
+          summary: "Dial Transfer trunk renegotiation failure rate high ({{`{{`}} $value {{`}}`}})"
+          description: "Not an isolated failure -- most or all codec-mismatch renegotiation attempts are ending with no audio, which usually points at a stale or broken feature-server build. No baseline has been measured for this ratio yet; check the signal-vs-threshold panel before assuming a false positive.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
       {{- end }}
 
       {{- if (.Values.rules.vg.featureServer.wsMaxReconnectsExceeded.enabled ) }}
@@ -167,6 +246,32 @@ spec:
           description: "Primary speech vendor failing, fallback vendor in use. Service degraded.\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
       {{- end }}
 
+      {{- if (.Values.rules.vg.featureServer.sttMissingVendor.enabled ) }}
+      - alert: SttMissingVendor
+        expr: rate(vg_feature_server_stt_missing_vendor_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+          priority: P5
+        annotations:
+          summary: "STT vendor is missing during channel variable setup"
+          description: "STT vendor is missing during channel variable setup. This indicates corrupted speech configuration and will result in failed or incorrect transcription.\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.sttLanguageFallback.enabled ) }}
+      - alert: SttLanguageFallback
+        expr: rate(vg_feature_server_stt_language_fallback_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+          priority: P5
+        annotations:
+          summary: "STT is falling back to en-US for application {{`{{`}} $labels.application_name {{`}}`}}"
+          description: "STT is falling back to en-US for application {{`{{`}} $labels.application_name {{`}}`}} (account {{`{{`}} $labels.account_sid {{`}}`}}). This likely indicates a misconfiguration or a bug in session config handling.\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
       {{- if (.Values.rules.vg.featureServer.callSetupTimeSlow.enabled ) }}
       - alert: CallSetupTimeSlow
         expr: histogram_quantile(0.95, sum(rate(vg_feature_server_call_setup_time_milliseconds_bucket[5m])) by (le)) > {{$.Values.rules.vg.featureServer.callSetupTimeSlow.threshold }}
@@ -226,6 +331,61 @@ spec:
           description: "Pod {{`{{`}} $labels.pod {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}} is responding 481 (Call/Transaction Does Not Exist) to SIP CANCEL requests. This indicates the Node.js event loop is saturated and drachtio can no longer process SIP transactions — new calls hang indefinitely in createEndpoint() and time out with 408 after 3 minutes. Immediate action: kubectl rollout restart statefulset/feature-server -n {{`{{`}} $labels.namespace {{`}}`}}"
       {{- end }}
 
+      {{/* Event-loop blocking, measured with nodejs_eventloop_lag_max_seconds.
+
+           IMPORTANT — do NOT switch this back to `nodejs_eventloop_lag_seconds`.
+           An earlier revision of this alert used it on the belief that _p99_ was
+           blind to a freeze. That was backwards. prom-client computes the
+           unsuffixed gauge *during a scrape*: it schedules a setImmediate at the
+           start of collection, and that callback cannot run until the whole
+           registry has been serialized and written. It therefore reports the cost
+           of its own scrape, and grows with metric cardinality and pod uptime
+           rather than with event-loop health, so a healthy pod exposing many
+           series reads on that gauge as if it were frozen.
+
+           _max_/_p99_/_mean_ come from perf_hooks.monitorEventLoopDelay and are
+           the honest signal. _max_ is the one worth alerting on: it catches a
+           single long block, whereas _p99_ sits at its ~10ms sampling-resolution
+           floor unless blocking is frequent.
+
+           NOTE on the current threshold: on a high-cardinality pod the scrape
+           itself is a real event-loop block, so _max_ is partly self-inflicted
+           until feature-server metric cardinality is reduced. 0.5 sits above that
+           scrape cost; tighten it once cardinality is under control and
+           FeatureServerMetricsCardinalityHigh has gone quiet. */}}
+      {{- if (.Values.rules.vg.featureServer.eventLoopLagHigh.enabled ) }}
+      - alert: FeatureServerEventLoopLagHigh
+        expr: nodejs_eventloop_lag_max_seconds{pod=~"feature-server.*"} > {{ $.Values.rules.vg.featureServer.eventLoopLagHigh.threshold }}
+        for: {{ $.Values.rules.vg.featureServer.eventLoopLagHigh.timeout }}
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "Feature-server event loop blocked for {{`{{`}} $value {{`}}`}}s on pod {{`{{`}} $labels.pod {{`}}`}}"
+          description: "The longest single event-loop block on pod {{`{{`}} $labels.pod {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}} reached {{`{{`}} $value {{`}}`}}s, above the {{ $.Values.rules.vg.featureServer.eventLoopLagHigh.threshold }}s threshold. This is nodejs_eventloop_lag_max_seconds (perf_hooks.monitorEventLoopDelay) — a genuine contiguous block, not scrape cost. A block this long delays every timer, SIP transaction and media callback on the pod. Check process_cpu_seconds_total for synchronous work, and scrape_samples_scraped for metric-serialization cost.\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{/* Metric cardinality. prom-client never evicts a label combination, so a
+           long-lived pod accumulates one label set per tenant it has ever served
+           and the scrape payload only grows. That payload is serialized
+           synchronously on every scrape and blocks the event loop at roughly
+           12ns per byte, so this is a real availability concern and not just a
+           monitoring-hygiene one — it is also what inflates the raw
+           nodejs_eventloop_lag_seconds gauge. This alerts on the defect directly,
+           days before it is large enough to matter. */}}
+      {{- if (.Values.rules.vg.featureServer.metricsCardinalityHigh.enabled ) }}
+      - alert: FeatureServerMetricsCardinalityHigh
+        expr: scrape_samples_scraped{container="feature-server", endpoint="metrics"} > {{ $.Values.rules.vg.featureServer.metricsCardinalityHigh.threshold }}
+        for: {{ $.Values.rules.vg.featureServer.metricsCardinalityHigh.timeout }}
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+          priority: P5
+        annotations:
+          summary: "Feature-server metrics cardinality is high on pod {{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $value {{`}}`}} series)"
+          description: "Pod {{`{{`}} $labels.pod {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}} is exposing {{`{{`}} $value {{`}}`}} series, above the {{ $.Values.rules.vg.featureServer.metricsCardinalityHigh.threshold }} threshold. prom-client does not evict label sets, so this grows with the number of tenants the pod has ever served and only resets on restart. Each scrape blocks the event loop for roughly 12ns per byte of payload. Confirm with nodejs_eventloop_lag_max_seconds; a rollout restart clears it as a stopgap.\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
       {{/* Media frame-rate stall alerts on the p10 of vg_freeswitch_{stt,tts}_frames_per_second.
            p10 is the fps below which the worst 10% of per-second samples fall, so it drops as soon
            as a meaningful share of sessions stall, before the median moves. Each alert is
@@ -241,6 +401,7 @@ spec:
         labels:
           severity: warning
           group: vg-custom-alert-rules
+          priority: P5
         annotations:
           summary: "FreeSWITCH inbound STT frame rate degraded (p10 below {{ $.Values.rules.vg.featureServer.sttFrameRateLow.warningThreshold }} fps)"
           description: "The 10th-percentile inbound STT audio frame rate is below {{ $.Values.rules.vg.featureServer.sttFrameRateLow.warningThreshold }} fps (target 50): the worst 10% of sessions are delivering degraded audio to the recognizer. Check FreeSWITCH CPU / CFS throttling and the per-vendor p10 drill-down on the VG / FreeSWITCH board.\n  VALUE = {{`{{`}} $value {{`}}`}}"
@@ -256,6 +417,7 @@ spec:
         labels:
           severity: warning
           group: vg-custom-alert-rules
+          priority: P5
         annotations:
           summary: "FreeSWITCH outbound TTS frame rate degraded (p10 below {{ $.Values.rules.vg.featureServer.ttsFrameRateLow.warningThreshold }} fps)"
           description: "The 10th-percentile outbound TTS audio frame rate is below {{ $.Values.rules.vg.featureServer.ttsFrameRateLow.warningThreshold }} fps (target 50): the worst 10% of sessions have stuttering/stuck playout. Check FreeSWITCH CPU / CFS throttling and the per-vendor p10 drill-down on the VG / FreeSWITCH board.\n  VALUE = {{`{{`}} $value {{`}}`}}"
@@ -324,6 +486,110 @@ spec:
         annotations:
           summary: "FreeSWITCH inbound jitter high (p95 > {{ $.Values.rules.vg.featureServer.audioQuality.highJitter.threshold }} ms)"
           description: "The 95th-percentile jitter-buffer estimated jitter exceeds {{ $.Values.rules.vg.featureServer.audioQuality.highJitter.threshold }} ms over the last 15m. High jitter forces the jitter buffer to grow (added latency) or drop packets (added loss). Check network path / carrier and FreeSWITCH scheduling.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+      {{- end }}
+    {{- end }}
+
+    {{- if (.Values.rules.vg.resourceResolver.enabled ) }}
+    # vg-resource-resolver. Every rule is `warning` for now by deliberate choice:
+    # this path has only just started carrying real traffic, so the thresholds are
+    # first estimates. Several describe genuinely serious states and are candidates
+    # for `critical` once reviewed against production data -- see values.yaml.
+    - name: cognigy.vg.alert.resource-resolver
+      rules:
+      {{- if (.Values.rules.vg.resourceResolver.doubleClaims.enabled ) }}
+      - alert: VGResolverDoubleClaim
+        expr: sum(increase(vg_resource_resolver_runtime_resources_multiple_hits_total[15m])) > 0
+        for: {{ $.Values.rules.vg.resourceResolver.doubleClaims.timeout }}
+        labels:
+          severity: {{ $.Values.rules.vg.resourceResolver.doubleClaims.severity }}
+          group: vg-custom-alert-rules
+          priority: {{ $.Values.rules.vg.resourceResolver.doubleClaims.priority }}
+        annotations:
+          summary: "Two AI clusters claimed the same call — the answer was a race"
+          description: "More than one linked AI cluster answered a resolve for the same call, so which one won was decided by a race. The same request can resolve to a DIFFERENT tenant's configuration run to run — a silent, intermittent, cross-tenant wrong answer. This should be zero forever; any occurrence is real. Check for an account or organisation configured on more than one linked AI cluster.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.resourceResolver.allowlistedButUnclaimed.enabled ) }}
+      - alert: VGResolverAllowlistedAccountUnclaimed
+        expr: sum(increase(vg_resource_resolver_runtime_resources_allowlisted_but_unclaimed_total[15m])) > {{ $.Values.rules.vg.resourceResolver.allowlistedButUnclaimed.threshold }}
+        for: {{ $.Values.rules.vg.resourceResolver.allowlistedButUnclaimed.timeout }}
+        labels:
+          severity: {{ $.Values.rules.vg.resourceResolver.allowlistedButUnclaimed.severity }}
+          group: vg-custom-alert-rules
+          priority: {{ $.Values.rules.vg.resourceResolver.allowlistedButUnclaimed.priority }}
+        annotations:
+          summary: "An allowlisted account no AI cluster claims — its calls are being rejected"
+          description: "An account in RUNTIME_TENANT_ACCOUNTS was routed to the runtime arm and every linked AI cluster answered unknown_account. Two pieces of config contradict each other, and the runtime arm does not fall back to legacy — so every call for that tenant fails (vg-feature-server turns it into a SIP 503) until one side is fixed. The resolver logs the accountSid on the matching warn line.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.resourceResolver.unconfiguredRejections.enabled ) }}
+      - alert: VGResolverRuntimePathUnconfigured
+        expr: sum(increase(vg_resource_resolver_runtime_resources_unconfigured_rejections_total[15m])) > {{ $.Values.rules.vg.resourceResolver.unconfiguredRejections.threshold }}
+        for: {{ $.Values.rules.vg.resourceResolver.unconfiguredRejections.timeout }}
+        labels:
+          severity: {{ $.Values.rules.vg.resourceResolver.unconfiguredRejections.severity }}
+          group: vg-custom-alert-rules
+          priority: {{ $.Values.rules.vg.resourceResolver.unconfiguredRejections.priority }}
+        annotations:
+          summary: "Calls routed to the runtime path with no vg-runtime-api configured"
+          description: "The tenancy flag sent requests to the runtime path while no vg-runtime-api passthrough is wired, so each one failed closed with a 502. These are thrown before the timing wrapper runs, so requests_total never sees them and the passthrough metrics look idle. Either configure resourceResolver.runtimeApiTargets or take the accounts back out of the allowlist.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.resourceResolver.targetUnauthorized.enabled ) }}
+      - alert: VGResolverTargetRejectedCredential
+        expr: sum by (target) (increase(vg_resource_resolver_runtime_resources_target_attempts_total{outcome="unauthorized"}[15m])) > {{ $.Values.rules.vg.resourceResolver.targetUnauthorized.threshold }}
+        for: {{ $.Values.rules.vg.resourceResolver.targetUnauthorized.timeout }}
+        labels:
+          severity: {{ $.Values.rules.vg.resourceResolver.targetUnauthorized.severity }}
+          group: vg-custom-alert-rules
+          priority: {{ $.Values.rules.vg.resourceResolver.targetUnauthorized.priority }}
+        annotations:
+          summary: "AI cluster {{`{{`}} $labels.target {{`}}`}} is rejecting this cluster's credential"
+          description: "A linked AI cluster returned 401 for this cluster's signed JWT. Usually the VG cluster's name does not match the key it is filed under in that cluster's vgRuntimeApi.auth.clusters, or a signing key was rotated in before that cluster's next JWKS refresh picked it up. That side's logs name both values on the rejection line. If only ONE target is affected the trust list on that cluster is wrong; if all are, suspect this cluster's key or name.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.resourceResolver.upstreamErrorRate.enabled ) }}
+      - alert: VGResolverRuntimeApiErrorRate
+        expr: |-
+          (
+            sum(rate(vg_resource_resolver_runtime_resources_requests_total{outcome="error"}[10m]))
+              /
+            clamp_min(sum(rate(vg_resource_resolver_runtime_resources_requests_total[10m])), 0.001)
+          ) > {{ $.Values.rules.vg.resourceResolver.upstreamErrorRate.threshold }}
+        for: {{ $.Values.rules.vg.resourceResolver.upstreamErrorRate.timeout }}
+        labels:
+          severity: {{ $.Values.rules.vg.resourceResolver.upstreamErrorRate.severity }}
+          group: vg-custom-alert-rules
+          priority: {{ $.Values.rules.vg.resourceResolver.upstreamErrorRate.priority }}
+        annotations:
+          summary: "Calls into vg-runtime-api are failing above {{ $.Values.rules.vg.resourceResolver.upstreamErrorRate.threshold | float64 | mulf 100 }}%"
+          description: "resolveRuntimeResources calls into the AI cluster are erroring, including fail-closed 502s. Every one of these is a call that could not be resolved from the runtime arm. Split by target on the resolver dashboard to tell one bad cluster from a fault on this side.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.resourceResolver.upstreamLatencySlow.enabled ) }}
+      - alert: VGResolverRuntimeApiSlow
+        expr: histogram_quantile(0.99, sum by (le) (rate(vg_resource_resolver_runtime_resources_latency_seconds_bucket[10m]))) > {{ $.Values.rules.vg.resourceResolver.upstreamLatencySlow.threshold }}
+        for: {{ $.Values.rules.vg.resourceResolver.upstreamLatencySlow.timeout }}
+        labels:
+          severity: {{ $.Values.rules.vg.resourceResolver.upstreamLatencySlow.severity }}
+          group: vg-custom-alert-rules
+          priority: {{ $.Values.rules.vg.resourceResolver.upstreamLatencySlow.priority }}
+        annotations:
+          summary: "p99 latency into vg-runtime-api above {{ $.Values.rules.vg.resourceResolver.upstreamLatencySlow.threshold }}s"
+          description: "This call sits on the call-admission path, so its latency is added to every resolve that reaches the runtime arm — it is caller-visible as slower call setup, not just a backend number. Check the cross-cluster network path and the AI cluster's own latency before assuming the resolver.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.resourceResolver.admissionErrors.enabled ) }}
+      - alert: VGResolverAdmissionErrors
+        expr: sum(increase(vg_resource_resolver_admission_outcomes_total{outcome="error"}[15m])) > {{ $.Values.rules.vg.resourceResolver.admissionErrors.threshold }}
+        for: {{ $.Values.rules.vg.resourceResolver.admissionErrors.timeout }}
+        labels:
+          severity: {{ $.Values.rules.vg.resourceResolver.admissionErrors.severity }}
+          group: vg-custom-alert-rules
+          priority: {{ $.Values.rules.vg.resourceResolver.admissionErrors.priority }}
+        annotations:
+          summary: "resolveCallAdmission is erroring rather than deciding"
+          description: "Call admission raised an error instead of returning a decision. This is distinct from a rejection — a rejection is a decision — so these are calls the resolver could not judge at all. Compare against the admission-outcome panels to see whether it is confined to one originator.\n  VALUE = {{`{{`}} $value {{`}}`}}"
       {{- end }}
     {{- end }}
 {{- end -}}

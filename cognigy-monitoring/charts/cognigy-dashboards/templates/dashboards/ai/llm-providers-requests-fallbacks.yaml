@@ -125,7 +125,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range]))",
+              "expr": "sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__range]))",
               "refId": "A"
             }
           ],
@@ -198,7 +198,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"success\"}[$__range])) / sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range]))",
+              "expr": "sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\",status=\"success\"}[$__range])) / sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__range]))",
               "refId": "A"
             }
           ],
@@ -268,7 +268,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[1m])))",
+              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[1m])))",
               "refId": "A"
             }
           ],
@@ -334,7 +334,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum(increase(llm_fallback_activations_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",primaryProvider=~\"$provider\"}[$__range]))",
+              "expr": "sum(increase(llm_fallback_activations_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",primaryProvider=~\"$provider\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__range]))",
               "refId": "A"
             }
           ],
@@ -429,7 +429,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"success\"}[$__range]))",
+              "expr": "sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\",status=\"success\"}[$__range]))",
               "instant": true,
               "legendFormat": "Success",
               "range": false,
@@ -442,7 +442,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"failure\"}[$__range]))",
+              "expr": "sum(increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\",status=\"failure\"}[$__range]))",
               "instant": true,
               "legendFormat": "Failure",
               "range": false,
@@ -521,7 +521,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum by(provider) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range])))",
+              "expr": "(sum by(provider) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__range])))",
               "instant": true,
               "legendFormat": "{{`{{`}}provider{{`}}`}}",
               "range": false,
@@ -600,7 +600,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range])))",
+              "expr": "(sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__range])))",
               "instant": true,
               "legendFormat": "{{`{{`}}useCase{{`}}`}}",
               "range": false,
@@ -681,7 +681,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum by(llmResourceLevel) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range])))",
+              "expr": "(sum by(llmResourceLevel) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__range])))",
               "instant": true,
               "legendFormat": "{{`{{`}}llmResourceLevel{{`}}`}}",
               "range": false,
@@ -795,7 +795,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[1h]))",
+              "expr": "sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[1h]))",
               "legendFormat": "{{`{{`}}useCase{{`}}`}}",
               "refId": "A"
             }
@@ -890,7 +890,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[1h]))",
+              "expr": "sum by(provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[1h]))",
               "legendFormat": "{{`{{`}}provider{{`}}`}} - {{`{{`}}modelType{{`}}`}}",
               "refId": "A"
             }
@@ -1005,7 +1005,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.50, sum by(le) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[1m])))",
+              "expr": "histogram_quantile(0.50, sum by(le) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[1m])))",
               "legendFormat": "p50",
               "refId": "A"
             },
@@ -1014,7 +1014,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[1m])))",
+              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[1m])))",
               "legendFormat": "p95",
               "refId": "B"
             },
@@ -1023,7 +1023,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.99, sum by(le) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[1m])))",
+              "expr": "histogram_quantile(0.99, sum by(le) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[1m])))",
               "legendFormat": "p99",
               "refId": "C"
             }
@@ -1118,7 +1118,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.95, sum by(le, provider, modelType) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[1m])))",
+              "expr": "histogram_quantile(0.95, sum by(le, provider, modelType) (rate(llm_providers_requests_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[1m])))",
               "legendFormat": "{{`{{`}}provider{{`}}`}} - {{`{{`}}modelType{{`}}`}}",
               "refId": "A"
             }
@@ -1230,7 +1230,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(failureReason) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"failure\"}[5m]))",
+              "expr": "sum by(failureReason) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\",status=\"failure\"}[5m]))",
               "legendFormat": "{{`{{`}}failureReason{{`}}`}}",
               "refId": "A"
             }
@@ -1324,7 +1324,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(failureReason, retryCount) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"failure\"}[5m]))",
+              "expr": "sum by(failureReason, retryCount) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\",status=\"failure\"}[5m]))",
               "legendFormat": "{{`{{`}}failureReason{{`}}`}} (retry {{`{{`}}retryCount{{`}}`}})",
               "refId": "A"
             }
@@ -1475,7 +1475,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum(rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"success\",retryCount!=\"0\"}[5m]))",
+              "expr": "sum(rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\",status=\"success\",retryCount!=\"0\"}[5m]))",
               "legendFormat": "Successful Retries",
               "refId": "A"
             },
@@ -1484,7 +1484,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum(rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"failure\",retryCount!=\"0\"}[5m]))",
+              "expr": "sum(rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\",status=\"failure\",retryCount!=\"0\"}[5m]))",
               "legendFormat": "Failed Retries",
               "refId": "B"
             },
@@ -1493,7 +1493,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum(rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"success\",retryCount!=\"0\"}[5m])) / sum(rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",retryCount!=\"0\"}[5m]))",
+              "expr": "sum(rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\",status=\"success\",retryCount!=\"0\"}[5m])) / sum(rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",retryCount!=\"0\"}[5m]))",
               "legendFormat": "Success Rate",
               "refId": "C"
             }
@@ -1564,7 +1564,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum by(failureReason) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"failure\"}[$__range]))",
+              "expr": "sum by(failureReason) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\",status=\"failure\"}[$__range]))",
               "instant": true,
               "legendFormat": "{{`{{`}}failureReason{{`}}`}}",
               "range": false,
@@ -1678,7 +1678,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(useCase) (rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])) * 60",
+              "expr": "sum by(useCase) (rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval])) * 60",
               "legendFormat": "{{`{{`}}useCase{{`}}`}}",
               "refId": "A"
             }
@@ -1773,7 +1773,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(llmResourceLevel) (rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])) * 60",
+              "expr": "sum by(llmResourceLevel) (rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval])) * 60",
               "legendFormat": "{{`{{`}}llmResourceLevel{{`}}`}}",
               "refId": "A"
             }
@@ -1850,7 +1850,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "round(sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range])))",
+              "expr": "round(sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__range])))",
               "instant": true,
               "legendFormat": "{{`{{`}}useCase{{`}}`}}",
               "range": false,
@@ -1929,7 +1929,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "round(sum by(provider,modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range])))",
+              "expr": "round(sum by(provider,modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__range])))",
               "instant": true,
               "legendFormat": "{{`{{`}}provider{{`}}`}} / {{`{{`}}modelType{{`}}`}}",
               "range": false,
@@ -2009,7 +2009,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"failure\"}[$__range])) / sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=~\"success|failure\"}[$__range])) * 100",
+              "expr": "sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\",status=\"failure\"}[$__range])) / sum by(useCase) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\",status=~\"success|failure\"}[$__range])) * 100",
               "instant": true,
               "legendFormat": "{{`{{`}}useCase{{`}}`}}",
               "range": false,
@@ -2089,7 +2089,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(provider,modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"failure\"}[$__range])) / sum by(provider,modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range])) * 100",
+              "expr": "sum by(provider,modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\",status=\"failure\"}[$__range])) / sum by(provider,modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__range])) * 100",
               "instant": true,
               "legendFormat": "{{`{{`}}provider{{`}}`}} / {{`{{`}}modelType{{`}}`}}",
               "range": false,
@@ -2201,7 +2201,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "topk(20, (100 * sum by(llmReferenceId, provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",status=\"failure\"}[$__range])) / sum by(llmReferenceId, provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range]))) > 0)",
+              "expr": "topk(20, (100 * sum by(llmReferenceId, provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\",status=\"failure\"}[$__range])) / sum by(llmReferenceId, provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__range]))) > 0)",
               "format": "table",
               "instant": true,
               "refId": "A"
@@ -2317,7 +2317,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "topk(20, histogram_quantile(0.95, sum by(le, llmReferenceId, provider, modelType) (rate(llm_providers_ttft_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval]))))",
+              "expr": "topk(20, histogram_quantile(0.95, sum by(le, llmReferenceId, provider, modelType) (rate(llm_providers_ttft_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval]))))",
               "format": "table",
               "instant": true,
               "refId": "A"
@@ -2416,7 +2416,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "topk(20, round(sum by(llmReferenceId, provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range]))))",
+              "expr": "topk(20, round(sum by(llmReferenceId, provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__range]))))",
               "format": "table",
               "instant": true,
               "refId": "A"
@@ -2532,7 +2532,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "topk(20, (100 * sum by(llmReferenceId, provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",retryCount!=\"0\"}[$__range])) / sum by(llmReferenceId, provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__range]))) > 0)",
+              "expr": "topk(20, (100 * sum by(llmReferenceId, provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\",retryCount!=\"0\"}[$__range])) / sum by(llmReferenceId, provider, modelType) (increase(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__range]))) > 0)",
               "format": "table",
               "instant": true,
               "refId": "A"
@@ -2647,7 +2647,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.50, sum by(le) (rate(llm_providers_ttft_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])))",
+              "expr": "histogram_quantile(0.50, sum by(le) (rate(llm_providers_ttft_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval])))",
               "legendFormat": "p50",
               "refId": "A"
             },
@@ -2656,7 +2656,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_ttft_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])))",
+              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_ttft_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval])))",
               "legendFormat": "p95",
               "refId": "B"
             },
@@ -2665,7 +2665,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.99, sum by(le) (rate(llm_providers_ttft_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])))",
+              "expr": "histogram_quantile(0.99, sum by(le) (rate(llm_providers_ttft_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval])))",
               "legendFormat": "p99",
               "refId": "C"
             }
@@ -2737,7 +2737,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.95, sum by(le, provider, modelType) (rate(llm_providers_ttft_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])))",
+              "expr": "histogram_quantile(0.95, sum by(le, provider, modelType) (rate(llm_providers_ttft_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval])))",
               "legendFormat": "{{`{{`}}provider{{`}}`}} - {{`{{`}}modelType{{`}}`}}",
               "refId": "A"
             }
@@ -2810,7 +2810,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.50, sum by(le) (rate(llm_providers_prompt_tokens_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])))",
+              "expr": "histogram_quantile(0.50, sum by(le) (rate(llm_providers_prompt_tokens_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval])))",
               "legendFormat": "p50",
               "refId": "A"
             },
@@ -2819,7 +2819,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_prompt_tokens_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])))",
+              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_prompt_tokens_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval])))",
               "legendFormat": "p95",
               "refId": "B"
             }
@@ -2892,7 +2892,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.50, sum by(le) (rate(llm_providers_output_tokens_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])))",
+              "expr": "histogram_quantile(0.50, sum by(le) (rate(llm_providers_output_tokens_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval])))",
               "legendFormat": "p50",
               "refId": "A"
             },
@@ -2901,12 +2901,228 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_output_tokens_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}[$__rate_interval])))",
+              "expr": "histogram_quantile(0.95, sum by(le) (rate(llm_providers_output_tokens_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval])))",
               "legendFormat": "p95",
               "refId": "B"
             }
           ],
           "title": "Output Tokens (Completion)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Request rate split by streaming vs non-streaming. Lets Support confirm whether a latency or failure spike is specific to one request mode.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "showPoints": "never",
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 114
+          },
+          "id": 3105,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "sum by(streaming) (rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval]))",
+              "legendFormat": "streaming={{`{{`}}streaming{{`}}`}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Request Rate by Streaming Mode",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "p95 time-to-first-token split by streaming vs non-streaming. Non-streaming TTFT equals total request duration; comparing the two shows the latency users actually perceive per mode.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "showPoints": "never",
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 114
+          },
+          "id": 3106,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "histogram_quantile(0.95, sum by(le, streaming) (rate(llm_providers_ttft_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval])))",
+              "legendFormat": "streaming={{`{{`}}streaming{{`}}`}}",
+              "refId": "A"
+            }
+          ],
+          "title": "p95 TTFT by Streaming Mode",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Request rate split by request type (chatCompletion / responses / embedding / textCompletion, per the requestType label). Lets Support isolate a regression to a single API surface.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "showPoints": "never",
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 122
+          },
+          "id": 3107,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "sum by(requestType) (rate(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval]))",
+              "legendFormat": "{{`{{`}}requestType{{`}}`}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Request Rate by Request Type",
           "type": "timeseries"
         },
         {
@@ -2919,7 +3135,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 114
+            "y": 130
           },
           "id": 16,
           "panels": [],
@@ -2986,7 +3202,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 115
+            "y": 131
           },
           "id": 17,
           "options": {
@@ -3013,7 +3229,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(primaryProvider, primaryModel, fallbackProvider, fallbackModel) (rate(llm_fallback_activations_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",primaryProvider=~\"$provider\"}[$__range]))",
+              "expr": "sum by(primaryProvider, primaryModel, fallbackProvider, fallbackModel) (rate(llm_fallback_activations_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",primaryProvider=~\"$provider\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__range]))",
               "legendFormat": "{{`{{`}}primaryProvider{{`}}`}}/{{`{{`}}primaryModel{{`}}`}} \u2192 {{`{{`}}fallbackProvider{{`}}`}}/{{`{{`}}fallbackModel{{`}}`}}",
               "refId": "A"
             }
@@ -3142,7 +3358,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 115
+            "y": 131
           },
           "id": 18,
           "options": {
@@ -3169,7 +3385,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(status) (rate(llm_fallback_primary_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\"}[$__rate_interval]))",
+              "expr": "sum by(status) (rate(llm_fallback_primary_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval]))",
               "legendFormat": "primary-{{`{{`}}status{{`}}`}}",
               "refId": "A"
             },
@@ -3178,7 +3394,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(status) (rate(llm_fallback_usage_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\"}[$__rate_interval]))",
+              "expr": "sum by(status) (rate(llm_fallback_usage_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval]))",
               "legendFormat": "fallback-{{`{{`}}status{{`}}`}}",
               "refId": "B"
             }
@@ -3246,7 +3462,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 123
+            "y": 139
           },
           "id": 19,
           "options": {
@@ -3273,7 +3489,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "histogram_quantile(0.95, sum by(le, primaryProvider, fallbackProvider) (rate(llm_fallback_active_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\"}[1m])))",
+              "expr": "histogram_quantile(0.95, sum by(le, primaryProvider, fallbackProvider) (rate(llm_fallback_active_duration_seconds_bucket{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[1m])))",
               "legendFormat": "{{`{{`}}primaryProvider{{`}}`}} \u2192 {{`{{`}}fallbackProvider{{`}}`}}",
               "refId": "A"
             }
@@ -3341,7 +3557,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 123
+            "y": 139
           },
           "id": 20,
           "options": {
@@ -3367,7 +3583,7 @@ data:
                 "type": "prometheus",
                 "uid": "$datasource"
               },
-              "expr": "sum by(failureReason) (rate(llm_fallback_primary_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",status=\"failure\",primaryProvider=~\"$provider\"}[$__rate_interval]))",
+              "expr": "sum by(failureReason) (rate(llm_fallback_primary_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",status=\"failure\",primaryProvider=~\"$provider\",streaming=~\"$streaming\",requestType=~\"$requestType\"}[$__rate_interval]))",
               "legendFormat": "{{`{{`}}failureReason{{`}}`}}",
               "refId": "A"
             }
@@ -3519,6 +3735,56 @@ data:
             "options": [],
             "query": {
               "query": "label_values(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\"}, llmReferenceId)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "allValue": ".*",
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}, streaming)",
+            "includeAll": true,
+            "label": "Streaming",
+            "multi": true,
+            "name": "streaming",
+            "options": [],
+            "query": {
+              "query": "label_values(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}, streaming)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "allValue": ".*",
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}, requestType)",
+            "includeAll": true,
+            "label": "Request Type",
+            "multi": true,
+            "name": "requestType",
+            "options": [],
+            "query": {
+              "query": "label_values(llm_providers_requests_total{cluster=~\"$cluster\",organisationId=~\"$organisationId\",projectId=~\"$projectId\",provider=~\"$provider\",llmReferenceId=~\"$llmReferenceId\"}, requestType)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 2,

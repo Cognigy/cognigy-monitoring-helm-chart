@@ -163,6 +163,21 @@ spec:
           description: "NLP Matcher had initializeLexicon errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
     {{- end }}
 
+    {{- if (.Values.rules.runtime.serviceNlpOrchestrator.enabled ) }}
+    # NLP Orchestrator
+    - name: cognigy.runtime.alert.nlp-orchestrator
+      rules:
+      - alert: NlpOrchestratorScoreClassifierTimeout
+        expr: increase(cognigy_nlp_orchestrator_score_classifier_timeout_counter_total[5m]) > {{ .Values.rules.runtime.serviceNlpOrchestrator.scoreClassifierTimeoutCounter.threshold }}
+        for: {{ .Values.rules.runtime.serviceNlpOrchestrator.scoreClassifierTimeoutCounter.timeout }}
+        labels:
+          severity: {{ .Values.rules.runtime.serviceNlpOrchestrator.scoreClassifierTimeoutCounter.severity }}
+          group: ai-custom-alert-rules-carbon
+        annotations:
+          summary: NLP orchestrator had classifier scoring timeouts (instance {{`{{`}} $labels.instance }})
+          description: "NLP Orchestrator had classifier scoring timeouts: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
     {{- if (.Values.rules.runtime.servicePlaybookExecution.enabled ) }}
     # Service Playbook Execution
     - name: cognigy.runtime.alert.playbook-execution

@@ -514,3 +514,204 @@ promitorScraper:
           - name: ProtocolType
       resourceDiscoveryGroups:
         - name: all-loadbalancers
+
+## Grafana Alloy: OTLP edge collector for the regional Tempo tracing
+## rollout (see the Distributed Tracing architecture page in Confluence).
+## Bundles two charts as optional dependencies, both disabled by default:
+##   - alloy          (vendored upstream grafana/alloy — owns the workload:
+##                      Deployment, HPA, Services, RBAC, ServiceMonitor)
+##   - cognigy-alloy   (in-house — owns only the River ConfigMap, rendered
+##                      from the structured values below)
+##
+## NOTE: alloy.fullnameOverride and cognigy-alloy.alloyFullname must stay
+##       equal (the config's trace-ID load-balancing resolver targets
+##       "<alloyFullname>-cluster"), and alloy.alloy.configMap.name must
+##       equal cognigy-alloy.configMapName. Changing one without the other
+##       breaks the collector silently — Helm renders fine, the pod just
+##       can't find its config or its peers.
+##
+## Required per cluster when enabling: cognigy-alloy.clusterName and
+## cognigy-alloy.tempo.endpoint. See the root README for the full
+## enablement snippet and prerequisites (the image mirror to ACR).
+
+alloy:
+  enabled: false
+  fullnameOverride: cognigy-alloy
+
+  crds:
+    create: false # the PodLogs CRD is cluster-scoped and unused here
+
+  image:
+    # The ACR mirror is a flat repository name, not upstream's "grafana/alloy"
+    # path — the mirrored image is cognigy.azurecr.io/grafana-alloy:v1.19.2.
+    repository: grafana-alloy
+
+  global:
+    image:
+      registry: cognigy.azurecr.io
+      pullSecrets:
+        - name: cognigy-registry-token
+
+  configReloader:
+    image:
+      # registry is intentionally not set here: templates/containers/_watch.yaml
+      # always prefers global.image.registry over this field when the former
+      # is set, so global.image.registry above (cognigy.azurecr.io) applies
+      # to this image too. Tag is aligned with vendored kube-prometheus-stack
+      # (75.6.0) so no extra image needs mirroring to ACR — upstream's own
+      # default tag is digest-pinned, which an ACR mirror would invalidate.
+      repository: prometheus-operator/prometheus-config-reloader
+      tag: v0.83.0
+      digest: ""
+
+  controller:
+    type: deployment
+    replicas: 1 # fallback used only when autoscaling below is disabled
+
+    autoscaling:
+      horizontal:
+        enabled: true
+        minReplicas: 1
+        maxReplicas: 3
+        targetCPUUtilizationPercentage: 80
+        # Load-bearing: chart defaults this to 80, giving a memory-only
+        # HPA unless explicitly zeroed here.
+        targetMemoryUtilizationPercentage: 0
+        # Biased slow: a scale event reshuffles the trace-ID hash ring,
+        # splitting in-flight traces across old/new ring members.
+        scaleUp:
+          stabilizationWindowSeconds: 60
+          policies:
+            - type: Pods
+              value: 1
+              periodSeconds: 60
+        scaleDown:
+          # Scale-down also discards the departing pod's queue (see
+          # volumes.extra below) — bias hard against it.
+          stabilizationWindowSeconds: 600
+          policies:
+            - type: Pods
+              value: 1
+              periodSeconds: 300
+
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: alloy
+
+    volumes:
+      extra:
+        # Not persistent: lost on restart/reschedule/eviction/scale-down,
+        # unlike the PVC this replaced (avoids PVC leaks on scale-down).
+        # sizeLimit overflow evicts the pod rather than just failing
+        # writes. 10Gi has large headroom — loadtest's PVC-backed queue
+        # peaked at ~60MiB under real traffic.
+        - name: alloy-data
+          emptyDir:
+            sizeLimit: 10Gi
+
+  alloy:
+    # otelcol.storage.file (the disk-backed sending_queue, pod-local, not
+    # durable — see volumes.extra above) is public-preview in v1.19.2.
+    # Required for the on-disk queue this chart exists for.
+    stabilityLevel: "public-preview"
+    storagePath: /var/lib/alloy
+    # Don't phone home anonymous usage stats to Grafana Labs.
+    enableReporting: false
+    clustering:
+      enabled: true # creates the "-cluster" headless Service the
+                    # trace-ID load-balancing resolver targets
+    configMap:
+      create: false
+      name: cognigy-alloy-config
+    mounts:
+      extra:
+        - name: alloy-data
+          mountPath: /var/lib/alloy
+    extraPorts:
+      - name: otlp-grpc
+        port: 4317
+        targetPort: 4317
+        protocol: TCP
+        appProtocol: h2c
+      - name: otlp-http
+        port: 4318
+        targetPort: 4318
+        protocol: TCP
+      - name: otlp-internal
+        port: 4319
+        targetPort: 4319
+        protocol: TCP
+        appProtocol: h2c
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        memory: 2Gi
+
+  rbac:
+    create: true
+    # Narrowed from the upstream chart default, which also grants
+    # secrets/configmaps/events/prometheusrules/pods-log cluster-wide for
+    # discovery.*, loki.* and mimir.* components this collector never runs.
+    #
+    # Split across rules/clusterRules only to keep both lists non-empty:
+    # templates/rbac.yaml concatenates them with `toYaml` unconditionally
+    # whenever either is set, so rules non-empty + clusterRules: [] (or
+    # vice versa) renders a bare "[]" inside a YAML block sequence and
+    # fails to parse. Both resources are namespace-scoped; the split has
+    # no RBAC effect since rbac.namespaces is unset here (one ClusterRole
+    # either way) — it exists purely to work around that upstream bug.
+    rules:
+      - apiGroups: ["", "discovery.k8s.io"]
+        resources: ["endpoints", "endpointslices", "pods", "namespaces"]
+        verbs: ["get", "list", "watch"]
+    clusterRules:
+      - apiGroups: ["apps"]
+        resources: ["replicasets"]
+        verbs: ["get", "list", "watch"]
+
+  serviceMonitor:
+    enabled: true
+
+  networkPolicy:
+    enabled: true
+    # Ingress only — egress is intentionally left unmanaged (the collector
+    # needs the k8s API, DNS and the regional Tempo endpoint, and locking
+    # that down is a separate, bigger change than this one).
+    policyTypes: ["Ingress"]
+    ingress:
+      # OTLP ingest (product services → collector): reachable from any
+      # pod, any namespace — this is the whole point of the collector.
+      - ports:
+          - port: 4317
+            protocol: TCP
+          - port: 4318
+            protocol: TCP
+          - port: 12345 # http-metrics/UI/readiness + clustering gossip
+            protocol: TCP
+      # Internal trace-ID load-balancing hop: peer Alloy pods only (same
+      # namespace, "app.kubernetes.io/name: alloy" is this Deployment's
+      # own pods — see alloy.name in charts/alloy/templates/_helpers.tpl).
+      # Never reachable from product services, which must go through the
+      # ingest ports above so every span of a trace lands on one replica.
+      - from:
+          - podSelector:
+              matchLabels:
+                app.kubernetes.io/name: alloy
+        ports:
+          - port: 4319
+            protocol: TCP
+
+cognigy-alloy:
+  enabled: false
+  configMapName: cognigy-alloy-config
+  alloyFullname: cognigy-alloy
+
+  clusterName: "" # REQUIRED, e.g. "foo-corp-dev"
+  tempo:
+    endpoint: "" # REQUIRED, e.g. "tempo-prod-eu.internal:4317"

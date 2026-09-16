@@ -29,7 +29,7 @@ spec:
         ) > {{ .Values.rules.serverless.executionSlo.criticalThreshold }}
       for: 5m
       labels:
-        severity: critical
+        severity: warning
         group: ai-custom-alert-rules-aluminium
       annotations:
         summary: Serverless execution SLO breach for {{`{{`}} $labels.execution_type {{`}}`}}
@@ -58,7 +58,7 @@ spec:
         ) > {{ .Values.rules.serverless.coldStartSlo.criticalThreshold }}
       for: 5m
       labels:
-        severity: critical
+        severity: warning
         group: ai-custom-alert-rules-aluminium
       annotations:
         summary: Serverless cold start SLO breach
@@ -73,7 +73,7 @@ spec:
         sum(increase(serverless_execution_reconcile_errors_total{reason="wait_timeout"}[10m])) > {{ .Values.rules.serverless.coldStartRolloutTimeouts.threshold }}
       for: 5m
       labels:
-        severity: critical
+        severity: warning
         group: ai-custom-alert-rules-aluminium
       annotations:
         summary: Serverless cold start rollout timeouts detected
@@ -98,7 +98,7 @@ spec:
         sum(rate(serverless_proxy_routing_errors_total[10m])) > {{ .Values.rules.serverless.routingErrors.criticalThreshold }}
       for: 5m
       labels:
-        severity: critical
+        severity: warning
         group: ai-custom-alert-rules-aluminium
       annotations:
         summary: Serverless routing error rate is critically high
@@ -123,7 +123,7 @@ spec:
         sum(rate(serverless_execution_reconcile_errors_total{reason!="wait_timeout"}[10m])) > {{ .Values.rules.serverless.reconcileErrors.criticalThreshold }}
       for: 5m
       labels:
-        severity: critical
+        severity: warning
         group: ai-custom-alert-rules-aluminium
       annotations:
         summary: Serverless reconcile error rate is critically high
@@ -138,7 +138,7 @@ spec:
         sum(increase(serverless_builder_jobs_total{result="failure"}[10m])) > {{ .Values.rules.serverless.builderFailures.threshold }}
       for: 5m
       labels:
-        severity: critical
+        severity: warning
         group: ai-custom-alert-rules-aluminium
       annotations:
         summary: Serverless builder failures are sustained

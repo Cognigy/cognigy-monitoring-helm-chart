@@ -1,0 +1,185 @@
+# Defaults for the cognigy-alloy River-config chart. See the umbrella
+# cognigy-monitoring/values.yaml for the knobs an SRE is expected to set
+# per cluster (clusterName, tempo.endpoint at minimum).
+
+enabled: false
+
+# -- Name of the ConfigMap this chart renders. Must equal
+# alloy.alloy.configMap.name in the umbrella values, since the vendored
+# `alloy` subchart consumes it via configMap.create: false.
+configMapName: cognigy-alloy-config
+
+# -- Fullname of the vendored `alloy` Deployment/Services. Must equal
+# alloy.fullnameOverride in the umbrella values. Used to build the
+# trace-ID load-balancing resolver target "<alloyFullname>-cluster".
+alloyFullname: cognigy-alloy
+
+# -- REQUIRED. The Flux cluster name, e.g. "foo-corp-dev". Sent as the
+# clusterAttribute resource attribute (below) on every span, and used as
+# the default Tempo tenant (X-Scope-OrgID) if tempo.tenant is unset.
+clusterName: ""
+
+# -- Resource attribute key the cluster name is written to (see
+# clusterName above). Keep this in sync with tempo-query's
+# routing.clusterAttribute, which references it as "resource.<this value>".
+clusterAttribute: "cluster"
+
+tempo:
+  # -- REQUIRED. host:port of the regional Tempo's OTLP gRPC endpoint,
+  # e.g. "tempo-prod-eu.internal:4317".
+  endpoint: ""
+  # -- X-Scope-OrgID tenant header. Defaults to clusterName when empty.
+  tenant: ""
+  tls:
+    insecure: false
+    insecureSkipVerify: false
+    caFile: ""
+  auth:
+    # -- none | basic | bearer | mtls. Selects which otelcol.auth component
+    # (if any) the default route's Tempo exporter uses for REAL request
+    # authentication — separate from the X-Scope-OrgID tenant header above,
+    # which is always sent regardless of this setting.
+    #
+    # Credentials never go here. This only selects the mechanism; the actual
+    # secret is wired into the vendored `alloy` chart's own generic knobs
+    # (extraEnv / a Secret volume), read via fixed env var names or a fixed
+    # mount path this chart's template expects. See the README's
+    # "Authenticating to a remote Tempo" section for the exact values to
+    # set per type, and note the same caveat as alloyFullname/configMapName
+    # elsewhere in this file: Helm can't cross-check that you actually wired
+    # the matching alloy.* values, so a mismatch fails silently (an empty
+    # credential gets sent, not a render or startup error).
+    type: none
+
+receivers:
+  # -- Max size of a single inbound request, applied to every receiver:
+  # ingest gRPC + HTTP, and the internal trace-ID load-balancing hop.
+  # Upstream defaults differ per protocol (gRPC 4 MiB, HTTP 20 MiB); this
+  # pins one ceiling across all three, equal to Tempo's
+  # max_recv_msg_size_mib, so no hop in the chain is the odd one out.
+  # A single SDK export batch can exceed 4 MiB on its own (512 spans at
+  # >8 KB/span on loadtest-eks), and the loadbalancing exporter forwards
+  # such batches to the internal receiver untouched — upstream of any
+  # batch processor, so batch.* cannot bound them.
+  maxRequestSize: "32MiB"
+
+# -- Ports the collector listens on. Kept in sync with
+# alloy.alloy.extraPorts in the umbrella values.
+ports:
+  # -- OTLP gRPC ingest, exposed to product services.
+  grpc: 4317
+  # -- OTLP HTTP ingest, exposed to product services.
+  http: 4318
+  # -- Internal OTLP gRPC receiver. Only ever reached peer-to-peer via the
+  # trace-ID load-balancing exporter, never by product services directly.
+  internal: 4319
+
+sampling:
+  # -- How long the tail-sampling processor waits after seeing a trace's
+  # first span before deciding whether to keep it.
+  decisionWait: "10s"
+  # -- Number of traces kept in the decision buffer at once.
+  numTraces: 100000
+  # -- Hint for pre-allocating the decision buffer.
+  expectedNewTracesPerSec: 2000
+  # -- Release a trace as soon as the first policy match decides to keep
+  # it, instead of holding it in memory for the full decisionWait. Cuts
+  # buffer occupancy for traces that hit an early policy (see the ordering
+  # note on `policies` below); traces matching no policy still wait out
+  # decisionWait in case `baseline` (or another later policy) picks them
+  # up. Verified against the pinned Alloy version (v1.19.2, via a Docker
+  # test): dropUrlPaths still wins over a later "keep" policy match
+  # (an ERROR span on a dropped path is dropped, not sampled).
+  sampleOnFirstMatch: true
+  # -- Traces whose url.path matches any of these regexes are dropped
+  # outright, regardless of the policies below (health/readiness/metrics
+  # endpoints are not worth ingesting).
+  dropUrlPaths:
+    - "/health.*"
+    - "/ready.*"
+    - "/metrics"
+  # -- Ordered tail-sampling policies, evaluated after the drop rule
+  # above. A trace is kept if ANY policy matches (OR semantics, the
+  # tail_sampling processor default). Supported types: status_code,
+  # latency, probabilistic — extend the range in _config.tpl before
+  # adding another type.
+  policies:
+    - name: errors
+      type: status_code
+      statusCodes: ["ERROR"]
+    - name: slow
+      type: latency
+      thresholdMs: 2000
+    - name: baseline
+      type: probabilistic
+      percentage: 10
+
+batch:
+  # sendBatchMaxSize is a span count, not bytes — must stay well under
+  # Tempo's max_recv_msg_size_mib. Batch-size histograms from loadtest-eks
+  # (otelcol_processor_batch_batch_send_size_bytes) show p90 ~4 MiB and
+  # p99 ~8 MiB at Alloy's own defaults (2000/3000), so these are sized
+  # with real margin below that, not a flat bytes/span guess.
+  sendBatchSize: 500
+  sendBatchMaxSize: 750
+  timeout: "5s"
+
+# -- Disk-backed sending_queue (otelcol.storage.file), so spans survive a
+# Tempo outage instead of being dropped from memory while the pod stays
+# up. NOT durable across a pod restart/reschedule/eviction — the volume
+# is an emptyDir (alloy.controller.volumes.extra), not a PVC. `directory`
+# must be a subdirectory of that volume's mount path
+# (alloy.alloy.mounts.extra) — see the umbrella values comment.
+queue:
+  directory: /var/lib/alloy/otlp-queue
+  numConsumers: 4
+  queueSize: 10000
+  fsync: false
+
+spanMetrics:
+  # -- Off by default. The architecture page's default is Tempo-side
+  # span-metrics generation with the tracestate multiplier, not the
+  # collector-side spanmetrics/servicegraph connectors. Turning this on
+  # is out of scope for this chart version — see the plan's follow-up
+  # section before flipping it.
+  enabled: false
+
+# -- Extra trace destinations, evaluated after the trace-ID load-balancing
+# hop (so every route still sees the whole trace on one replica) but with
+# no tail-sampling or disk-backed queue of their own — everything that
+# matches a route's condition is kept and exported as-is. The default
+# route above is unaffected except that it now excludes whatever these
+# routes claim, so a trace goes to exactly one destination, never both.
+#
+# Empty by default: no extra routes, today's single-destination behavior.
+#
+# Example — send traces carrying a specific resource attribute to an
+# in-cluster application-level collector instead of the shared Tempo:
+#
+# routes:
+#   - name: app_traces                # used verbatim in River labels: must
+#                                      # match ^[a-z][a-z0-9_]*$ and not be
+#                                      # "default" (both enforced with a
+#                                      # hard failure at render time)
+#     match: 'resource.attributes["cognigy.trace.route"] == "app"'
+#                                      # RAW OTTL boolean expression, evaluated
+#                                      # with context="span" (so span-level
+#                                      # fields like `attributes[...]` or
+#                                      # `kind` work directly, and resource
+#                                      # attributes are reachable via the
+#                                      # explicit "resource." prefix as shown).
+#                                      # A bad expression here is a
+#                                      # collector-wide startup failure, not a
+#                                      # helm-template error — validate with
+#                                      # `alloy fmt` / `alloy run` before
+#                                      # shipping a change to this list.
+#     tempo:
+#       endpoint: "app-otel-collector.cognigy-ai.svc.cluster.local:4317"
+#       tenant: ""                     # X-Scope-OrgID; defaults to clusterName
+#       tls:
+#         insecure: true
+#         insecureSkipVerify: false
+#         caFile: ""
+#     batch: {}                        # optional; falls back to the
+#                                       # top-level `batch` values above
+routes: []

@@ -1,0 +1,91 @@
+{{- $targetNamespace := .Values.rules.billing.namespace }}
+{{- if .Values.rules.billing.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-cognigy-billing-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+    - name: cognigy.billing.alert.cronjobs
+      rules:
+      {{- if .Values.rules.billing.usageAggregation.failure.enabled }}
+      - alert: BillingUsageAggregationCronJobFailed
+        expr: |-
+          kube_job_status_failed{namespace=~"{{ $targetNamespace }}", job_name=~"^{{ .Values.rules.billing.usageAggregation.cronjobName }}-.*"} > 0
+          and on (namespace, job_name)
+          (time() - kube_job_status_start_time{namespace=~"{{ $targetNamespace }}", job_name=~"^{{ .Values.rules.billing.usageAggregation.cronjobName }}-.*"}) < {{ .Values.rules.billing.usageAggregation.failure.lookbackHours }} * 60 * 60
+        for: 5m
+        labels:
+          severity: {{ .Values.rules.billing.usageAggregation.failure.severity }}
+          group: billing-custom-alert-rules-zinc
+        annotations:
+          summary: "usage-aggregation cron job failed (namespace {{`{{`}} $labels.namespace {{`}}`}})"
+          description: "The usage-aggregation CronJob reported a failed Job run.\n VALUE = {{`{{`}} $value {{`}}`}}\n LABELS = {{`{{`}} $labels {{`}}`}}"
+      {{- end }}
+      {{- if .Values.rules.billing.usageAggregation.duration.enabled }}
+      - alert: BillingUsageAggregationCronJobLongRunning
+        expr: |-
+          (kube_job_status_active{namespace=~"{{ $targetNamespace }}", job_name=~"^{{ .Values.rules.billing.usageAggregation.cronjobName }}-.*"} == 1)
+          and on (namespace, job_name)
+          (time() - kube_job_status_start_time{namespace=~"{{ $targetNamespace }}", job_name=~"^{{ .Values.rules.billing.usageAggregation.cronjobName }}-.*"}) > {{ .Values.rules.billing.usageAggregation.duration.thresholdHours }} * 60 * 60
+        for: 5m
+        labels:
+          severity: {{ .Values.rules.billing.usageAggregation.duration.severity }}
+          group: billing-custom-alert-rules-zinc
+        annotations:
+          summary: "usage-aggregation cron job running longer than {{ .Values.rules.billing.usageAggregation.duration.thresholdHours }}h (namespace {{`{{`}} $labels.namespace {{`}}`}})"
+          description: "The usage-aggregation CronJob has been running for more than {{ .Values.rules.billing.usageAggregation.duration.thresholdHours }} hours.\n VALUE = {{`{{`}} $value {{`}}`}}\n LABELS = {{`{{`}} $labels {{`}}`}}"
+      {{- end }}
+      {{- if .Values.rules.billing.usageAggregation.neverRan.enabled }}
+      - alert: BillingUsageAggregationCronJobNeverRan
+        expr: time() - kube_cronjob_next_schedule_time{namespace=~"{{ $targetNamespace }}", cronjob="{{ .Values.rules.billing.usageAggregation.cronjobName }}"} > {{ .Values.rules.billing.usageAggregation.neverRan.graceMinutes }} * 60
+        for: 0m
+        labels:
+          severity: {{ .Values.rules.billing.usageAggregation.neverRan.severity }}
+          group: billing-custom-alert-rules-zinc
+        annotations:
+          summary: "usage-aggregation cron job did not run at its scheduled time (namespace {{`{{`}} $labels.namespace {{`}}`}})"
+          description: "The usage-aggregation CronJob has not started a Job within {{ .Values.rules.billing.usageAggregation.neverRan.graceMinutes }} minutes of its scheduled time.\n VALUE = {{`{{`}} $value {{`}}`}}\n LABELS = {{`{{`}} $labels {{`}}`}}"
+      {{- end }}
+      {{- if .Values.rules.billing.niceBillingDailyReport.failure.enabled }}
+      - alert: BillingNiceDailyReportCronJobFailed
+        expr: |-
+          kube_job_status_failed{namespace=~"{{ $targetNamespace }}", job_name=~"^{{ .Values.rules.billing.niceBillingDailyReport.cronjobName }}-.*"} > 0
+          and on (namespace, job_name)
+          (time() - kube_job_status_start_time{namespace=~"{{ $targetNamespace }}", job_name=~"^{{ .Values.rules.billing.niceBillingDailyReport.cronjobName }}-.*"}) < {{ .Values.rules.billing.niceBillingDailyReport.failure.lookbackHours }} * 60 * 60
+        for: 5m
+        labels:
+          severity: {{ .Values.rules.billing.niceBillingDailyReport.failure.severity }}
+          group: billing-custom-alert-rules-zinc
+        annotations:
+          summary: "nice-billing-daily-report cron job failed (namespace {{`{{`}} $labels.namespace {{`}}`}})"
+          description: "The nice-billing-daily-report CronJob reported a failed Job run.\n VALUE = {{`{{`}} $value {{`}}`}}\n LABELS = {{`{{`}} $labels {{`}}`}}"
+      {{- end }}
+      {{- if .Values.rules.billing.niceBillingDailyReport.duration.enabled }}
+      - alert: BillingNiceDailyReportCronJobLongRunning
+        expr: |-
+          (kube_job_status_active{namespace=~"{{ $targetNamespace }}", job_name=~"^{{ .Values.rules.billing.niceBillingDailyReport.cronjobName }}-.*"} == 1)
+          and on (namespace, job_name)
+          (time() - kube_job_status_start_time{namespace=~"{{ $targetNamespace }}", job_name=~"^{{ .Values.rules.billing.niceBillingDailyReport.cronjobName }}-.*"}) > {{ .Values.rules.billing.niceBillingDailyReport.duration.thresholdHours }} * 60 * 60
+        for: 5m
+        labels:
+          severity: {{ .Values.rules.billing.niceBillingDailyReport.duration.severity }}
+          group: billing-custom-alert-rules-zinc
+        annotations:
+          summary: "nice-billing-daily-report cron job running longer than {{ .Values.rules.billing.niceBillingDailyReport.duration.thresholdHours }}h (namespace {{`{{`}} $labels.namespace {{`}}`}})"
+          description: "The nice-billing-daily-report CronJob has been running for more than {{ .Values.rules.billing.niceBillingDailyReport.duration.thresholdHours }} hours.\n VALUE = {{`{{`}} $value {{`}}`}}\n LABELS = {{`{{`}} $labels {{`}}`}}"
+      {{- end }}
+      {{- if .Values.rules.billing.niceBillingDailyReport.neverRan.enabled }}
+      - alert: BillingNiceDailyReportCronJobNeverRan
+        expr: time() - kube_cronjob_next_schedule_time{namespace=~"{{ $targetNamespace }}", cronjob="{{ .Values.rules.billing.niceBillingDailyReport.cronjobName }}"} > {{ .Values.rules.billing.niceBillingDailyReport.neverRan.graceMinutes }} * 60
+        for: 0m
+        labels:
+          severity: {{ .Values.rules.billing.niceBillingDailyReport.neverRan.severity }}
+          group: billing-custom-alert-rules-zinc
+        annotations:
+          summary: "nice-billing-daily-report cron job did not run at its scheduled time (namespace {{`{{`}} $labels.namespace {{`}}`}})"
+          description: "The nice-billing-daily-report CronJob has not started a Job within {{ .Values.rules.billing.niceBillingDailyReport.neverRan.graceMinutes }} minutes of its scheduled time.\n VALUE = {{`{{`}} $value {{`}}`}}\n LABELS = {{`{{`}} $labels {{`}}`}}"
+      {{- end }}
+{{- end }}

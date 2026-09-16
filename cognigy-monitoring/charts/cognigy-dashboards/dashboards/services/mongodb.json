@@ -888,6 +888,251 @@
     },
     {
       "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "id": 90,
+      "panels": [],
+      "title": "Replica Priority & Version",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "Configured replica-set election priority per member. All members should share the same priority (default 1); a divergence is a leftover from the PVC-resize graceful-restart runbook. Stepped lines show when it changed.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "stepAfter",
+            "lineWidth": 2,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 0,
+        "y": 27
+      },
+      "id": 91,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "max by (member_idx) (mongodb_rs_cfg_members_priority{cluster=\"$cluster\", namespace=\"$namespace\"})",
+          "legendFormat": "{{member_idx}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Replica Member Priority",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "Running mongod server version (mongodb_version_info).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "string"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 27
+      },
+      "id": 92,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {},
+        "textMode": "name",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "max by (mongodb) (mongodb_version_info{cluster=\"$cluster\", namespace=\"$namespace\"})",
+          "instant": true,
+          "legendFormat": "{{mongodb}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Current MongoDB Version",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "featureCompatibilityVersion \u2014 the minimum compatibility level the replica set operates at.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "string"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 31
+      },
+      "id": 93,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {},
+        "textMode": "name",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "max by (version) (mongodb_fcv_feature_compatibility_version{cluster=\"$cluster\", namespace=\"$namespace\"})",
+          "instant": true,
+          "legendFormat": "{{version}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Min Compatibility Version (FCV)",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
       "datasource": {
         "type": "prometheus",
         "uid": "$datasource"
@@ -896,7 +1141,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 35
       },
       "id": 22,
       "panels": [],
@@ -959,7 +1204,7 @@
         "h": 4,
         "w": 4,
         "x": 0,
-        "y": 27
+        "y": 36
       },
       "id": 10,
       "maxDataPoints": 100,
@@ -1043,7 +1288,7 @@
         "h": 4,
         "w": 4,
         "x": 4,
-        "y": 27
+        "y": 36
       },
       "id": 2,
       "maxDataPoints": 100,
@@ -1128,7 +1373,7 @@
         "h": 4,
         "w": 16,
         "x": 8,
-        "y": 27
+        "y": 36
       },
       "hideTimeOverride": false,
       "id": 1,
@@ -1181,7 +1426,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 40
       },
       "id": 72,
       "panels": [],
@@ -1303,7 +1548,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 41
       },
       "id": 78,
       "interval": "1m",
@@ -1455,7 +1700,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 39
+        "y": 48
       },
       "id": 80,
       "interval": "1m",
@@ -1606,7 +1851,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 45
+        "y": 54
       },
       "id": 82,
       "interval": "1m",
@@ -1724,7 +1969,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 52
+        "y": 61
       },
       "id": 84,
       "interval": "1m",
@@ -1833,7 +2078,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 52
+        "y": 61
       },
       "id": 86,
       "interval": "1m",
@@ -1887,7 +2132,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 59
+        "y": 68
       },
       "id": 23,
       "panels": [],
@@ -1967,7 +2212,7 @@
         "h": 6,
         "w": 8,
         "x": 0,
-        "y": 60
+        "y": 69
       },
       "id": 6,
       "options": {
@@ -2068,7 +2313,7 @@
         "h": 6,
         "w": 8,
         "x": 8,
-        "y": 60
+        "y": 69
       },
       "id": 4,
       "options": {
@@ -2187,7 +2432,7 @@
         "h": 6,
         "w": 8,
         "x": 16,
-        "y": 60
+        "y": 69
       },
       "id": 5,
       "options": {
@@ -2235,7 +2480,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 66
+        "y": 75
       },
       "id": 24,
       "panels": [],
@@ -2315,7 +2560,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 67
+        "y": 76
       },
       "id": 16,
       "options": {
@@ -2417,7 +2662,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 67
+        "y": 76
       },
       "id": 58,
       "options": {
@@ -2466,7 +2711,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 74
+        "y": 83
       },
       "id": 25,
       "panels": [],
@@ -2547,7 +2792,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 75
+        "y": 84
       },
       "id": 52,
       "options": {
@@ -2649,7 +2894,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 75
+        "y": 84
       },
       "id": 75,
       "options": {
@@ -2751,7 +2996,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 83
+        "y": 92
       },
       "id": 76,
       "options": {
@@ -2853,7 +3098,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 83
+        "y": 92
       },
       "id": 57,
       "options": {
@@ -2929,7 +3174,7 @@
         "h": 18,
         "w": 5,
         "x": 0,
-        "y": 91
+        "y": 100
       },
       "id": 54,
       "options": {
@@ -3004,7 +3249,7 @@
         "h": 18,
         "w": 5,
         "x": 5,
-        "y": 91
+        "y": 100
       },
       "id": 53,
       "options": {
@@ -3079,7 +3324,7 @@
         "h": 18,
         "w": 5,
         "x": 10,
-        "y": 91
+        "y": 100
       },
       "id": 55,
       "options": {
@@ -3179,7 +3424,7 @@
         "h": 6,
         "w": 9,
         "x": 15,
-        "y": 91
+        "y": 100
       },
       "id": 56,
       "options": {
@@ -3276,7 +3521,7 @@
         "h": 6,
         "w": 9,
         "x": 15,
-        "y": 97
+        "y": 106
       },
       "id": 73,
       "options": {
@@ -3373,7 +3618,7 @@
         "h": 6,
         "w": 9,
         "x": 15,
-        "y": 103
+        "y": 112
       },
       "id": 74,
       "options": {

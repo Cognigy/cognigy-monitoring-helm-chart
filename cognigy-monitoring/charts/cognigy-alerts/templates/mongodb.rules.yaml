@@ -90,4 +90,15 @@ spec:
         description: "High memory usage\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
     {{- end }}
 
+    {{- if (.Values.rules.mongodb.mongodbReplicaPriorityMismatch.enabled ) }}
+    - alert: MongodbReplicaPriorityMismatch
+      expr: (max by (rs_nm, namespace) (mongodb_rs_cfg_members_priority) - min by (rs_nm, namespace) (mongodb_rs_cfg_members_priority)) > {{ .Values.rules.mongodb.mongodbReplicaPriorityMismatch.threshold }}
+      for: {{ .Values.rules.mongodb.mongodbReplicaPriorityMismatch.timeout }}
+      labels:
+        severity: {{ .Values.rules.mongodb.mongodbReplicaPriorityMismatch.severity }}
+      annotations:
+        summary: MongoDB replica priority mismatch (cluster {{`{{`}} $externalLabels.cluster }})
+        description: "MongoDB replica-set members of {{`{{`}} $labels.rs_nm }} in namespace {{`{{`}} $labels.namespace }} do not all share the same election priority. Election priority is relative, so every member is expected to carry the same value (default 1); an unequal spread usually means a member's priority was raised for a maintenance/graceful-restart procedure and never reset, leaving an unintended preferred primary. Reset the diverging member(s) back to the default priority via rs.reconfig().\n  VALUE (priority spread) = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+    {{- end }}
+
 {{- end -}}

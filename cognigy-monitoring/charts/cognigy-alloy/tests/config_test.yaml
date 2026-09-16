@@ -1,0 +1,428 @@
+# Requires the helm-unittest plugin:
+#   helm plugin install https://github.com/helm-unittest/helm-unittest --verify=false
+# Run from the repo root (must be invoked through the cognigy-monitoring umbrella,
+# not this chart standalone — configmap.yaml uses the "cognigy-monitoring.labels"
+# helper, which is only defined in the parent's templates/_helpers.tpl):
+#   helm unittest cognigy-monitoring -f 'charts/cognigy-alloy/tests/*_test.yaml'
+suite: cognigy-alloy config generation
+templates:
+  - charts/cognigy-alloy/templates/configmap.yaml
+set:
+  alloy.enabled: true
+  cognigy-alloy.enabled: true
+tests:
+  - it: fails when clusterName is not set
+    set:
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+    asserts:
+      - failedTemplate:
+          errorMessage: "cognigy-alloy.clusterName is required (set it to the Flux cluster name)"
+
+  - it: fails when tempo.endpoint is not set
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+    asserts:
+      - failedTemplate:
+          errorMessage: "cognigy-alloy.tempo.endpoint is required (host:port of the regional Tempo OTLP endpoint)"
+
+  - it: renders the default single-destination chain with no routes
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo-prod-eu:4317"
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: cognigy-alloy-config
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'set\(resource\.attributes\["cluster"\], "foo-corp-dev"\)'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'endpoint = "tempo-prod-eu:4317"'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'traces = \[otelcol\.processor\.tail_sampling\.default\.input\]'
+      - notMatchRegex:
+          path: data["config.alloy"]
+          pattern: 'otelcol\.processor\.filter'
+
+  - it: overrides the cluster resource attribute key via clusterAttribute
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.clusterAttribute: "k8s.cluster.name"
+    asserts:
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'set\(resource\.attributes\["k8s\.cluster\.name"\], "foo-corp-dev"\)'
+
+  - it: defaults the tenant header to clusterName when tempo.tenant is unset
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+    asserts:
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: '"X-Scope-OrgID" = "foo-corp-dev",'
+      - notMatchRegex:
+          path: data["config.alloy"]
+          pattern: "otelcol\\.auth\\.headers"
+
+  - it: uses an explicit tempo.tenant override instead of clusterName
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.tempo.tenant: "custom-tenant"
+    asserts:
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: '"X-Scope-OrgID" = "custom-tenant",'
+
+  # --- tempo.auth ---
+
+  - it: defaults to no auth component and no client.auth when auth.type is unset
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+    asserts:
+      - notMatchRegex:
+          path: data["config.alloy"]
+          pattern: "otelcol\\.auth\\.(basic|bearer)"
+      - notMatchRegex:
+          path: data["config.alloy"]
+          pattern: "auth\\s*=\\s*otelcol\\.auth"
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: '"X-Scope-OrgID" = "foo-corp-dev",' # tenant header unaffected by auth.type
+
+  - it: fails on an unsupported tempo.auth.type
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.tempo.auth.type: "digest"
+    asserts:
+      - failedTemplate:
+          errorMessage: 'cognigy-alloy: tempo.auth.type "digest" must be one of: none, basic, bearer, mtls'
+
+  - it: fails when basic/bearer auth is combined with an insecure transport
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.tempo.auth.type: "basic"
+      cognigy-alloy.tempo.tls.insecure: true
+    asserts:
+      - failedTemplate:
+          errorMessage: 'cognigy-alloy: tempo.auth.type "basic" cannot be combined with tempo.tls.insecure: true — gRPC refuses to send credentials over a plaintext channel (verified: "grpc: the credentials require transport level security"), and unlike a startup failure this fails per-component while the pod stays healthy. Use tempo.tls.insecureSkipVerify instead if you need to skip certificate validation against a self-signed endpoint.'
+
+  - it: allows mtls auth with an insecure transport (not a PerRPCCredentials mechanism)
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.tempo.auth.type: "mtls"
+      cognigy-alloy.tempo.tls.insecure: true
+    asserts:
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'cert_file\s*=\s*"/etc/alloy-secrets/tempo-mtls/tls\.crt"'
+
+  - it: wires otelcol.auth.basic reading fixed env vars, alongside the unaffected tenant header
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.tempo.auth.type: "basic"
+    asserts:
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'otelcol\.auth\.basic "tempo" \{\n  username = sys\.env\("TEMPO_AUTH_USERNAME"\)\n  password = sys\.env\("TEMPO_AUTH_PASSWORD"\)'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: "auth = otelcol\\.auth\\.basic\\.tempo\\.handler"
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: '"X-Scope-OrgID" = "foo-corp-dev",'
+
+  - it: wires otelcol.auth.bearer reading a fixed env var
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.tempo.auth.type: "bearer"
+    asserts:
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'otelcol\.auth\.bearer "tempo" \{\n  token = sys\.env\("TEMPO_AUTH_TOKEN"\)'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: "auth = otelcol\\.auth\\.bearer\\.tempo\\.handler"
+
+  - it: wires mTLS client cert/key at the fixed mount path with no auth component
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.tempo.auth.type: "mtls"
+    asserts:
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'cert_file\s*=\s*"/etc/alloy-secrets/tempo-mtls/tls\.crt"'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'key_file\s*=\s*"/etc/alloy-secrets/tempo-mtls/tls\.key"'
+      - notMatchRegex:
+          path: data["config.alloy"]
+          pattern: "otelcol\\.auth\\.(basic|bearer)"
+      - notMatchRegex:
+          path: data["config.alloy"]
+          pattern: "auth\\s*=\\s*otelcol\\.auth"
+
+  - it: interpolates custom ports and resolver target
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.alloyFullname: some-alloy
+      cognigy-alloy.ports:
+        grpc: 5317
+        http: 5318
+        internal: 5319
+    asserts:
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'endpoint\s+= "0\.0\.0\.0:5317"'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'endpoint\s+= "0\.0\.0\.0:5318"'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'endpoint\s+= "0\.0\.0\.0:5319"'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'ports   = \[5319\]'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'service = "some-alloy-cluster"'
+
+  - it: sets the request-size limit on every receiver and protocol
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.receivers.maxRequestSize: "64MiB"
+    asserts:
+      # All three must carry it. The internal receiver especially: it
+      # bounds the trace-ID load-balancing hop, which no batch processor
+      # precedes, so batch.* cannot limit what arrives there.
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'otelcol\.receiver\.otlp "ingest" \{\n  grpc \{\n    endpoint          = "0\.0\.0\.0:4317"\n    max_recv_msg_size = "64MiB"'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'http \{\n    endpoint              = "0\.0\.0\.0:4318"\n    max_request_body_size = "64MiB"'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'otelcol\.receiver\.otlp "internal" \{\n  grpc \{\n    endpoint          = "0\.0\.0\.0:4319"\n    max_recv_msg_size = "64MiB"'
+
+  - it: omits the health-check drop policy when dropUrlPaths is empty
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.sampling.dropUrlPaths: []
+    asserts:
+      - notMatchRegex:
+          path: data["config.alloy"]
+          pattern: "drop-health-checks"
+
+  - it: fails on an unsupported sampling policy type
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.sampling.policies:
+        - name: weird
+          type: made_up_type
+    asserts:
+      - failedTemplate:
+          errorMessage: 'cognigy-alloy: unsupported sampling.policies[].type "made_up_type" for policy "weird" — add it to templates/_config.tpl first'
+
+  - it: renders each supported sampling policy type
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.sampling.policies:
+        - name: e
+          type: status_code
+          statusCodes: ["ERROR"]
+        - name: l
+          type: latency
+          thresholdMs: 999
+        - name: p
+          type: probabilistic
+          percentage: 42
+    asserts:
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'status_codes = \["ERROR", \]'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: "threshold_ms = 999"
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: "sampling_percentage = 42"
+
+  # --- routes ---
+
+  - it: adds no filter/route components when routes is empty
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.routes: []
+    asserts:
+      - notMatchRegex:
+          path: data["config.alloy"]
+          pattern: "otelcol\\.processor\\.filter"
+
+  - it: renders a fan-out filter and a dedicated chain for a configured route
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.routes:
+        - name: app_traces
+          match: 'resource.attributes["cognigy.trace.route"] == "app"'
+          tempo:
+            endpoint: "app-otel:4317"
+    asserts:
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: "otelcol\\.processor\\.filter\\.default\\.input,\n      otelcol\\.processor\\.filter\\.app_traces\\.input,"
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'otelcol\.processor\.filter "default"'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: '`resource\.attributes\["cognigy\.trace\.route"\] == "app"`,'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'otelcol\.processor\.filter "app_traces"'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'conditions = \[`not \(resource\.attributes\["cognigy\.trace\.route"\] == "app"\)`\]'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'endpoint = "app-otel:4317"'
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: '"X-Scope-OrgID" = "foo-corp-dev",'
+      - notMatchRegex:
+          path: data["config.alloy"]
+          pattern: "otelcol\\.auth\\.headers"
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: "send_batch_size     = 500" # falls back to top-level batch defaults
+      - notMatchRegex:
+          path: data["config.alloy"]
+          pattern: 'otelcol\.exporter\.otlp "app_traces"[\s\S]*?storage\s*=\s*otelcol\.storage\.file'
+
+  - it: defaults a route's tenant header to clusterName
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.routes:
+        - name: app_traces
+          match: "true"
+          tempo:
+            endpoint: "app-otel:4317"
+    asserts:
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: 'otelcol\.exporter\.otlp "app_traces" \{\n  client \{\n    endpoint = "app-otel:4317"\n    headers = \{\n      "X-Scope-OrgID" = "foo-corp-dev",'
+
+  - it: fails when a route is named default
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.routes:
+        - name: default
+          match: "true"
+          tempo:
+            endpoint: "x:4317"
+    asserts:
+      - failedTemplate:
+          errorMessage: 'cognigy-alloy: routes[].name "default" is reserved for the default route — choose a different name'
+
+  - it: fails when a route name has invalid characters
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.routes:
+        - name: App-Traces
+          match: "true"
+          tempo:
+            endpoint: "x:4317"
+    asserts:
+      - failedTemplate:
+          errorMessage: 'cognigy-alloy: routes[].name "App-Traces" must match ^[a-z][a-z0-9_]*$ (used verbatim as a River component label)'
+
+  - it: fails when a route has no tempo block
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.routes:
+        - name: app_traces
+          match: "true"
+    asserts:
+      - failedTemplate:
+          errorMessage: "cognigy-alloy: routes[app_traces].tempo is required"
+
+  - it: fails when a route has no match condition
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.routes:
+        - name: app_traces
+          tempo:
+            endpoint: "x:4317"
+    asserts:
+      - failedTemplate:
+          errorMessage: "cognigy-alloy: routes[app_traces].match is required (a non-empty OTTL boolean expression)"
+
+  - it: fails when a route's tempo block is missing an endpoint
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.routes:
+        - name: app_traces
+          match: "true"
+          tempo:
+            tenant: "x"
+    asserts:
+      - failedTemplate:
+          errorMessage: "cognigy-alloy: routes[app_traces].tempo.endpoint is required"
+
+  - it: falls back to the top-level batch defaults when a route omits batch
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.batch.sendBatchSize: 111
+      cognigy-alloy.routes:
+        - name: app_traces
+          match: "true"
+          tempo:
+            endpoint: "x:4317"
+    asserts:
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: "otelcol\\.processor\\.batch \"app_traces\" \\{\n  send_batch_size     = 111"
+
+  - it: uses a route-level batch override instead of the top-level default
+    set:
+      cognigy-alloy.clusterName: "foo-corp-dev"
+      cognigy-alloy.tempo.endpoint: "tempo:4317"
+      cognigy-alloy.batch.sendBatchSize: 111
+      cognigy-alloy.routes:
+        - name: app_traces
+          match: "true"
+          tempo:
+            endpoint: "x:4317"
+          batch:
+            sendBatchSize: 222
+    asserts:
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: "otelcol\\.processor\\.batch \"app_traces\" \\{\n  send_batch_size     = 222"
