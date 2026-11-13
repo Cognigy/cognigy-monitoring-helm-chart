@@ -1,5 +1,45 @@
 # Release Notes
 
+### 2026.5.0
+**Released** November 13th, 2026
+
+#### Changes
+- Updated Grafana to v13.0.12 (security fix).
+- Updated the kube-state-metrics image to v2.19.1.
+- Introduced the following new dashboards:
+    - `AI / Agents v2 Runtime` (including a Reloadable config row: rejected setting values, last config file change per pod, restart coordinator)
+    - `AI / Agents v2 Management API`
+    - `VG / Load Capacity Proof v6` (load-capacity proof with a share-based Audio Quality row, Voice Gateway → caller send-gap panels, and poor-audio breakdowns by account and carrier)
+- Updated the following dashboards:
+    - `AI / LLM Gateway` (added error-count-by-type panels, token consumption and average tokens per request by provider and model for completions and embeddings, request token size percentiles, and cumulative token count by use case).
+    - `AI / Service Endpoint` (added a Webchat Background Notifications row, an OOMKilled Pods panel, and a combined memory usage vs. limit panel; per-pod memory now shows working set instead of resident memory).
+    - `VG / Operational Diagnostics` (added TTS say-options parse error panels, and signal-vs-threshold / firing-expression panels for the new frame-rate, stream-stall, TTS no-audio and critical WebSocket reconnect alerts).
+    - `VG / Drachtio Server Monitoring v2` (added a Carrier REGISTER State Timeline panel and Account SID / Service Provider SID filter variables).
+    - `VG / Overview v4` (added a Long-Running Calls panel).
+- Introduced AI Agents v2 alerts (turn error rate and latency, LLM failure rate, tool and builtin-tool error rates, builtin-resources availability, handoff store connectivity, Management API 5xx rate, `AgentsV2ConfigValueRejected`, `AgentsV2DependencyDown`). The whole family is off by default.
+- Introduced the following VG alerts:
+    - `FeatureServerDrachtioWedged` (critical) — a feature-server pod whose drachtio stopped sending while calls still arrive.
+    - `FeatureServerFreeSWITCHHeartbeatLost` (warning) and `FeatureServerFreeSWITCHHeartbeatLostCritical` (critical) — early warning on lost FreeSWITCH heartbeats.
+    - A critical tier of `WebSocketMaxReconnectsExceeded` for repeated reconnect exhaustion to Cognigy.AI, alongside the existing warning.
+    - `InternalDtlsOfferNotDtls` (warning) — FreeSWITCH offered non-DTLS media on the internal leg; silent unless internal DTLS is enabled.
+    - `VGApiBanListStale` (warning) — the IP blocklist refresh CronJob has not succeeded for two consecutive runs.
+    - `VGSbcSipBanListRedisErrors` (warning, calibration) — drachtio on sbc-sip cannot reach the Redis backing its ban lists.
+    - `VGCarrierOptionsStopped` and `VGSbcSipTportStallClosed` — **opt-in, off by default**; `VGCarrierOptionsStopped` also requires `rules.vg.sbcSip.carrierOptionsStopped.carrierSids` to be set.
+    - `VGFreeSWITCHSttStreamStalls`, `VGFreeSWITCHTtsStreamStalls` and `VGFreeSWITCHTtsNoAudio` (warning, calibration).
+- Reworked the VG media frame-rate alerts (`VGFreeSWITCHSttFrameRateLow`, `VGFreeSWITCHTtsFrameRateLow`) to evaluate per pod as the share of seconds outside the expected frame-rate band, with new `...Critical` tiers. All tiers report as warning while being calibrated. **The `warningThreshold` / `criticalThreshold` / `minTrafficFraction` values keys were replaced** by `window`, `minActiveSeconds` and per-tier `warning` / `critical` blocks; review any overrides.
+- Introduced a critical-severity `RedisMemoryHigh` tier for Voice Gateway Redis before it fills up and starts evicting keys; it inhibits the existing warning while firing. Configurable under `rules.redis.redisMemoryHigh.critical`.
+- Made the severity of the critical VG alerts (`TaskErrorsFeatureServer`, `WebSocketMaxReconnectsExceeded` critical tier, `FeatureServerESLEventLoopFreeze`, `FeatureServerFreeSWITCHHeartbeatLostCritical`) and of the critical `RedisMemoryHigh` tier configurable through new `severity` values keys (default `critical`), so non-production clusters can lower them to `warning`.
+- Introduced `ServiceEndpointMemoryNearLimit` (warning) for when the combined service-endpoint working set stays near its combined memory limit.
+- Introduced `ServerlessNodeGroupCapacityExhausted` (warning) and `ServerlessNodeGroupCapacityExhaustedCritical` (critical) for serverless executor node groups that can no longer scale out.
+- Reduced serverless alert noise: removed `ServerlessExecutionLatencyDegrading` and `ServerlessExecutionSloBreach` (and the `rules.serverless.executionSlo` values block); `ServerlessColdStartLatencyDegrading` and `ServerlessColdStartSloBreach` now evaluate over a longer window and only fire once a minimum number of cold starts has occurred (new `window` / `minColdStarts` keys).
+- `EndpointMessageProcessingTimeHigh` now requires a sustained 60-minute breach before firing, to stop flapping.
+- Grafana Alloy trace collector replicas now tolerate the autoscaler node pool taint, so scaled-out replicas can schedule there.
+
+#### Bugfixes
+- Gave the `AI / Functions Deprecation Tracker` dashboard (previously `AI / Functions — Deprecation Tracker`) a unique title and uid. Bookmarks to the old uid no longer resolve.
+- Fixed the `RedisMemoryHigh` description, which reported the wrong value instead of the memory usage percentage.
+- Fixed the `TaskErrorsFeatureServer` description, which referenced an unset threshold value.
+
 ### 2026.4.0
 **Released** September 16th, 2026
 

@@ -2125,7 +2125,7 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "Seconds since the last successful SIP REGISTER 200 OK per carrier. Green < 7.5 min (normal refresh), yellow < 15 min (approaching expiry), red >= 15 min (carrier registration expired).",
+          "description": "Seconds since the last successful SIP REGISTER 200 OK per carrier. Thresholds (450s/900s) are tuned for deployments with JAMBONES_REGBOT_DEFAULT_EXPIRES_INTERVAL=900. The code default is 3600s \u2014 on unoverridden deployments green extends to 1800s and expiry occurs at 3600s, so red firing here does not mean the registration has expired. Actual expiry is whatever the carrier negotiated in the 200 OK Expires header.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2141,11 +2141,11 @@ data:
                   },
                   {
                     "color": "yellow",
-                    "value": 450
+                    "value": 0.5
                   },
                   {
                     "color": "red",
-                    "value": 900
+                    "value": 1.0
                   }
                 ]
               },
@@ -2182,7 +2182,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "time() - vg_carrier_register_last_success_timestamp_seconds{cluster=\"$cluster\"}",
+              "expr": "(time() - vg_carrier_register_last_success_timestamp_seconds{cluster=\"$cluster\", account_sid=~\"$account_sid\", service_provider_sid=~\"$service_provider_sid\"}) / vg_carrier_register_expires_seconds{cluster=\"$cluster\", account_sid=~\"$account_sid\", service_provider_sid=~\"$service_provider_sid\"}",
               "instant": true,
               "legendFormat": "{{`{{`}}carrier_sid{{`}}`}}",
               "refId": "A"
@@ -2196,7 +2196,7 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "Time since last successful REGISTER per carrier over time. Gaps or sustained values above 900s indicate the carrier-side registration has expired.",
+          "description": "Time since last successful REGISTER per carrier over time. Threshold lines at 450s/900s match JAMBONES_REGBOT_DEFAULT_EXPIRES_INTERVAL=900. The code default is 3600s \u2014 on unoverridden deployments the thresholds fire well before actual expiry.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2242,11 +2242,11 @@ data:
                   },
                   {
                     "color": "yellow",
-                    "value": 450
+                    "value": 0.5
                   },
                   {
                     "color": "red",
-                    "value": 900
+                    "value": 1.0
                   }
                 ]
               },
@@ -2284,7 +2284,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "time() - vg_carrier_register_last_success_timestamp_seconds{cluster=\"$cluster\"}",
+              "expr": "(time() - vg_carrier_register_last_success_timestamp_seconds{cluster=\"$cluster\", account_sid=~\"$account_sid\", service_provider_sid=~\"$service_provider_sid\"}) / vg_carrier_register_expires_seconds{cluster=\"$cluster\", account_sid=~\"$account_sid\", service_provider_sid=~\"$service_provider_sid\"}",
               "legendFormat": "{{`{{`}}carrier_sid{{`}}`}}",
               "range": true,
               "refId": "A"
@@ -2292,6 +2292,118 @@ data:
           ],
           "title": "Carrier REGISTER History",
           "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Registration state over time per carrier, derived from the normalized ratio (time() - last_success) / expires. Green = healthy (<0.5), yellow = approaching expiry (0.5\u20131.0), red = expired (>1.0). Each row is one carrier; filter by account or service provider using the variables above. Works regardless of negotiated expires interval.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "fillOpacity": 70,
+                "lineWidth": 0,
+                "spanNulls": false
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "from": 0,
+                    "result": {
+                      "color": "green",
+                      "index": 0,
+                      "text": "OK"
+                    },
+                    "to": 0.5
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 0.5,
+                    "result": {
+                      "color": "yellow",
+                      "index": 1,
+                      "text": "Stale"
+                    },
+                    "to": 1.0
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 1.0,
+                    "result": {
+                      "color": "red",
+                      "index": 2,
+                      "text": "Expired"
+                    },
+                    "to": 9999
+                  },
+                  "type": "range"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 0.5
+                  },
+                  {
+                    "color": "red",
+                    "value": 1.0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 87
+          },
+          "id": 28,
+          "options": {
+            "alignValue": "left",
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "mergeValues": true,
+            "rowHeight": 0.9,
+            "showValue": "auto",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "expr": "(time() - vg_carrier_register_last_success_timestamp_seconds{cluster=\"$cluster\", account_sid=~\"$account_sid\", service_provider_sid=~\"$service_provider_sid\"}) / vg_carrier_register_expires_seconds{cluster=\"$cluster\", account_sid=~\"$account_sid\", service_provider_sid=~\"$service_provider_sid\"}",
+              "instant": false,
+              "legendFormat": "{{`{{`}}carrier_sid{{`}}`}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Carrier REGISTER State Timeline",
+          "type": "state-timeline"
         }
       ],
       "refresh": "{{ index .Values "products" "vg" "dashboards" "vg-drachtio-server-v2" "refreshInterval" | default "5m" }}",
@@ -2369,6 +2481,58 @@ data:
             },
             "refresh": 2,
             "regex": "/^(sbc-sip.*|feature-server.*)/",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(vg_carrier_register_last_success_timestamp_seconds{cluster=\"$cluster\"}, account_sid)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "Account SID",
+            "multi": false,
+            "name": "account_sid",
+            "options": [],
+            "query": {
+              "query": "label_values(vg_carrier_register_last_success_timestamp_seconds{cluster=\"$cluster\"}, account_sid)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "$datasource"
+            },
+            "definition": "label_values(vg_carrier_register_last_success_timestamp_seconds{cluster=\"$cluster\"}, service_provider_sid)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "Service Provider SID",
+            "multi": false,
+            "name": "service_provider_sid",
+            "options": [],
+            "query": {
+              "query": "label_values(vg_carrier_register_last_success_timestamp_seconds{cluster=\"$cluster\"}, service_provider_sid)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
             "skipUrlSync": false,
             "sort": 1,
             "type": "query"

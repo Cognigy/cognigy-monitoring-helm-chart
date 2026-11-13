@@ -3310,9 +3310,129 @@
       "type": "timeseries"
     },
     {
-      "collapsed": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "Calls active for more than 1h, per duration bucket (vg_feature_server_long_running_active_sessions, exclusive buckets: '1h' = 1h-2h, '24h' = 24h+). The gauge only counts calls still in the feature-server session tracker. Red bars: calls the tracker dropped (TTL expiry or 24h age ceiling) although they were not released, so they left the gauge while SIP/media may still be up (vg_feature_server_sessions_evicted_while_active_total). Any red bar needs investigation. CGY-42375, RCA 2026-063 Jetstar.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "bars"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 80
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "B",
+                  "mode": "none"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
       "gridPos": {
         "y": 160,
+        "h": 8,
+        "w": 24,
+        "x": 0
+      },
+      "id": 219,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "sum by (duration_bucket) (vg_feature_server_long_running_active_sessions{cluster=\"$cluster\"})",
+          "legendFormat": "active {{duration_bucket}} bucket",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "sum by (reason) (increase(vg_feature_server_sessions_evicted_while_active_total{cluster=\"$cluster\"}[5m]))",
+          "legendFormat": "evicted while active ({{reason}}) / 5m",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Long-Running Calls",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "y": 168,
         "h": 1,
         "w": 24,
         "x": 0
@@ -3360,7 +3480,7 @@
         "overrides": []
       },
       "gridPos": {
-        "y": 161,
+        "y": 169,
         "h": 8,
         "w": 12,
         "x": 0
@@ -3433,7 +3553,7 @@
         "overrides": []
       },
       "gridPos": {
-        "y": 161,
+        "y": 169,
         "h": 8,
         "w": 12,
         "x": 12
@@ -3506,7 +3626,7 @@
         "overrides": []
       },
       "gridPos": {
-        "y": 169,
+        "y": 177,
         "h": 8,
         "w": 24,
         "x": 0
@@ -3544,7 +3664,7 @@
     {
       "collapsed": false,
       "gridPos": {
-        "y": 177,
+        "y": 185,
         "h": 1,
         "w": 24,
         "x": 0
@@ -3592,7 +3712,7 @@
         "overrides": []
       },
       "gridPos": {
-        "y": 178,
+        "y": 186,
         "h": 8,
         "w": 12,
         "x": 0
@@ -3665,7 +3785,7 @@
         "overrides": []
       },
       "gridPos": {
-        "y": 178,
+        "y": 186,
         "h": 8,
         "w": 12,
         "x": 12
@@ -3738,7 +3858,7 @@
         "overrides": []
       },
       "gridPos": {
-        "y": 186,
+        "y": 194,
         "h": 8,
         "w": 12,
         "x": 0
@@ -3822,7 +3942,7 @@
         "overrides": []
       },
       "gridPos": {
-        "y": 186,
+        "y": 194,
         "h": 8,
         "w": 12,
         "x": 12
@@ -3906,7 +4026,7 @@
         "overrides": []
       },
       "gridPos": {
-        "y": 194,
+        "y": 202,
         "h": 8,
         "w": 24,
         "x": 0
@@ -3944,7 +4064,7 @@
     {
       "collapsed": false,
       "gridPos": {
-        "y": 202,
+        "y": 210,
         "h": 1,
         "w": 24,
         "x": 0
@@ -3992,7 +4112,7 @@
         "overrides": []
       },
       "gridPos": {
-        "y": 203,
+        "y": 211,
         "h": 8,
         "w": 12,
         "x": 0
@@ -4089,7 +4209,7 @@
         ]
       },
       "gridPos": {
-        "y": 203,
+        "y": 211,
         "h": 8,
         "w": 12,
         "x": 12
@@ -4374,7 +4494,7 @@
           "color": "rgba(255,0,255,0.7)"
         },
         "filterValues": {
-          "le": 1E-9
+          "le": 1e-09
         },
         "legend": {
           "show": true
@@ -4455,7 +4575,7 @@
           "color": "rgba(255,0,255,0.7)"
         },
         "filterValues": {
-          "le": 1E-9
+          "le": 1e-09
         },
         "legend": {
           "show": true
@@ -4495,7 +4615,7 @@
     {
       "collapsed": false,
       "gridPos": {
-        "y": 211,
+        "y": 219,
         "h": 1,
         "w": 24,
         "x": 0
@@ -4536,7 +4656,7 @@
         "overrides": []
       },
       "gridPos": {
-        "y": 212,
+        "y": 220,
         "h": 6,
         "w": 6,
         "x": 0
@@ -4604,7 +4724,7 @@
         "overrides": []
       },
       "gridPos": {
-        "y": 212,
+        "y": 220,
         "h": 6,
         "w": 6,
         "x": 6
@@ -4672,7 +4792,7 @@
         "overrides": []
       },
       "gridPos": {
-        "y": 212,
+        "y": 220,
         "h": 6,
         "w": 6,
         "x": 12
@@ -4740,7 +4860,7 @@
         "overrides": []
       },
       "gridPos": {
-        "y": 212,
+        "y": 220,
         "h": 6,
         "w": 6,
         "x": 18
@@ -4832,7 +4952,7 @@
         "overrides": []
       },
       "gridPos": {
-        "y": 218,
+        "y": 226,
         "h": 8,
         "w": 12,
         "x": 0
@@ -4946,7 +5066,7 @@
         "overrides": []
       },
       "gridPos": {
-        "y": 218,
+        "y": 226,
         "h": 8,
         "w": 12,
         "x": 12
@@ -5049,7 +5169,7 @@
         "overrides": []
       },
       "gridPos": {
-        "y": 226,
+        "y": 234,
         "h": 8,
         "w": 24,
         "x": 0

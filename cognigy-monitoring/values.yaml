@@ -41,6 +41,11 @@ kubepromstack:
   kubeScheduler:
     enabled: false
 
+  # Overrides the subchart default image. Review/remove on the next kube-prometheus-stack update.
+  kube-state-metrics:
+    image:
+      tag: v2.19.1
+
   # Global image registry and pull secrets
   global:
     imageRegistry: "cognigy.azurecr.io"
@@ -157,6 +162,10 @@ kubepromstack:
     ## Other options are: browser or a specific timezone, i.e. Europe/Luxembourg
     ##
     defaultDashboardsTimezone: browser
+    ## Pin the Grafana patch release: 13.0.12 ships the fixed brotli-libs (CVE-2026-111497).
+    ## Remove once the bundled grafana subchart defaults to 13.0.12 or newer.
+    image:
+      tag: "13.0.12"
     ## Disable deprecated PodSecurityPolicy
     rbac:
       pspEnabled: false
@@ -257,8 +266,6 @@ cognigy-dashboards:
         rabbitmq:
           enabled: true
         redis:
-          enabled: true
-        pod-services:
           enabled: true
         mysql:
           enabled: false
@@ -593,6 +600,12 @@ alloy:
             - type: Pods
               value: 1
               periodSeconds: 300
+
+    # Lets HPA-added replicas land on the tainted autoscaled node pool too.
+    tolerations:
+      - key: "node-role.cognigy.ai"
+        value: "autoscaler"
+        effect: "NoSchedule"
 
     topologySpreadConstraints:
       - maxSkew: 1

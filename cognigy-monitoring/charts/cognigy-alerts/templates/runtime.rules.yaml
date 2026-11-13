@@ -59,19 +59,25 @@ spec:
         for: 1m
         labels:
           severity: warning
-          group: ai-custom-alert-rules-aluminium
+          group: ai-custom-alert-rules-boron
         annotations:
           summary: service-app-session-manager had uncaught errors on (instance {{`{{`}} $labels.instance }})
           description: "service-app-session-manager had uncaught errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+          {{- with .Values.rules.runtime.serviceAppSessionManager.uncaughtErrorsRunbookUrl }}
+          runbook_url: {{ . }}
+          {{- end }}
       - alert: PersistErrorsAppSessionManager
         expr: sum(increase(cognigy_app_session_manager_persist_error_total[5m])) > 5
         for: 1m
         labels:
           severity: warning
-          group: ai-custom-alert-rules-aluminium
+          group: ai-custom-alert-rules-boron
         annotations:
-          summary: service-app-session-manager had handover errors (instance {{`{{`}} $labels.instance }})
-          description: "service-app-session-manager had handover errors: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+          summary: service-app-session-manager failed to save xApp session state (instance {{`{{`}} $labels.instance }})
+          description: "service-app-session-manager failed to save xApp session state: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+          {{- with .Values.rules.runtime.serviceAppSessionManager.persistErrorsRunbookUrl }}
+          runbook_url: {{ . }}
+          {{- end }}
     {{- end }}
 
     {{- if (.Values.rules.runtime.serviceExecution.enabled ) }}

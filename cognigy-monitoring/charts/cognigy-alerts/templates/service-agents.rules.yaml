@@ -1,0 +1,320 @@
+{{- if .Values.rules.serviceAgents.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-service-agents-rules
+  labels:
+    {{- include "cognigy-monitors.labels" . | nindent 4 }}
+spec:
+  groups:
+  {{- if or .Values.rules.serviceAgents.turnErrorRateHigh.enabled .Values.rules.serviceAgents.turnLatencyHigh.enabled }}
+  - name: cognigy.alert.agents-v2.turns
+    rules:
+    {{- if .Values.rules.serviceAgents.turnErrorRateHigh.enabled }}
+    - alert: AgentsV2TurnErrorRateHigh
+      expr: |-
+        sum by (cluster, namespace) (rate(cognigy_agents_turns_total{outcome=~"error|timeout"}[10m]))
+          /
+        sum by (cluster, namespace) (rate(cognigy_agents_turns_total[10m]))
+          > {{ .Values.rules.serviceAgents.turnErrorRateHigh.warningThreshold }}
+      for: 10m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Agents v2 turn error rate is high
+        description: "Agents v2 turn error/timeout rate is {{`{{`}} $value | humanizePercentage {{`}}`}} in {{`{{`}} $labels.namespace {{`}}`}}, above the {{ .Values.rules.serviceAgents.turnErrorRateHigh.warningThreshold }} warning threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.turnErrorRateHigh.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+    - alert: AgentsV2TurnErrorRateCritical
+      expr: |-
+        sum by (cluster, namespace) (rate(cognigy_agents_turns_total{outcome=~"error|timeout"}[10m]))
+          /
+        sum by (cluster, namespace) (rate(cognigy_agents_turns_total[10m]))
+          > {{ .Values.rules.serviceAgents.turnErrorRateHigh.criticalThreshold }}
+      for: 10m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Agents v2 turn error rate is critically high
+        description: "Agents v2 turn error/timeout rate is {{`{{`}} $value | humanizePercentage {{`}}`}} in {{`{{`}} $labels.namespace {{`}}`}}, above the {{ .Values.rules.serviceAgents.turnErrorRateHigh.criticalThreshold }} critical threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.turnErrorRateHigh.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+    {{- end }}
+    {{- if .Values.rules.serviceAgents.turnLatencyHigh.enabled }}
+    - alert: AgentsV2TurnLatencyHigh
+      expr: |-
+        histogram_quantile(
+          {{ .Values.rules.serviceAgents.turnLatencyHigh.quantile }},
+          sum by (cluster, namespace, le) (rate(cognigy_agents_turn_duration_seconds_bucket{outcome="success"}[10m]))
+        ) > {{ .Values.rules.serviceAgents.turnLatencyHigh.warningThreshold }}
+      for: 10m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Agents v2 p{{ .Values.rules.serviceAgents.turnLatencyHigh.quantile }} turn latency is high
+        description: "Agents v2 p{{ .Values.rules.serviceAgents.turnLatencyHigh.quantile }} turn duration is {{`{{`}} $value | humanizeDuration {{`}}`}} in {{`{{`}} $labels.namespace {{`}}`}}, above the {{ .Values.rules.serviceAgents.turnLatencyHigh.warningThreshold }}s warning threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.turnLatencyHigh.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+    - alert: AgentsV2TurnLatencyCritical
+      expr: |-
+        histogram_quantile(
+          {{ .Values.rules.serviceAgents.turnLatencyHigh.quantile }},
+          sum by (cluster, namespace, le) (rate(cognigy_agents_turn_duration_seconds_bucket{outcome="success"}[10m]))
+        ) > {{ .Values.rules.serviceAgents.turnLatencyHigh.criticalThreshold }}
+      for: 10m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Agents v2 p{{ .Values.rules.serviceAgents.turnLatencyHigh.quantile }} turn latency is critically high
+        description: "Agents v2 p{{ .Values.rules.serviceAgents.turnLatencyHigh.quantile }} turn duration is {{`{{`}} $value | humanizeDuration {{`}}`}} in {{`{{`}} $labels.namespace {{`}}`}}, above the {{ .Values.rules.serviceAgents.turnLatencyHigh.criticalThreshold }}s critical threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.turnLatencyHigh.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+    {{- end }}
+  {{- end }}
+
+  {{- if .Values.rules.serviceAgents.llmFailureRateHigh.enabled }}
+  - name: cognigy.alert.agents-v2.llm
+    rules:
+    - alert: AgentsV2LlmFailureRateHigh
+      expr: |-
+        sum by (cluster, namespace) (rate(cognigy_agents_llm_requests_total{outcome="error"}[10m]))
+          /
+        sum by (cluster, namespace) (rate(cognigy_agents_llm_requests_total[10m]))
+          > {{ .Values.rules.serviceAgents.llmFailureRateHigh.warningThreshold }}
+      for: 10m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Agents v2 LLM call failure rate is high
+        description: "Agents v2 LLM call failure rate is {{`{{`}} $value | humanizePercentage {{`}}`}} in {{`{{`}} $labels.namespace {{`}}`}}, above the {{ .Values.rules.serviceAgents.llmFailureRateHigh.warningThreshold }} warning threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.llmFailureRateHigh.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+    - alert: AgentsV2LlmFailureRateCritical
+      expr: |-
+        sum by (cluster, namespace) (rate(cognigy_agents_llm_requests_total{outcome="error"}[10m]))
+          /
+        sum by (cluster, namespace) (rate(cognigy_agents_llm_requests_total[10m]))
+          > {{ .Values.rules.serviceAgents.llmFailureRateHigh.criticalThreshold }}
+      for: 10m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Agents v2 LLM call failure rate is critically high
+        description: "Agents v2 LLM call failure rate is {{`{{`}} $value | humanizePercentage {{`}}`}} in {{`{{`}} $labels.namespace {{`}}`}}, above the {{ .Values.rules.serviceAgents.llmFailureRateHigh.criticalThreshold }} critical threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.llmFailureRateHigh.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+  {{- end }}
+
+  {{- if .Values.rules.serviceAgents.toolErrorRateHigh.enabled }}
+  - name: cognigy.alert.agents-v2.tools
+    rules:
+    - alert: AgentsV2ToolErrorRateHigh
+      expr: |-
+        sum by (cluster, namespace) (rate(cognigy_agents_tool_calls_total{outcome="error"}[10m]))
+          /
+        sum by (cluster, namespace) (rate(cognigy_agents_tool_calls_total[10m]))
+          > {{ .Values.rules.serviceAgents.toolErrorRateHigh.warningThreshold }}
+      for: 10m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Agents v2 tool call error rate is high
+        description: "Agents v2 tool call error rate is {{`{{`}} $value | humanizePercentage {{`}}`}} in {{`{{`}} $labels.namespace {{`}}`}}, above the {{ .Values.rules.serviceAgents.toolErrorRateHigh.warningThreshold }} warning threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.toolErrorRateHigh.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+    - alert: AgentsV2ToolErrorRateCritical
+      expr: |-
+        sum by (cluster, namespace) (rate(cognigy_agents_tool_calls_total{outcome="error"}[10m]))
+          /
+        sum by (cluster, namespace) (rate(cognigy_agents_tool_calls_total[10m]))
+          > {{ .Values.rules.serviceAgents.toolErrorRateHigh.criticalThreshold }}
+      for: 10m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Agents v2 tool call error rate is critically high
+        description: "Agents v2 tool call error rate is {{`{{`}} $value | humanizePercentage {{`}}`}} in {{`{{`}} $labels.namespace {{`}}`}}, above the {{ .Values.rules.serviceAgents.toolErrorRateHigh.criticalThreshold }} critical threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.toolErrorRateHigh.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+  {{- end }}
+
+  {{- if or .Values.rules.serviceAgents.builtinToolErrorRateHigh.enabled .Values.rules.serviceAgents.builtinResourcesUnavailable.enabled .Values.rules.serviceAgents.builtinResourceMissing.enabled }}
+  - name: cognigy.alert.agents-v2.builtin-resources
+    rules:
+    {{- if .Values.rules.serviceAgents.builtinToolErrorRateHigh.enabled }}
+    - alert: AgentsV2BuiltinToolErrorRateHigh
+      expr: |-
+        sum by (cluster, namespace) (rate(cognigy_builtin_resources_tool_executions_total{outcome=~"error|internal"}[10m]))
+          /
+        sum by (cluster, namespace) (rate(cognigy_builtin_resources_tool_executions_total[10m]))
+          > {{ .Values.rules.serviceAgents.builtinToolErrorRateHigh.warningThreshold }}
+      for: 10m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: service-builtin-resources-go tool execution error rate is high
+        description: "service-builtin-resources-go tool execution error rate is {{`{{`}} $value | humanizePercentage {{`}}`}} in {{`{{`}} $labels.namespace {{`}}`}}, above the {{ .Values.rules.serviceAgents.builtinToolErrorRateHigh.warningThreshold }} warning threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.builtinToolErrorRateHigh.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+    - alert: AgentsV2BuiltinToolErrorRateCritical
+      expr: |-
+        sum by (cluster, namespace) (rate(cognigy_builtin_resources_tool_executions_total{outcome=~"error|internal"}[10m]))
+          /
+        sum by (cluster, namespace) (rate(cognigy_builtin_resources_tool_executions_total[10m]))
+          > {{ .Values.rules.serviceAgents.builtinToolErrorRateHigh.criticalThreshold }}
+      for: 10m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: service-builtin-resources-go tool execution error rate is critically high
+        description: "service-builtin-resources-go tool execution error rate is {{`{{`}} $value | humanizePercentage {{`}}`}} in {{`{{`}} $labels.namespace {{`}}`}}, above the {{ .Values.rules.serviceAgents.builtinToolErrorRateHigh.criticalThreshold }} critical threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.builtinToolErrorRateHigh.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+    {{- end }}
+    {{- if .Values.rules.serviceAgents.builtinResourcesUnavailable.enabled }}
+    - alert: AgentsV2BuiltinResourcesUnavailable
+      expr: |-
+        sum by (cluster, namespace) (rate(cognigy_agents_builtin_resources_requests_total{outcome="unavailable"}[5m])) > 0
+      for: 5m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: service-agents cannot reach service-builtin-resources-go
+        description: "service-agents' builtin-resources client is seeing outcome=unavailable calls in {{`{{`}} $labels.namespace {{`}}`}} — builtin tools (native execution) are unusable until this clears.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.builtinResourcesUnavailable.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+    {{- end }}
+    {{- if .Values.rules.serviceAgents.builtinResourceMissing.enabled }}
+    {{- range .Values.rules.serviceAgents.builtinResourceMissing.expectedSlugs }}
+    - alert: AgentsV2BuiltinResourceMissing
+      expr: |-
+        absent(cognigy_builtin_resources_registered_resources{slug="{{ . }}"})
+      for: 10m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-aluminium
+        expected_slug: {{ . | quote }}
+      annotations:
+        summary: "Builtin resource '{{ . }}' is not registered on any scraped pod"
+        description: "No service-builtin-resources-go pod reports '{{ . }}' as registered. This is a cluster-wide floor — it fires only when every pod is missing the slug, so one healthy replica can mask another that skipped registration at startup (see follow-up on a per-pod version of this alert).\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.builtinResourceMissing.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+    {{- end }}
+    {{- end }}
+  {{- end }}
+
+  {{- if .Values.rules.serviceAgents.handoffStoreDisconnected.enabled }}
+  - name: cognigy.alert.agents-v2.handoff
+    rules:
+    - alert: AgentsV2HandoffStoreDisconnected
+      expr: |-
+        min by (cluster, namespace) (cognigy_agents_redis_connected) == 0
+      for: 5m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Agents v2 handoff Redis store is disconnected
+        description: "At least one service-agents pod in {{`{{`}} $labels.namespace {{`}}`}} has not successfully dialed its handoff-store Redis — handoffs will fail closed (see cognigy_agents_handoff_refusals_total) until this clears.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.handoffStoreDisconnected.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+  {{- end }}
+
+  {{- if .Values.rules.serviceAgents.dependencyDown.enabled }}
+  - name: cognigy.alert.agents-v2.dependencies
+    rules:
+    - alert: AgentsV2DependencyDown
+      expr: |-
+        min by (namespace, dependency) (cognigy_agents_dependency_up) == 0
+      for: 5m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: An Agents v2 dependency is unreachable
+        description: "At least one service-agents pod in {{`{{`}} $labels.namespace {{`}}`}} cannot reach its {{`{{`}} $labels.dependency {{`}}`}} dependency (cognigy_agents_dependency_up is 0). Turns and API calls that need it fail on that pod until this clears.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.dependencyDown.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+  {{- end }}
+
+  {{- if .Values.rules.serviceAgents.configValueRejected.enabled }}
+  - name: cognigy.alert.agents-v2.config
+    rules:
+    - alert: AgentsV2ConfigValueRejected
+      expr: |-
+        sum by (namespace, container) (
+          increase(cognigy_reloadable_config_callback_errors_total{kind="parse", container=~"service-agents|builtin-resources"}[10m])
+        ) > 0
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Agents v2 rejected a setting value from its reloadable config file
+        description: "{{`{{`}} $labels.container {{`}}`}} pods in {{`{{`}} $labels.namespace {{`}}`}} rejected a setting value that does not parse (about {{`{{`}} $value | humanize {{`}}`}} rejections in 10m). Running pods keep the previous value; a pod that starts while the value is in the file stops at start-up and crash-loops. The alert clears after 10m even if the value is still there.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.configValueRejected.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+  {{- end }}
+
+  {{- if .Values.rules.serviceAgents.managementApi5xxRateHigh.enabled }}
+  - name: cognigy.alert.agents-v2.management
+    rules:
+    - alert: AgentsV2ManagementApi5xxRateHigh
+      expr: |-
+        sum by (cluster, namespace) (rate(cognigy_agents_http_requests_total{status_class="5xx"}[10m]))
+          /
+        sum by (cluster, namespace) (rate(cognigy_agents_http_requests_total[10m]))
+          > {{ .Values.rules.serviceAgents.managementApi5xxRateHigh.warningThreshold }}
+      for: 10m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Agents v2 Management API 5xx rate is high
+        description: "Agents v2 Management API 5xx rate is {{`{{`}} $value | humanizePercentage {{`}}`}} in {{`{{`}} $labels.namespace {{`}}`}}, above the {{ .Values.rules.serviceAgents.managementApi5xxRateHigh.warningThreshold }} warning threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.managementApi5xxRateHigh.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+    - alert: AgentsV2ManagementApi5xxRateCritical
+      expr: |-
+        sum by (cluster, namespace) (rate(cognigy_agents_http_requests_total{status_class="5xx"}[10m]))
+          /
+        sum by (cluster, namespace) (rate(cognigy_agents_http_requests_total[10m]))
+          > {{ .Values.rules.serviceAgents.managementApi5xxRateHigh.criticalThreshold }}
+      for: 10m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Agents v2 Management API 5xx rate is critically high
+        description: "Agents v2 Management API 5xx rate is {{`{{`}} $value | humanizePercentage {{`}}`}} in {{`{{`}} $labels.namespace {{`}}`}}, above the {{ .Values.rules.serviceAgents.managementApi5xxRateHigh.criticalThreshold }} critical threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- with $.Values.rules.serviceAgents.managementApi5xxRateHigh.runbookUrl }}
+        runbook_url: {{ . | quote }}
+        {{- end }}
+  {{- end }}
+{{- end -}}

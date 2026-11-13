@@ -1863,7 +1863,137 @@ data:
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "Resident memory by pod for service-endpoint. Watch for sustained growth approaching the pod memory limit.",
+          "description": "Combined working set of all service-endpoint pods in the selected cluster as a share of their combined memory limit. \"Alert ratio\" is the exact expression ServiceEndpointMemoryNearLimit evaluates (working set averaged over 15m); \"Instant ratio\" is unsmoothed. The alert fires when the alert ratio stays above the dashed 90% line for 1h. The line reflects the chart defaults; per-cluster threshold overrides are not shown here.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "dashed"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.9
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byFrameRefID",
+                  "options": "B"
+                },
+                "properties": [
+                  {
+                    "id": "custom.lineWidth",
+                    "value": 1
+                  },
+                  {
+                    "id": "custom.fillOpacity",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 102
+          },
+          "id": 79,
+          "options": {
+            "legend": {
+              "calcs": [
+                "last",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (namespace) (\n  max by (namespace, pod) (avg_over_time(container_memory_working_set_bytes{cluster=\"$cluster\", container=\"service-endpoint\"}[15m]))\n    and on (namespace, pod)\n  max by (namespace, pod) (kube_pod_container_resource_limits{cluster=\"$cluster\", container=\"service-endpoint\", resource=\"memory\"})\n)\n  /\nsum by (namespace) (\n  max by (namespace, pod) (kube_pod_container_resource_limits{cluster=\"$cluster\", container=\"service-endpoint\", resource=\"memory\"})\n    and on (namespace, pod)\n  max by (namespace, pod) (avg_over_time(container_memory_working_set_bytes{cluster=\"$cluster\", container=\"service-endpoint\"}[15m]))\n)",
+              "legendFormat": "{{`{{`}}namespace{{`}}`}} alert ratio (15m avg)",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (namespace) (\n  max by (namespace, pod) (container_memory_working_set_bytes{cluster=\"$cluster\", container=\"service-endpoint\"})\n    and on (namespace, pod)\n  max by (namespace, pod) (kube_pod_container_resource_limits{cluster=\"$cluster\", container=\"service-endpoint\", resource=\"memory\"})\n)\n  /\nsum by (namespace) (\n  max by (namespace, pod) (kube_pod_container_resource_limits{cluster=\"$cluster\", container=\"service-endpoint\", resource=\"memory\"})\n    and on (namespace, pod)\n  max by (namespace, pod) (container_memory_working_set_bytes{cluster=\"$cluster\", container=\"service-endpoint\"})\n)",
+              "legendFormat": "{{`{{`}}namespace{{`}}`}} instant ratio",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Combined Memory Usage vs Limit",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Container working set memory by pod for service-endpoint, against the dashed 85% per-pod limit line. Use it to spot which pod is hot; the ServiceEndpointMemoryNearLimit alert evaluates the combined ratio in the panel above, not individual pods.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1954,7 +2084,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 102
+            "y": 110
           },
           "id": 46,
           "options": {
@@ -1980,7 +2110,7 @@ data:
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "sum by (pod) (process_resident_memory_bytes{cluster=\"$cluster\", container=\"service-endpoint\"})",
+              "expr": "max by (pod) (container_memory_working_set_bytes{cluster=\"$cluster\", container=\"service-endpoint\"})",
               "legendFormat": "{{`{{`}}pod{{`}}`}}",
               "range": true,
               "refId": "A"
@@ -1997,7 +2127,7 @@ data:
               "refId": "B"
             }
           ],
-          "title": "Resident Memory by Pod",
+          "title": "Working Set Memory by Pod",
           "type": "timeseries"
         },
         {
@@ -2062,7 +2192,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 102
+            "y": 110
           },
           "id": 47,
           "options": {
@@ -2163,7 +2293,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 110
+            "y": 118
           },
           "id": 48,
           "options": {
@@ -2264,7 +2394,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 110
+            "y": 118
           },
           "id": 49,
           "options": {
@@ -2361,7 +2491,7 @@ data:
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 118
+            "y": 126
           },
           "id": 50,
           "options": {
@@ -2397,6 +2527,105 @@ data:
           "type": "timeseries"
         },
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Number of service-endpoint pods in the selected cluster whose container was last terminated with reason OOMKilled. A sustained or rising count means the memory limit is too low for this cluster's load \u2014 compare with Working Set Memory / Peak Memory above and raise resources.limits.memory (and NODE_OPTIONS --max-old-space-size) accordingly.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "stepAfter",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "decimals": 0,
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 134
+          },
+          "id": 69,
+          "options": {
+            "legend": {
+              "calcs": [
+                "last",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "count (\n  kube_pod_container_status_last_terminated_reason{container=~\"^service-endpoint\", reason=\"OOMKilled\", cluster=\"$cluster\"}\n)",
+              "legendFormat": "OOMKilled pods",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "OOMKilled Pods",
+          "type": "timeseries"
+        },
+        {
           "collapsed": false,
           "datasource": {
             "type": "prometheus",
@@ -2406,7 +2635,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 126
+            "y": 142
           },
           "id": 60,
           "panels": [],
@@ -2484,7 +2713,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 127
+            "y": 143
           },
           "id": 61,
           "options": {
@@ -2583,7 +2812,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 127
+            "y": 143
           },
           "id": 62,
           "options": {
@@ -2682,7 +2911,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 135
+            "y": 151
           },
           "id": 63,
           "options": {
@@ -2820,7 +3049,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 135
+            "y": 151
           },
           "id": 64,
           "options": {
@@ -2895,6 +3124,371 @@ data:
           ],
           "title": "Notify latency (percentiles)",
           "type": "timeseries"
+        },
+        {
+          "collapsed": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 151
+          },
+          "id": 70,
+          "panels": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "description": "Every webhook send attempt that reached the channel adapter, classified. 'success' = 2xx; 'transient' = retryable (5xx, 429, network/timeout); 'permanent' = not retried (4xx, auth misconfiguration). Suppressed windows never reach the adapter and so do not appear here.",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 25,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": true,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "normal"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "unit": "reqps"
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "permanent"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "permanent failure"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "transient"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "transient failure"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 152
+              },
+              "id": 75,
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "last",
+                    "mean",
+                    "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "pluginVersion": "12.0.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": true,
+                  "expr": "sum by (outcome) (rate(cognigy_endpoint_bgnotify_webhook_outcome_total{cluster=\"$cluster\", container=\"service-endpoint\"}[$__rate_interval]))",
+                  "interval": "",
+                  "legendFormat": "{{`{{`}}outcome{{`}}`}}",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "title": "Send attempts by outcome",
+              "type": "timeseries"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "description": "The diagnostic panel: where delivery is failing and why. `stage` is the leg of send() the attempt ended in. stage=auth means token acquisition failed and the webhook POST was never issued \u2014 status_class then describes the AUTH server, so auth/timeout is 'could not reach the auth server' (bad tokenUrl, DNS, timeout) while auth/4xx_other is 'the auth server rejected our credentials'. stage=delivery is the webhook POST itself: 5xx = the receiver is down, timeout = unreachable, 401 = their OAuth credential or token endpoint is broken, 403 = valid but not authorised, 429 = they are throttling us. stage=validation means the stored webhook URL failed the send-time SSRF re-check and nothing was sent. stage=unknown means an adapter returned no stage \u2014 an instrumentation bug on our side, not a customer problem. Note a server-sent 408 carries an httpStatus and so lands in 4xx_other, not timeout.",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 10,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": true,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 152
+              },
+              "id": 76,
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "last",
+                    "mean",
+                    "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "pluginVersion": "12.0.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": true,
+                  "expr": "sum by (stage, status_class) (increase(cognigy_endpoint_bgnotify_webhook_outcome_total{cluster=\"$cluster\", container=\"service-endpoint\", outcome!=\"success\"}[$__rate_interval]))",
+                  "interval": "",
+                  "legendFormat": "{{`{{`}}stage{{`}}`}} / {{`{{`}}status_class{{`}}`}}",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "title": "Failed attempts by stage & status class",
+              "type": "timeseries"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "description": "The complete loss picture \u2014 two distinct modes that no single metric covers. give_up{max_attempts} = transient failures exhausted MAX_ATTEMPTS; give_up{permanent} = a 4xx or misconfiguration, never retried; orphaned = the meta key expired before its fireAt was reached, so the notification was dropped before any send was attempted (usually a per-endpoint Max Delay configured longer than the ~20 min arm-key TTL). Orphans carry no org/project labels \u2014 the meta that held them is gone.",
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 10,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": true,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 160
+              },
+              "id": 78,
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "last",
+                    "mean",
+                    "max"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "pluginVersion": "12.0.2",
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": true,
+                  "expr": "sum by (reason) (increase(cognigy_endpoint_bgnotify_give_up_total{cluster=\"$cluster\", container=\"service-endpoint\"}[$__rate_interval]))",
+                  "interval": "",
+                  "legendFormat": "give up \u2014 {{`{{`}}reason{{`}}`}}",
+                  "range": true,
+                  "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "$datasource"
+                  },
+                  "editorMode": "code",
+                  "exemplar": true,
+                  "expr": "sum(increase(cognigy_endpoint_bgnotify_orphaned_due_entry_total{cluster=\"$cluster\", container=\"service-endpoint\"}[$__rate_interval]))",
+                  "interval": "",
+                  "legendFormat": "orphaned (meta expired)",
+                  "range": true,
+                  "refId": "B"
+                }
+              ],
+              "title": "Notifications lost",
+              "type": "timeseries"
+            }
+          ],
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "refId": "A"
+            }
+          ],
+          "title": "Webchat Background Notifications",
+          "type": "row"
         }
       ],
       "refresh": "{{ index .Values "products" "ai" "dashboards" "service-endpoint" "refreshInterval" | default "5m" }}",

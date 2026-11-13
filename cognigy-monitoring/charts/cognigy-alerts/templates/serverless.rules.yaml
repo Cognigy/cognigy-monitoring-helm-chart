@@ -7,62 +7,37 @@ metadata:
     {{- include "cognigy-monitors.labels" . | nindent 4 }}
 spec:
   groups:
-  {{- if .Values.rules.serverless.executionSlo.enabled }}
-  - name: cognigy.alert.serverless.execution-slo
-    rules:
-    - alert: ServerlessExecutionLatencyDegrading
-      expr: |-
-        histogram_quantile(0.95,
-          sum by (le, execution_type) (rate(serverless_proxy_stream_duration_seconds_bucket[5m]))
-        ) > {{ .Values.rules.serverless.executionSlo.warningThreshold }}
-      for: 5m
-      labels:
-        severity: warning
-        group: ai-custom-alert-rules-aluminium
-      annotations:
-        summary: Serverless execution p95 latency is degrading for {{`{{`}} $labels.execution_type {{`}}`}}
-        description: "Serverless p95 stream duration for execution type {{`{{`}} $labels.execution_type {{`}}`}} is {{`{{`}} $value | humanizeDuration {{`}}`}}, above the {{ .Values.rules.serverless.executionSlo.warningThreshold }}s warning threshold. Approaching SLO breach.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
-    - alert: ServerlessExecutionSloBreach
-      expr: |-
-        histogram_quantile(0.95,
-          sum by (le, execution_type) (rate(serverless_proxy_stream_duration_seconds_bucket[10m]))
-        ) > {{ .Values.rules.serverless.executionSlo.criticalThreshold }}
-      for: 5m
-      labels:
-        severity: warning
-        group: ai-custom-alert-rules-aluminium
-      annotations:
-        summary: Serverless execution SLO breach for {{`{{`}} $labels.execution_type {{`}}`}}
-        description: "Serverless p95 stream duration for execution type {{`{{`}} $labels.execution_type {{`}}`}} is {{`{{`}} $value | humanizeDuration {{`}}`}}, above the {{ .Values.rules.serverless.executionSlo.criticalThreshold }}s SLO. Users are experiencing timeouts.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
-  {{- end }}
-
   {{- if .Values.rules.serverless.coldStartSlo.enabled }}
   - name: cognigy.alert.serverless.cold-start-slo
     rules:
     - alert: ServerlessColdStartLatencyDegrading
       expr: |-
         histogram_quantile(0.95,
-          sum by (le) (rate(serverless_proxy_routing_duration_seconds_bucket{path="slow"}[5m]))
+          sum by (le) (rate(serverless_proxy_routing_duration_seconds_bucket{path="slow"}[{{ .Values.rules.serverless.coldStartSlo.window }}]))
         ) > {{ .Values.rules.serverless.coldStartSlo.warningThreshold }}
+        and
+        sum(increase(serverless_proxy_routing_duration_seconds_count{path="slow"}[{{ .Values.rules.serverless.coldStartSlo.window }}])) >= {{ .Values.rules.serverless.coldStartSlo.minColdStarts }}
       for: 5m
       labels:
         severity: warning
         group: ai-custom-alert-rules-aluminium
       annotations:
         summary: Serverless cold start p95 latency is degrading
-        description: "Serverless cold start p95 routing duration is {{`{{`}} $value | humanizeDuration {{`}}`}}, above the {{ .Values.rules.serverless.coldStartSlo.warningThreshold }}s warning threshold. Approaching SLO breach.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "Serverless cold start p95 routing duration over the last {{ .Values.rules.serverless.coldStartSlo.window }} is {{`{{`}} $value | humanizeDuration {{`}}`}}, above the {{ .Values.rules.serverless.coldStartSlo.warningThreshold }}s warning threshold. Approaching SLO breach.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     - alert: ServerlessColdStartSloBreach
       expr: |-
         histogram_quantile(0.95,
-          sum by (le) (rate(serverless_proxy_routing_duration_seconds_bucket{path="slow"}[10m]))
+          sum by (le) (rate(serverless_proxy_routing_duration_seconds_bucket{path="slow"}[{{ .Values.rules.serverless.coldStartSlo.window }}]))
         ) > {{ .Values.rules.serverless.coldStartSlo.criticalThreshold }}
+        and
+        sum(increase(serverless_proxy_routing_duration_seconds_count{path="slow"}[{{ .Values.rules.serverless.coldStartSlo.window }}])) >= {{ .Values.rules.serverless.coldStartSlo.minColdStarts }}
       for: 5m
       labels:
         severity: warning
         group: ai-custom-alert-rules-aluminium
       annotations:
         summary: Serverless cold start SLO breach
-        description: "Serverless cold start p95 routing duration is {{`{{`}} $value | humanizeDuration {{`}}`}}, above the {{ .Values.rules.serverless.coldStartSlo.criticalThreshold }}s SLO. First-time executor requests are degraded.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "Serverless cold start p95 routing duration over the last {{ .Values.rules.serverless.coldStartSlo.window }} is {{`{{`}} $value | humanizeDuration {{`}}`}}, above the {{ .Values.rules.serverless.coldStartSlo.criticalThreshold }}s SLO. First-time executor requests are degraded.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
   {{- end }}
 
   {{- if .Values.rules.serverless.coldStartRolloutTimeouts.enabled }}
@@ -185,5 +160,42 @@ spec:
       annotations:
         summary: Serverless lifecycle pending writes are building up
         description: "Serverless pending lifecycle writes are at {{`{{`}} $value | printf \"%.0f\" {{`}}`}}, above the {{ .Values.rules.serverless.lifecyclePendingWrites.threshold }} threshold. Stale executor usage data risks premature executor cleanup.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+  {{- end }}
+
+  {{- if .Values.rules.serverless.nodeCapacity.enabled }}
+  - name: cognigy.alert.serverless.node-capacity
+    rules:
+    - alert: ServerlessNodeGroupCapacityExhausted
+      expr: |-
+        sum(kube_pod_status_phase{namespace="serverless", phase="Pending", pod!~"serverless-image-preload.*"} == 1) >= {{ .Values.rules.serverless.nodeCapacity.minPendingPods }}
+        and
+        (
+          count(kube_node_spec_taint{key="node-role.cognigy.ai", value="serverless-executor", effect="NoSchedule"})
+          -
+          count(kube_node_spec_taint{key="node-role.cognigy.ai", value="serverless-executor", effect="NoSchedule"} offset 15m)
+        ) <= 0
+      for: 5m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Serverless node group may be capacity-exhausted
+        description: "{{`{{`}} $value | printf \"%.0f\" {{`}}`}} pod(s) in the serverless namespace have been Pending for 5m+ while the serverless-executor node group hasn't grown in the last 15m. Cluster-autoscaler is either still provisioning a node (typically takes ~3-4m) or stuck — investigate.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    - alert: ServerlessNodeGroupCapacityExhaustedCritical
+      expr: |-
+        sum(kube_pod_status_phase{namespace="serverless", phase="Pending", pod!~"serverless-image-preload.*"} == 1) >= {{ .Values.rules.serverless.nodeCapacity.minPendingPods }}
+        and
+        (
+          count(kube_node_spec_taint{key="node-role.cognigy.ai", value="serverless-executor", effect="NoSchedule"})
+          -
+          count(kube_node_spec_taint{key="node-role.cognigy.ai", value="serverless-executor", effect="NoSchedule"} offset 15m)
+        ) <= 0
+      for: 16m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-aluminium
+      annotations:
+        summary: Serverless node group is capacity-exhausted
+        description: "{{`{{`}} $value | printf \"%.0f\" {{`}}`}} pod(s) in the serverless namespace have been Pending for 16m+ while the serverless-executor node group hasn't grown in the last 15m. Cluster-autoscaler's own max-node-provision-time (15m, unmodified default on both clouds) has elapsed — this scale-up attempt has definitively failed, not just slow. Customers are affected.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
   {{- end }}
 {{- end -}}

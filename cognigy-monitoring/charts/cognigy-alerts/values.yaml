@@ -10,9 +10,10 @@ rules:
   kubernetes:
     enabled: true
     # Routes pod-level alerts (PodManyRestarts, Container*OOMKilled) to the owning
-    # team by joining on the `owner-team` label carried by Cognigy Deployments and
-    # StatefulSets. Requires kube-state-metrics started with
-    #   --metric-labels-allowlist=deployments=[owner-team],statefulsets=[owner-team]
+    # team by joining on the `owner-team` label carried by Cognigy Deployments,
+    # StatefulSets and Jobs (CronJob pods are matched through the label on the
+    # Job they create). Requires kube-state-metrics started with
+    #   --metric-labels-allowlist=deployments=[owner-team],statefulsets=[owner-team],jobs=[owner-team]
     # OFF by default: with `enabled: false` this chart renders exactly the same
     # alert rules it always has, so installs without team routing are unaffected.
     # `teams` maps an owner-team label value to the Alertmanager `group` label used
@@ -170,6 +171,17 @@ rules:
   # Redis alert rules
   redis:
     enabled: true
+    redisMemoryHigh:
+      # Critical-severity RedisMemoryHigh, on top of the generic 90% warning.
+      # `namespaces` is a regex; Redis instances outside it only get the warning.
+      critical:
+        enabled: true
+        threshold: 95
+        timeout: 5m
+        namespaces: "voicegateway"
+        # Set to warning on non-production clusters. At warning it no longer
+        # inhibits the 90% warning, so both fire.
+        severity: critical
     redisBlockedClients:
       enabled: true
       threshold: 50
@@ -414,7 +426,8 @@ rules:
       enabled: true
       # Message processing Time quantile to analyze
       messageProcessingTimeQuantile: 0.8
-      # Threshold (sec) of Message processing Time for EndpointMessageProcessingTimeHigh to start firing
+      # Threshold (sec) of Message processing Time for EndpointMessageProcessingTimeHigh;
+      # the quantile must stay above it for 60m before the alert fires
       messageProcessingTimeThreshold: 50
       # Threshold of increase (%) of Message Processing Time for EndpointMessageProcessingTimeIncreasing to start firing
       messageProcessingTimeIncreasingThreshold: 300
@@ -427,6 +440,19 @@ rules:
         timeout: 5m
         threshold: 0
         offset: 3h
+      # Warns when the combined working set of all service-endpoint pods stays above
+      # `threshold` % of their combined memory limit for `timeout`
+      serviceEndpointMemoryNearLimit:
+        enabled: true
+        severity: warning
+        # % of the combined memory limit at which the alert fires. Kept above the
+        # 85-90% band healthy deployments normally run in
+        threshold: 90
+        # Window the working set is averaged over, to flatten GC sawtooth
+        smoothingWindow: 15m
+        # How long the smoothed ratio must stay above the threshold before firing. Long
+        # enough that a deployment briefly hovering around the threshold doesn't fire
+        timeout: 1h
     serviceCollaboration:
       enabled: true
       unhandledErrorThreshold: 5
@@ -475,12 +501,121 @@ rules:
       enabled: true
       # Fraction of requests that activate a config-set fallback (0.10 = 10%)
       threshold: 0.10
+    poolMemberRateLimitErrors:
+      enabled: true
+      # Fraction of NICE-provided (pool_member=true) config-set failures that are rate-limit errors before warning (0.05 = 5%)
+      warningThreshold: 0.05
+      # Fraction of NICE-provided (pool_member=true) config-set failures that are rate-limit errors before critical alert (0.10 = 10%)
+      criticalThreshold: 0.10
+    poolMemberAuthErrors:
+      enabled: true
+      # auth_error only occurs when the config-set's API key is invalid or wrong — a credentials
+      # mistake, not transient noise, and it will not self-resolve. Even a single occurrence
+      # within the window is worth a warning; 2+ indicates a persistent bad credential that
+      # needs immediate (critical) attention.
+      lookbackWindow: 1h
+      warningThreshold: 1
+      criticalThreshold: 2
+    poolHydrationErrors:
+      enabled: true
+      # pool_hydration_error only occurs on an invalid config-set (a config mistake), and the
+      # affected pool member goes into cooldown after firing, so it won't recur until cooldown
+      # ends. Even a single occurrence within the window is worth a warning; 2+ indicates a
+      # recurring/persistent bad config that needs immediate (critical) attention.
+      lookbackWindow: 1h
+      warningThreshold: 1
+      criticalThreshold: 2
+    poolUnavailableErrors:
+      enabled: true
+      # Fraction of config-set failures that are pool_unavailable before warning (0.05 = 5%)
+      warningThreshold: 0.05
+      # Fraction of config-set failures that are pool_unavailable before critical alert (0.10 = 10%)
+      criticalThreshold: 0.10
     timeToFirstToken:
       enabled: true
       # p95 time-to-first-token warning threshold in seconds
       warningThreshold: 5
       # p95 time-to-first-token critical threshold in seconds
       criticalThreshold: 10
+
+  # AI Agents v2 (service-agents + service-builtin-resources-go) alert rules
+  serviceAgents:
+    enabled: false
+    turnErrorRateHigh:
+      enabled: true
+      runbookUrl: ""
+      # Fraction of turns with outcome error|timeout that triggers a warning (0.05 = 5%)
+      warningThreshold: 0.05
+      # Fraction of turns with outcome error|timeout that triggers a critical alert (0.10 = 10%)
+      criticalThreshold: 0.10
+    turnLatencyHigh:
+      enabled: true
+      runbookUrl: ""
+      # Quantile to evaluate for high turn duration (successful turns only)
+      quantile: 0.99
+      # Warning threshold in seconds
+      warningThreshold: 30
+      # Critical threshold in seconds
+      criticalThreshold: 60
+    llmFailureRateHigh:
+      enabled: true
+      runbookUrl: ""
+      # Fraction of LLM calls with outcome=error that triggers a warning (0.05 = 5%)
+      warningThreshold: 0.05
+      # Fraction of LLM calls with outcome=error that triggers a critical alert (0.10 = 10%)
+      criticalThreshold: 0.10
+    toolErrorRateHigh:
+      enabled: true
+      runbookUrl: ""
+      # Fraction of tool calls with outcome=error that triggers a warning (0.05 = 5%)
+      warningThreshold: 0.05
+      # Fraction of tool calls with outcome=error that triggers a critical alert (0.10 = 10%)
+      criticalThreshold: 0.10
+    builtinToolErrorRateHigh:
+      enabled: true
+      runbookUrl: ""
+      # Fraction of builtin-resources tool executions with outcome error|internal before warning (0.05 = 5%)
+      warningThreshold: 0.05
+      # Fraction of builtin-resources tool executions with outcome error|internal before critical (0.10 = 10%)
+      criticalThreshold: 0.10
+    builtinResourcesUnavailable:
+      enabled: true
+      runbookUrl: ""
+      # No threshold knob: fires on any outcome="unavailable" call from service-agents'
+      # builtin-resources client in the last 5m — see AgentsV2BuiltinResourcesUnavailable.
+    builtinResourceMissing:
+      enabled: true
+      runbookUrl: ""
+      # Slugs expected to be registered on every service-builtin-resources-go pod.
+      # Keep this to slugs that self-register unconditionally (e.g. no optional API
+      # key gate) — otherwise a normal, correctly-configured deployment pages.
+      expectedSlugs:
+        - http-request
+    handoffStoreDisconnected:
+      enabled: true
+      runbookUrl: ""
+      # No threshold knob: fires when the cluster-wide min of cognigy_agents_redis_connected
+      # is 0 for 5m — see AgentsV2HandoffStoreDisconnected.
+    managementApi5xxRateHigh:
+      enabled: true
+      runbookUrl: ""
+      # Fraction of REST CRUD requests with status_class=5xx that triggers a warning (0.05 = 5%)
+      warningThreshold: 0.05
+      # Fraction of REST CRUD requests with status_class=5xx that triggers a critical alert (0.10 = 10%)
+      criticalThreshold: 0.10
+    configValueRejected:
+      enabled: true
+      runbookUrl: ""
+      # No threshold knob: fires when a service-agents or builtin-resources pod
+      # rejected a value from its reloadable config file in the last 10m
+      # (cognigy_reloadable_config_callback_errors_total{kind="parse"}).
+    dependencyDown:
+      # Off even when the group is enabled: turn it on per cluster once the
+      # expression and duration have been checked against real traffic.
+      enabled: false
+      runbookUrl: ""
+      # Fires when the lowest cognigy_agents_dependency_up across service-agents
+      # pods is 0 for one dependency (mongodb, rabbitmq, tools_fs) for 5m.
 
   # Qdrant vector DB alert rules
   # Off by default to match the cognigy-ai chart's qdrant.enabled: false default
@@ -496,14 +631,13 @@ rules:
   # Serverless router alert rules
   serverless:
     enabled: true
-    executionSlo:
-      enabled: true
-      # p95 stream duration warning threshold in seconds
-      warningThreshold: 10
-      # p95 stream duration critical (SLO) threshold in seconds
-      criticalThreshold: 15
     coldStartSlo:
       enabled: true
+      # Window for both the p95 and the cold-start count. Cold starts are rare,
+      # so over a short window the p95 is just the single slowest cold start.
+      window: 1h
+      # Minimum cold starts in the window before either cold start alert can fire.
+      minColdStarts: 10
       # p95 cold start routing duration warning threshold in seconds
       warningThreshold: 10
       # p95 cold start routing duration critical (SLO) threshold in seconds
@@ -540,6 +674,14 @@ rules:
       enabled: true
       # Pending writes gauge threshold
       threshold: 100
+    nodeCapacity:
+      enabled: true
+      # Minimum number of pods stuck Pending in the serverless namespace, sustained
+      # for the rule's `for` duration, while the serverless-executor node group
+      # hasn't grown in the last 15m, before firing. Cloud-agnostic proxy for "node
+      # group is at its max" — cluster-autoscaler doesn't expose per-node-group max
+      # size on AKS (integrated autoscaler) or on EKS without --emit-per-nodegroup-metrics.
+      minPendingPods: 1
 
   # Cognigy.AI runtime services alert rules
   runtime:
@@ -549,6 +691,8 @@ rules:
 
     serviceAppSessionManager:
       enabled: true
+      uncaughtErrorsRunbookUrl: ""
+      persistErrorsRunbookUrl: ""
     serviceExecution:
       enabled: true
     serviceFunctionExecution:
@@ -573,12 +717,15 @@ rules:
     enabled: false
     featureServer:
       enabled: true
+      # A `severity: critical` below pages the on-call. Set it to warning on
+      # non-production clusters.
       uncaughtErrors:
         enabled: true
         threshold: 5
       taskErrors:
         enabled: true
         threshold: 25
+        severity: critical
       handoverErrors:
         enabled: true
         threshold: 5
@@ -612,6 +759,7 @@ rules:
           timeout: 5m
       wsMaxReconnectsExceeded:
         enabled: true
+        severity: critical
       wsConnectionTimeouts:
         enabled: true
       speechErrors:
@@ -620,6 +768,11 @@ rules:
       grpcTtsErrors:
         enabled: true
         threshold: 5
+      # Counts FreeSWITCH offers on the internal leg that are not DTLS-SRTP. Silent while
+      # INTERNAL_DTLS_ENABLED is off everywhere, which is the case today.
+      internalDtlsNotDtls:
+        enabled: true
+        severity: warning
       speechFallback:
         enabled: true
         threshold: 5
@@ -639,6 +792,26 @@ rules:
       eslEventLoopFreeze:
         enabled: true
         timeout: 10m
+        severity: critical
+      # A feature-server pod whose drachtio stopped sending on the app's behalf
+      # while calls still arrive: every new call on the pod fails until it is
+      # restarted. The window must span a few scrapes of a pod with light traffic;
+      # the timeout sits above the sub-minute gaps seen on healthy quiet pods.
+      drachtioWedged:
+        enabled: true
+        window: 3m
+        timeout: 2m
+        severity: critical
+        # Variants that run test builds or a different call flow.
+        podExcludeRegex: "feature-server-(nightly|legacy)-.*"
+        runbookUrl: ""
+      freeSwitchHeartbeatLost:
+        enabled: true
+        timeout: 6h
+      freeSwitchHeartbeatLostCritical:
+        enabled: true
+        window: 72h
+        severity: critical
       # Longest single event-loop block, from nodejs_eventloop_lag_max_seconds.
       # NOT the unsuffixed nodejs_eventloop_lag_seconds gauge — that one measures
       # the cost of its own scrape and grows with pod uptime.
@@ -663,22 +836,75 @@ rules:
       analyticsDataErrors:
         enabled: true
         threshold: 5
-      # Media frame-rate stall alerts on the p10 of vg_freeswitch_{stt,tts}_frames_per_second
-      # (target 50 fps). warningThreshold is the p10 fps below which the alert fires;
-      # criticalThreshold is available for a second tier. Each alert is traffic-gated to
-      # minTrafficFraction of the cluster's recent peak so idle windows produce no series.
+      # Media frame-rate alerts on vg_freeswitch_{stt,tts}_frames_per_second and the stall /
+      # no-audio counters (see the comments in cognigy.vg.rules.yaml). They are still being
+      # calibrated, so every tier reports as warning / P5 until it has proven quiet on healthy
+      # traffic; promote a tier by changing its severity and priority.
+      #
+      # *FrameRateLow: per pod, the share of non-zero seconds outside 40-55 fps over `window`.
+      # It only counts once the pod streamed more than minActiveSeconds in the window (1800 is
+      # two concurrent streams over 15m), because every stream starts with a partial second.
+      # Healthy pods stay at a few percent for STT. TTS sits higher, since each utterance ends
+      # on a partial second, so its thresholds are higher too.
       sttFrameRateLow:
         enabled: true
-        warningThreshold: 40
-        criticalThreshold: 25
-        minTrafficFraction: 0.1
+        window: 15m
+        minActiveSeconds: 1800
         timeout: 5m
+        warning:
+          enabled: true
+          threshold: 0.10
+          severity: warning
+          priority: P5
+        critical:
+          enabled: true
+          threshold: 0.25
+          severity: warning
+          priority: P5
       ttsFrameRateLow:
         enabled: true
-        warningThreshold: 40
-        criticalThreshold: 25
-        minTrafficFraction: 0.1
+        window: 15m
+        minActiveSeconds: 900
         timeout: 5m
+        warning:
+          enabled: true
+          threshold: 0.35
+          severity: warning
+          priority: P5
+        critical:
+          enabled: true
+          threshold: 0.50
+          severity: warning
+          priority: P5
+      # *StreamStalls: per vendor, more than `threshold` stall episodes in `window`, and more
+      # than rateThreshold stalls per hour of active streaming, so a busy cluster does not
+      # alert on a level that is normal for its volume. First estimates, to be tuned once
+      # production data from images that export the counters is available.
+      sttStreamStalls:
+        enabled: true
+        window: 15m
+        threshold: 5
+        rateThreshold: 2
+        timeout: 5m
+        severity: warning
+        priority: P5
+      ttsStreamStalls:
+        enabled: true
+        window: 15m
+        threshold: 5
+        rateThreshold: 2
+        timeout: 5m
+        severity: warning
+        priority: P5
+      # TTS streams that produced no audio within 10 seconds, per vendor. Each one is a caller
+      # left in silence, so the bar is lower than for stalls. First estimate, as above.
+      ttsNoAudio:
+        enabled: true
+        window: 15m
+        threshold: 3
+        timeout: 5m
+        severity: warning
+        priority: P5
       # Inbound RTP audio-quality alerts on the mod_prometheus per-call histograms. minCalls
       # gates each alert on call volume so a sparse window cannot trip a quantile. Set enabled
       # true where thresholds have been aligned to the environment's baseline.
@@ -761,6 +987,55 @@ rules:
         priority: P5
         threshold: 0
         timeout: 5m
+    apiBan:
+      enabled: true
+      # The update-api-ban-list CronJob that refreshes the IP blocklist drachtio
+      # enforces has not succeeded for staleAfterSeconds. With its hourly default
+      # schedule, 7200 plus the timeout fires after two runs in a row fail, not on a
+      # single failure followed by a slightly later success.
+      stale:
+        enabled: true
+        severity: warning
+        priority: P5
+        staleAfterSeconds: 7200
+        timeout: 10m
+    sbcSip:
+      enabled: true
+      # A carrier that sends SIP OPTIONS keepalives went silent on one sbc-sip
+      # pod. Opt-in: set carrierSids to a regex of the voip_carrier_sid values
+      # expected to send OPTIONS; the rule is not rendered while it is empty.
+      # Requires CARRIER_OPTIONS_METRICS_ENABLED on sbc-sip-sidecar.
+      carrierOptionsStopped:
+        enabled: false
+        carrierSids: ""
+        severity: critical
+        # Must cover several OPTIONS intervals of the slowest expected carrier.
+        window: 5m
+        timeout: 2m
+        runbookUrl: ""
+      # drachtio's stall watchdog closed an inbound TCP connection it had
+      # stopped reading. Requires the watchdog to be enabled on drachtio.
+      tportStallClosed:
+        enabled: false
+        severity: warning
+        priority: P5
+        timeout: 0m
+        runbookUrl: ""
+      # drachtio on an sbc-sip pod keeps failing to reach the Redis master behind its
+      # ban lists, so REGISTER-spam counting, the gateway allowlist check and tmpban
+      # writes fail open. Still being calibrated, so it reports as warning / P5 until it
+      # has proven quiet on healthy traffic; promote it by changing severity and priority.
+      # Errors scale with REGISTER traffic, so the default threshold is 0 and `timeout`
+      # (errors in every `window` for that long) tells an outage from a short failover.
+      # Silent on drachtio images that do not export the counter.
+      banListRedisErrors:
+        enabled: true
+        window: 5m
+        threshold: 0
+        timeout: 15m
+        severity: warning
+        priority: P5
+        runbookUrl: ""
     cpuThrottlingVGServiceHigh:
       enabled: true
       severity: warning

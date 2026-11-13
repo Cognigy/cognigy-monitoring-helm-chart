@@ -19,16 +19,35 @@ spec:
         summary: Redis down (instance {{`{{`}} $labels.instance }})
         description: "Redis instance is down\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
 
+    # The percentage is the left operand of `and`, so $value is the percentage.
     - alert: RedisMemoryHigh
       expr: >
-        (redis_memory_max_bytes{} > 0) and (redis_memory_used_bytes{} * 100/redis_memory_max_bytes{} > 90)
+        (redis_memory_used_bytes{} * 100/redis_memory_max_bytes{} > 90) and (redis_memory_max_bytes{} > 0)
       for: 5m
       labels:
         severity: warning
       annotations:
         summary: Redis instance {{ "{{ $labels.instance }}" }} is using too much memory
         description: |
-          Redis instance {{ "{{ $labels.instance }}" }} is using {{ "{{ $value }}" }}% of its available memory
+          Redis instance {{ "{{ $labels.instance }}" }} is using {{`{{`}} $value | printf "%.1f" }}% of its available memory
+
+    {{- $memCritical := .Values.rules.redis.redisMemoryHigh.critical }}
+    {{- if $memCritical.enabled }}
+
+    # Same alert name, so Alertmanager inhibits the warning while this fires.
+    # At 100% Redis evicts keys, shortest remaining TTL first.
+    - alert: RedisMemoryHigh
+      expr: >
+        (redis_memory_used_bytes{namespace=~"{{ $memCritical.namespaces }}"} * 100/redis_memory_max_bytes{namespace=~"{{ $memCritical.namespaces }}"} > {{ $memCritical.threshold }}) and (redis_memory_max_bytes{namespace=~"{{ $memCritical.namespaces }}"} > 0)
+      for: {{ $memCritical.timeout }}
+      labels:
+        severity: {{ $memCritical.severity }}
+        group: vg-custom-alert-rules
+      annotations:
+        summary: Redis instance {{ "{{ $labels.instance }}" }} is about to run out of memory
+        description: |
+          Redis instance {{ "{{ $labels.instance }}" }} is using {{`{{`}} $value | printf "%.1f" }}% of its available memory. At 100% it starts evicting keys.
+    {{- end }}
 
     {{- if (.Values.rules.redis.redisBlockedClients.enabled ) }}
     - alert: RedisBlockedClients

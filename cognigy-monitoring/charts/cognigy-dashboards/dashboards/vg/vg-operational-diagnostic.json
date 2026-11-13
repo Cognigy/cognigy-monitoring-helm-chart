@@ -149,7 +149,7 @@
               "showLineNumbers": false,
               "showMiniMap": false
             },
-            "content": "## How to read this row\n\nEach alert in `cognigy.vg.rules.yaml` gets **two panels side by side**. Hover any panel's **ⓘ** icon for its exact severity and fire direction.\n\n**Threshold line color = alert severity**\n\n| Line | Severity | Meaning |\n|------|----------|---------|\n| 🟧 Orange | `warning` | Degradation — investigate |\n| 🟥 Red | `critical` | Service-impacting — act now (only `TaskErrorsFeatureServer` and `FeatureServerESLEventLoopFreeze`) |\n\nMost alerts fire when the signal rises **above** the line. Four fire when it drops **below** (STT/TTS frame rate, low MOS) — the panel description says which.\n\n**The two panels per alert**\n\n| Panel | Plots | Shows data | Use it to |\n|-------|-------|-----------|-----------|\n| **… — signal vs threshold** | The live metric vs the threshold line | **Always** | **Calibrate** — is the line too loose or too tight vs real traffic? |\n| **… — firing expression** | The full alert rule (incl. `>` and traffic/volume gates) | **Only while the alert would fire** | **Verify** — does the complete definition actually trigger on a real event? |\n\n> The threshold line is the `values.yaml` **default**. A cluster with a Helm override alerts at a different value than the line drawn.\n\n**Correlation panel**\n\nThe last panel in this row, **Feature-Server Active Sessions — per pod**, is not an alert pair -- it plots `vg_feature_server_call_session_count` per pod so you can check whether an alert above traces back to one specific pod (a drop to zero, or one pod carrying disproportionate load) versus a cluster-wide condition.",
+            "content": "## How to read this row\n\nEach alert in `cognigy.vg.rules.yaml` gets **two panels side by side**. Hover any panel's **ⓘ** icon for its exact severity and fire direction.\n\n**Threshold line color = alert severity**\n\n| Line | Severity | Meaning |\n|------|----------|---------|\n| 🟧 Orange | `warning` | Degradation — investigate |\n| 🟥 Red | `critical` | Service-impacting — act now (only `TaskErrorsFeatureServer`, `FeatureServerESLEventLoopFreeze`, and `WebSocketMaxReconnectsExceeded` (critical variant)). The `…FrameRateLowCritical` tiers are drawn red too, but report as `warning` until their calibration is done |\n\nMost alerts fire when the signal rises **above** the line. Low MOS fires when it drops **below** — the panel description says which.\n\n**The two panels per alert**\n\n| Panel | Plots | Shows data | Use it to |\n|-------|-------|-----------|-----------|\n| **… — signal vs threshold** | The live metric vs the threshold line | **Always** | **Calibrate** — is the line too loose or too tight vs real traffic? |\n| **… — firing expression** | The full alert rule (incl. `>` and traffic/volume gates) | **Only while the alert would fire** | **Verify** — does the complete definition actually trigger on a real event? |\n\n> The threshold line is the `values.yaml` **default**. A cluster with a Helm override alerts at a different value than the line drawn.\n\n**Correlation panel**\n\nThe last panel in this row, **Feature-Server Active Sessions — per pod**, is not an alert pair -- it plots `vg_feature_server_call_session_count` per pod so you can check whether an alert above traces back to one specific pod (a drop to zero, or one pod carrying disproportionate load) versus a cluster-wide condition.",
             "mode": "markdown"
           },
           "pluginVersion": "12.0.2",
@@ -1946,6 +1946,216 @@
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "description": "[severity: critical] WebSocketMaxReconnectsExceeded fires when the signal rises above the 5 line. Threshold line is the values.yaml default; per-cluster Helm overrides may differ. Use this to judge whether the threshold catches a real incident.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "line"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 92
+          },
+          "id": 301,
+          "options": {
+            "annotations": {
+              "clustering": -1,
+              "multiLane": false
+            },
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": true,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (cluster) (increase(vg_feature_server_websocket_exceeded_max_reconnects_total{cluster=~\"$cluster\"}[5m]))",
+              "instant": false,
+              "legendFormat": "{{cluster}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "WebSocketMaxReconnectsExceeded (critical) — signal vs threshold",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "[severity: critical] WebSocketMaxReconnectsExceeded — exact alert expression from cognigy.vg.rules.yaml (Helm defaults substituted, 'for' duration omitted). Series appear only while the alert condition holds.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 92
+          },
+          "id": 302,
+          "options": {
+            "annotations": {
+              "clustering": -1,
+              "multiLane": false
+            },
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": true,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (cluster) (increase(vg_feature_server_websocket_exceeded_max_reconnects_total{cluster=~\"$cluster\"}[5m])) > 5",
+              "instant": false,
+              "legendFormat": "{{cluster}} (reconnect exhaustions, 5m)",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "WebSocketMaxReconnectsExceeded (critical) — firing expression",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
           "description": "[severity: warning] WebSocketConnectionTimeouts fires when the signal rises above the 0 line. Threshold line is the values.yaml default; per-cluster Helm overrides may differ. Use this to judge whether the threshold catches a real incident.",
           "fieldConfig": {
             "defaults": {
@@ -2007,7 +2217,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 92
+            "y": 100
           },
           "id": 116,
           "options": {
@@ -2110,7 +2320,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 92
+            "y": 100
           },
           "id": 117,
           "options": {
@@ -2217,7 +2427,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 100
+            "y": 108
           },
           "id": 118,
           "options": {
@@ -2320,7 +2530,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 100
+            "y": 108
           },
           "id": 119,
           "options": {
@@ -2427,7 +2637,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 108
+            "y": 116
           },
           "id": 120,
           "options": {
@@ -2530,7 +2740,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 108
+            "y": 116
           },
           "id": 121,
           "options": {
@@ -2637,7 +2847,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 116
+            "y": 124
           },
           "id": 122,
           "options": {
@@ -2740,7 +2950,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 116
+            "y": 124
           },
           "id": 123,
           "options": {
@@ -2847,7 +3057,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 124
+            "y": 132
           },
           "id": 124,
           "options": {
@@ -2950,7 +3160,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 124
+            "y": 132
           },
           "id": 125,
           "options": {
@@ -3057,7 +3267,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 132
+            "y": 140
           },
           "id": 126,
           "options": {
@@ -3160,7 +3370,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 132
+            "y": 140
           },
           "id": 127,
           "options": {
@@ -3267,7 +3477,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 140
+            "y": 148
           },
           "id": 128,
           "options": {
@@ -3370,7 +3580,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 140
+            "y": 148
           },
           "id": 129,
           "options": {
@@ -3477,7 +3687,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 148
+            "y": 156
           },
           "id": 130,
           "options": {
@@ -3580,7 +3790,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 148
+            "y": 156
           },
           "id": 131,
           "options": {
@@ -3626,7 +3836,7 @@
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "[severity: warning] VGFreeSWITCHSttFrameRateLow fires when the signal drops below the 40 line. Threshold line is the values.yaml default; per-cluster Helm overrides may differ. Use this to judge whether the threshold catches a real incident.",
+          "description": "[severity: warning] VGFreeSWITCHSttFrameRateLow fires when the signal rises above the 0.1 line; VGFreeSWITCHSttFrameRateLowCritical above the 0.25 line (red). Both still report as warning / P5 while they are calibrated. The signal is the share of each pod's non-zero STT seconds outside 40-55 fps over 15m, drawn only for pods that streamed more than 1800 active seconds in the window. Threshold line is the values.yaml default; per-cluster Helm overrides may differ. Use this to judge whether the threshold catches a real incident.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3675,11 +3885,15 @@
                   },
                   {
                     "color": "orange",
-                    "value": 40
+                    "value": 0.1
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.25
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "percentunit"
             },
             "overrides": []
           },
@@ -3687,7 +3901,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 156
+            "y": 164
           },
           "id": 132,
           "options": {
@@ -3718,9 +3932,9 @@
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "histogram_quantile(0.10, sum by (le, cluster) (rate(vg_freeswitch_stt_frames_per_second_bucket{cluster=~\"$cluster\"}[5m])))",
+              "expr": "(\n  (\n      sum by (cluster, pod) (increase(vg_freeswitch_stt_frames_per_second_bucket{cluster=~\"$cluster\", le=~\"40|40.0\"}[15m]))\n    - sum by (cluster, pod) (increase(vg_freeswitch_stt_frames_per_second_bucket{cluster=~\"$cluster\", le=~\"0|0.0\"}[15m]))\n    + sum by (cluster, pod) (increase(vg_freeswitch_stt_frames_per_second_count{cluster=~\"$cluster\"}[15m]))\n    - sum by (cluster, pod) (increase(vg_freeswitch_stt_frames_per_second_bucket{cluster=~\"$cluster\", le=~\"55|55.0\"}[15m]))\n  )\n  /\n  (\n    (\n        sum by (cluster, pod) (increase(vg_freeswitch_stt_frames_per_second_count{cluster=~\"$cluster\"}[15m]))\n      - sum by (cluster, pod) (increase(vg_freeswitch_stt_frames_per_second_bucket{cluster=~\"$cluster\", le=~\"0|0.0\"}[15m]))\n    ) > 1800\n  )\n)",
               "instant": false,
-              "legendFormat": "{{cluster}} p10 STT fps",
+              "legendFormat": "{{cluster}} {{pod}}",
               "range": true,
               "refId": "A"
             }
@@ -3733,7 +3947,7 @@
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "[severity: warning] VGFreeSWITCHSttFrameRateLow — exact alert expression from cognigy.vg.rules.yaml (Helm defaults substituted, 'for' duration omitted). Series appear only while the alert condition holds.",
+          "description": "[severity: warning] VGFreeSWITCHSttFrameRateLow — exact alert expression from cognigy.vg.rules.yaml (Helm defaults substituted, 'for' duration omitted, cluster added). Series appear only while the alert condition holds.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3782,7 +3996,7 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "percentunit"
             },
             "overrides": []
           },
@@ -3790,7 +4004,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 156
+            "y": 164
           },
           "id": 133,
           "options": {
@@ -3821,9 +4035,9 @@
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "(histogram_quantile(0.10, sum by (le, cluster) (rate(vg_freeswitch_stt_frames_per_second_bucket{cluster=~\"$cluster\"}[5m]))) < 40)\n  and\n(sum by (cluster) (rate(vg_freeswitch_stt_frames_per_second_count{cluster=~\"$cluster\"}[5m])) > 0.1 * max_over_time(sum by (cluster) (rate(vg_freeswitch_stt_frames_per_second_count{cluster=~\"$cluster\"}[5m]))[1d:5m]))",
+              "expr": "(\n  (\n      sum by (cluster, pod) (increase(vg_freeswitch_stt_frames_per_second_bucket{cluster=~\"$cluster\", le=~\"40|40.0\"}[15m]))\n    - sum by (cluster, pod) (increase(vg_freeswitch_stt_frames_per_second_bucket{cluster=~\"$cluster\", le=~\"0|0.0\"}[15m]))\n    + sum by (cluster, pod) (increase(vg_freeswitch_stt_frames_per_second_count{cluster=~\"$cluster\"}[15m]))\n    - sum by (cluster, pod) (increase(vg_freeswitch_stt_frames_per_second_bucket{cluster=~\"$cluster\", le=~\"55|55.0\"}[15m]))\n  )\n  /\n  (\n    (\n        sum by (cluster, pod) (increase(vg_freeswitch_stt_frames_per_second_count{cluster=~\"$cluster\"}[15m]))\n      - sum by (cluster, pod) (increase(vg_freeswitch_stt_frames_per_second_bucket{cluster=~\"$cluster\", le=~\"0|0.0\"}[15m]))\n    ) > 1800\n  )\n) > 0.1",
               "instant": false,
-              "legendFormat": "{{cluster}} p10 STT fps (firing)",
+              "legendFormat": "{{cluster}} {{pod}} (firing)",
               "range": true,
               "refId": "A"
             }
@@ -3836,7 +4050,7 @@
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "[severity: warning] VGFreeSWITCHTtsFrameRateLow fires when the signal drops below the 40 line. Threshold line is the values.yaml default; per-cluster Helm overrides may differ. Use this to judge whether the threshold catches a real incident.",
+          "description": "[severity: warning] VGFreeSWITCHTtsFrameRateLow fires when the signal rises above the 0.35 line; VGFreeSWITCHTtsFrameRateLowCritical above the 0.5 line (red). Both still report as warning / P5 while they are calibrated. The signal is the share of each pod's non-zero TTS seconds outside 40-55 fps over 15m, drawn only for pods that streamed more than 900 active seconds in the window. Threshold line is the values.yaml default; per-cluster Helm overrides may differ. Use this to judge whether the threshold catches a real incident.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3885,11 +4099,15 @@
                   },
                   {
                     "color": "orange",
-                    "value": 40
+                    "value": 0.35
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.5
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "percentunit"
             },
             "overrides": []
           },
@@ -3897,7 +4115,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 164
+            "y": 172
           },
           "id": 134,
           "options": {
@@ -3928,9 +4146,9 @@
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "histogram_quantile(0.10, sum by (le, cluster) (rate(vg_freeswitch_tts_frames_per_second_bucket{cluster=~\"$cluster\"}[5m])))",
+              "expr": "(\n  (\n      sum by (cluster, pod) (increase(vg_freeswitch_tts_frames_per_second_bucket{cluster=~\"$cluster\", le=~\"40|40.0\"}[15m]))\n    - sum by (cluster, pod) (increase(vg_freeswitch_tts_frames_per_second_bucket{cluster=~\"$cluster\", le=~\"0|0.0\"}[15m]))\n    + sum by (cluster, pod) (increase(vg_freeswitch_tts_frames_per_second_count{cluster=~\"$cluster\"}[15m]))\n    - sum by (cluster, pod) (increase(vg_freeswitch_tts_frames_per_second_bucket{cluster=~\"$cluster\", le=~\"55|55.0\"}[15m]))\n  )\n  /\n  (\n    (\n        sum by (cluster, pod) (increase(vg_freeswitch_tts_frames_per_second_count{cluster=~\"$cluster\"}[15m]))\n      - sum by (cluster, pod) (increase(vg_freeswitch_tts_frames_per_second_bucket{cluster=~\"$cluster\", le=~\"0|0.0\"}[15m]))\n    ) > 900\n  )\n)",
               "instant": false,
-              "legendFormat": "{{cluster}} p10 TTS fps",
+              "legendFormat": "{{cluster}} {{pod}}",
               "range": true,
               "refId": "A"
             }
@@ -3943,7 +4161,217 @@
             "type": "prometheus",
             "uid": "$datasource"
           },
-          "description": "[severity: warning] VGFreeSWITCHTtsFrameRateLow — exact alert expression from cognigy.vg.rules.yaml (Helm defaults substituted, 'for' duration omitted). Series appear only while the alert condition holds.",
+          "description": "[severity: warning] VGFreeSWITCHTtsFrameRateLow — exact alert expression from cognigy.vg.rules.yaml (Helm defaults substituted, 'for' duration omitted, cluster added). Series appear only while the alert condition holds.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 172
+          },
+          "id": 135,
+          "options": {
+            "annotations": {
+              "clustering": -1,
+              "multiLane": false
+            },
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": true,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "(\n  (\n      sum by (cluster, pod) (increase(vg_freeswitch_tts_frames_per_second_bucket{cluster=~\"$cluster\", le=~\"40|40.0\"}[15m]))\n    - sum by (cluster, pod) (increase(vg_freeswitch_tts_frames_per_second_bucket{cluster=~\"$cluster\", le=~\"0|0.0\"}[15m]))\n    + sum by (cluster, pod) (increase(vg_freeswitch_tts_frames_per_second_count{cluster=~\"$cluster\"}[15m]))\n    - sum by (cluster, pod) (increase(vg_freeswitch_tts_frames_per_second_bucket{cluster=~\"$cluster\", le=~\"55|55.0\"}[15m]))\n  )\n  /\n  (\n    (\n        sum by (cluster, pod) (increase(vg_freeswitch_tts_frames_per_second_count{cluster=~\"$cluster\"}[15m]))\n      - sum by (cluster, pod) (increase(vg_freeswitch_tts_frames_per_second_bucket{cluster=~\"$cluster\", le=~\"0|0.0\"}[15m]))\n    ) > 900\n  )\n) > 0.35",
+              "instant": false,
+              "legendFormat": "{{cluster}} {{pod}} (firing)",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "VGFreeSWITCHTtsFrameRateLow — firing expression",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "[severity: warning] VGFreeSWITCHSttStreamStalls fires when the signal rises above the 5 line. The signal is STT stall episodes per vendor in 15m; path=grpc are the gRPC proxy modules. Still reports as warning / P5 while it is calibrated. Empty on images that predate the counter. The alert also requires more than 2 stalls per hour of active streaming, which the firing panel includes. Threshold line is the values.yaml default; per-cluster Helm overrides may differ. Use this to judge whether the threshold catches a real incident.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "line"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 5
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 180
+          },
+          "id": 303,
+          "options": {
+            "annotations": {
+              "clustering": -1,
+              "multiLane": false
+            },
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": true,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "(\n    label_replace(sum by (cluster, vendor) (increase(vg_freeswitch_stt_stream_stalls_total{cluster=~\"$cluster\"}[15m])), \"path\", \"native\", \"\", \"\")\n  or\n    label_replace(sum by (cluster, vendor) (increase(vg_freeswitch_grpc_transcribe_stream_stalls_total{cluster=~\"$cluster\"}[15m])), \"path\", \"grpc\", \"\", \"\")\n)",
+              "instant": false,
+              "legendFormat": "{{cluster}} {{vendor}} ({{path}})",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "VGFreeSWITCHSttStreamStalls — signal vs threshold",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "[severity: warning] VGFreeSWITCHSttStreamStalls — exact alert expression from cognigy.vg.rules.yaml (Helm defaults substituted, 'for' duration omitted, cluster added). Series appear only while the alert condition holds.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -4000,9 +4428,9 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 164
+            "y": 180
           },
-          "id": 135,
+          "id": 304,
           "options": {
             "annotations": {
               "clustering": -1,
@@ -4031,14 +4459,434 @@
                 "uid": "$datasource"
               },
               "editorMode": "code",
-              "expr": "(histogram_quantile(0.10, sum by (le, cluster) (rate(vg_freeswitch_tts_frames_per_second_bucket{cluster=~\"$cluster\"}[5m]))) < 40)\n  and\n(sum by (cluster) (rate(vg_freeswitch_tts_frames_per_second_count{cluster=~\"$cluster\"}[5m])) > 0.1 * max_over_time(sum by (cluster) (rate(vg_freeswitch_tts_frames_per_second_count{cluster=~\"$cluster\"}[5m]))[1d:5m]))",
+              "expr": "(\n    label_replace(sum by (cluster, vendor) (increase(vg_freeswitch_stt_stream_stalls_total{cluster=~\"$cluster\"}[15m])), \"path\", \"native\", \"\", \"\")\n  or\n    label_replace(sum by (cluster, vendor) (increase(vg_freeswitch_grpc_transcribe_stream_stalls_total{cluster=~\"$cluster\"}[15m])), \"path\", \"grpc\", \"\", \"\")\n) > 5\nand\n(\n    label_replace(\n      sum by (cluster, vendor) (increase(vg_freeswitch_stt_stream_stalls_total{cluster=~\"$cluster\"}[15m]))\n        / (sum by (cluster, vendor) (increase(vg_freeswitch_stt_frames_per_second_count{cluster=~\"$cluster\"}[15m])) / 3600),\n      \"path\", \"native\", \"\", \"\")\n  or\n    label_replace(\n      sum by (cluster, vendor) (increase(vg_freeswitch_grpc_transcribe_stream_stalls_total{cluster=~\"$cluster\"}[15m]))\n        / (sum by (cluster, vendor) (increase(vg_freeswitch_grpc_transcribe_frames_per_second_count{cluster=~\"$cluster\"}[15m])) / 3600),\n      \"path\", \"grpc\", \"\", \"\")\n) > 2",
               "instant": false,
-              "legendFormat": "{{cluster}} p10 TTS fps (firing)",
+              "legendFormat": "{{cluster}} {{vendor}} ({{path}}) (firing)",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "VGFreeSWITCHTtsFrameRateLow — firing expression",
+          "title": "VGFreeSWITCHSttStreamStalls — firing expression",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "[severity: warning] VGFreeSWITCHTtsStreamStalls fires when the signal rises above the 5 line. The signal is TTS stall episodes per vendor in 15m; path=grpc are the gRPC proxy modules. Still reports as warning / P5 while it is calibrated. Empty on images that predate the counter. The alert also requires more than 2 stalls per hour of active streaming, which the firing panel includes. Threshold line is the values.yaml default; per-cluster Helm overrides may differ. Use this to judge whether the threshold catches a real incident.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "line"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 5
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 188
+          },
+          "id": 305,
+          "options": {
+            "annotations": {
+              "clustering": -1,
+              "multiLane": false
+            },
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": true,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "(\n    label_replace(sum by (cluster, vendor) (increase(vg_freeswitch_tts_stream_stalls_total{cluster=~\"$cluster\"}[15m])), \"path\", \"native\", \"\", \"\")\n  or\n    label_replace(sum by (cluster, vendor) (increase(vg_freeswitch_grpc_tts_stream_stalls_total{cluster=~\"$cluster\"}[15m])), \"path\", \"grpc\", \"\", \"\")\n)",
+              "instant": false,
+              "legendFormat": "{{cluster}} {{vendor}} ({{path}})",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "VGFreeSWITCHTtsStreamStalls — signal vs threshold",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "[severity: warning] VGFreeSWITCHTtsStreamStalls — exact alert expression from cognigy.vg.rules.yaml (Helm defaults substituted, 'for' duration omitted, cluster added). Series appear only while the alert condition holds.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 188
+          },
+          "id": 306,
+          "options": {
+            "annotations": {
+              "clustering": -1,
+              "multiLane": false
+            },
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": true,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "(\n    label_replace(sum by (cluster, vendor) (increase(vg_freeswitch_tts_stream_stalls_total{cluster=~\"$cluster\"}[15m])), \"path\", \"native\", \"\", \"\")\n  or\n    label_replace(sum by (cluster, vendor) (increase(vg_freeswitch_grpc_tts_stream_stalls_total{cluster=~\"$cluster\"}[15m])), \"path\", \"grpc\", \"\", \"\")\n) > 5\nand\n(\n    label_replace(\n      sum by (cluster, vendor) (increase(vg_freeswitch_tts_stream_stalls_total{cluster=~\"$cluster\"}[15m]))\n        / (sum by (cluster, vendor) (increase(vg_freeswitch_tts_frames_per_second_count{cluster=~\"$cluster\"}[15m])) / 3600),\n      \"path\", \"native\", \"\", \"\")\n  or\n    label_replace(\n      sum by (cluster, vendor) (increase(vg_freeswitch_grpc_tts_stream_stalls_total{cluster=~\"$cluster\"}[15m]))\n        / (sum by (cluster, vendor) (increase(vg_freeswitch_grpc_tts_frames_per_second_count{cluster=~\"$cluster\"}[15m])) / 3600),\n      \"path\", \"grpc\", \"\", \"\")\n) > 2",
+              "instant": false,
+              "legendFormat": "{{cluster}} {{vendor}} ({{path}}) (firing)",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "VGFreeSWITCHTtsStreamStalls — firing expression",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "[severity: warning] VGFreeSWITCHTtsNoAudio fires when the signal rises above the 3 line. The signal is TTS streams without any audio per vendor in 15m; path=grpc are the gRPC proxy modules. Still reports as warning / P5 while it is calibrated. Empty on images that predate the counter. Threshold line is the values.yaml default; per-cluster Helm overrides may differ. Use this to judge whether the threshold catches a real incident.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "line"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 3
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 196
+          },
+          "id": 307,
+          "options": {
+            "annotations": {
+              "clustering": -1,
+              "multiLane": false
+            },
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": true,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "(\n    label_replace(sum by (cluster, vendor) (increase(vg_freeswitch_tts_no_audio_total{cluster=~\"$cluster\"}[15m])), \"path\", \"native\", \"\", \"\")\n  or\n    label_replace(sum by (cluster, vendor) (increase(vg_freeswitch_grpc_tts_no_audio_total{cluster=~\"$cluster\"}[15m])), \"path\", \"grpc\", \"\", \"\")\n)",
+              "instant": false,
+              "legendFormat": "{{cluster}} {{vendor}} ({{path}})",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "VGFreeSWITCHTtsNoAudio — signal vs threshold",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "[severity: warning] VGFreeSWITCHTtsNoAudio — exact alert expression from cognigy.vg.rules.yaml (Helm defaults substituted, 'for' duration omitted, cluster added). Series appear only while the alert condition holds.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 196
+          },
+          "id": 308,
+          "options": {
+            "annotations": {
+              "clustering": -1,
+              "multiLane": false
+            },
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": true,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "(\n    label_replace(sum by (cluster, vendor) (increase(vg_freeswitch_tts_no_audio_total{cluster=~\"$cluster\"}[15m])), \"path\", \"native\", \"\", \"\")\n  or\n    label_replace(sum by (cluster, vendor) (increase(vg_freeswitch_grpc_tts_no_audio_total{cluster=~\"$cluster\"}[15m])), \"path\", \"grpc\", \"\", \"\")\n) > 3",
+              "instant": false,
+              "legendFormat": "{{cluster}} {{vendor}} ({{path}}) (firing)",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "VGFreeSWITCHTtsNoAudio — firing expression",
           "type": "timeseries"
         },
         {
@@ -4107,7 +4955,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 172
+            "y": 204
           },
           "id": 136,
           "options": {
@@ -4210,7 +5058,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 172
+            "y": 204
           },
           "id": 137,
           "options": {
@@ -4317,7 +5165,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 180
+            "y": 212
           },
           "id": 138,
           "options": {
@@ -4420,7 +5268,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 180
+            "y": 212
           },
           "id": 139,
           "options": {
@@ -4527,7 +5375,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 188
+            "y": 220
           },
           "id": 140,
           "options": {
@@ -4630,7 +5478,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 188
+            "y": 220
           },
           "id": 141,
           "options": {
@@ -4737,7 +5585,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 196
+            "y": 228
           },
           "id": 142,
           "options": {
@@ -4840,7 +5688,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 196
+            "y": 228
           },
           "id": 143,
           "options": {
@@ -4947,7 +5795,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 204
+            "y": 236
           },
           "id": 144,
           "options": {
@@ -5050,7 +5898,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 204
+            "y": 236
           },
           "id": 145,
           "options": {
@@ -5157,7 +6005,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 212
+            "y": 244
           },
           "id": 147,
           "options": {
@@ -5260,7 +6108,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 212
+            "y": 244
           },
           "id": 148,
           "options": {
@@ -5367,7 +6215,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 220
+            "y": 252
           },
           "id": 214,
           "options": {
@@ -5470,7 +6318,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 220
+            "y": 252
           },
           "id": 215,
           "options": {
@@ -5577,7 +6425,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 228
+            "y": 260
           },
           "id": 165,
           "options": {
@@ -5680,7 +6528,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 228
+            "y": 260
           },
           "id": 166,
           "options": {
@@ -5787,7 +6635,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 236
+            "y": 268
           },
           "id": 208,
           "options": {
@@ -5890,7 +6738,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 236
+            "y": 268
           },
           "id": 209,
           "options": {
@@ -5997,7 +6845,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 244
+            "y": 276
           },
           "id": 210,
           "options": {
@@ -6100,7 +6948,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 244
+            "y": 276
           },
           "id": 211,
           "options": {
@@ -6207,7 +7055,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 252
+            "y": 284
           },
           "id": 212,
           "options": {
@@ -6310,7 +7158,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 252
+            "y": 284
           },
           "id": 213,
           "options": {
@@ -6881,6 +7729,216 @@
             }
           ],
           "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Customer-provided TTS say options (synthesizer options / queryOptions) that failed to parse or had fields dropped, by reason. invalid_json: options were not an object. schema_validation: the vendor schema rejected the options, so none were applied. unsupported_field: parse succeeded but unrecognized or blocked fields were stripped.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "decimals": 0,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 253
+          },
+          "id": 301,
+          "options": {
+            "legend": {
+              "calcs": [
+                "sum"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true,
+              "sortBy": "Sum",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "hideZeros": true,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (cluster, reason) (increase(vg_speech_utils_say_options_parse_errors{cluster=~\"$cluster\"}[5m]))",
+              "instant": false,
+              "legendFormat": "{{cluster}} / {{reason}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "TTS Say Options Parse Errors — by Reason",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Share of TTS say options parses that failed or dropped fields, per cluster (errors / attempts over 5m). Normalizes for traffic, so a rise here means options quality changed rather than call volume.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "decimals": 1,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.05
+                  }
+                ]
+              },
+              "unit": "percentunit",
+              "min": 0
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 253
+          },
+          "id": 302,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true,
+              "sortBy": "Max",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "hideZeros": true,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (cluster) (increase(vg_speech_utils_say_options_parse_errors{cluster=~\"$cluster\"}[5m])) / (sum by (cluster) (increase(vg_speech_utils_say_options_parse_attempts{cluster=~\"$cluster\"}[5m])) > 0)",
+              "instant": false,
+              "legendFormat": "{{cluster}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "TTS Say Options Parse Error Ratio",
+          "type": "timeseries"
         }
       ],
       "title": "Speech Error Triage",
@@ -11864,5 +12922,5 @@
   "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
   "title": "VG / Operational Diagnostics",
   "uid": "vg-operational-diagnostic",
-  "version": 13
+  "version": 14
 }

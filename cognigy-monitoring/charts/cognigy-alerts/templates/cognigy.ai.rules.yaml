@@ -127,13 +127,13 @@ spec:
               histogram_quantile( {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeQuantile }},
               sum(rate(cognigy_endpoint_raw_messages_response_time_bucket[5m])) by (le))/1000 >
               {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeThreshold }}
-        for: 15m
+        for: 60m
         labels:
           severity: warning
           group: ai-custom-alert-rules-dubnium
         annotations:
-          summary: Message processing time is higher than {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeThreshold }} sec for {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeQuantile }}% of messages on (instance {{`{{`}} $labels.instance }})
-          description: "Message processing time is {{`{{`}} $value }} sec for {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeQuantile }}% of messages for last 15 minutes\n LABELS = {{`{{`}} $labels }}"
+          summary: Message processing time at quantile {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeQuantile }} has been above {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeThreshold }} sec for 60 minutes
+          description: "Message processing time at quantile {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeQuantile }} across all endpoints is currently {{`{{`}} $value | printf \"%.1f\" }} sec and has stayed above the {{ $.Values.rules.ai.serviceEndpoint.messageProcessingTimeThreshold }} sec threshold for at least 60 minutes\n LABELS = {{`{{`}} $labels }}"
       {{- if (.Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.enabled ) }}
       - alert: ServiceEndpointOOMKilled
         expr: |-
@@ -149,6 +149,40 @@ spec:
         labels:
           severity: {{ .Values.rules.ai.serviceEndpoint.serviceEndpointOOMKilled.severity }}
           group: ai-custom-alert-rules-dubnium
+      {{- end }}
+      {{- $seMem := .Values.rules.ai.serviceEndpoint.serviceEndpointMemoryNearLimit }}
+      {{- if $seMem.enabled }}
+      # Combined working set of all service-endpoint pods against their combined memory
+      # limits, per cluster/namespace: flags the deployment as a whole running short of
+      # memory (needs more replicas or a higher limit), not a single hot pod (that is
+      # covered by the OOMKilled alerts). Working set is scraped from the kubelet, so it
+      # does not depend on the app's own metrics endpoint under memory pressure.
+      # - working set is averaged over `smoothingWindow` so GC sawtooth neither fires the
+      #   alert on peaks nor resets `for` on troughs
+      # - both sides only count pods that have a working set and a limit, so pods that are
+      #   starting or terminating during a rollout don't skew the ratio
+      # - `max by pod` dedupes duplicate scrape series
+      - alert: ServiceEndpointMemoryNearLimit
+        expr: |-
+          sum by (cluster, namespace) (
+            max by (cluster, namespace, pod) (avg_over_time(container_memory_working_set_bytes{container="service-endpoint"}[{{ $seMem.smoothingWindow }}]))
+              and on (cluster, namespace, pod)
+            max by (cluster, namespace, pod) (kube_pod_container_resource_limits{container="service-endpoint", resource="memory"})
+          )
+            /
+          sum by (cluster, namespace) (
+            max by (cluster, namespace, pod) (kube_pod_container_resource_limits{container="service-endpoint", resource="memory"})
+              and on (cluster, namespace, pod)
+            max by (cluster, namespace, pod) (avg_over_time(container_memory_working_set_bytes{container="service-endpoint"}[{{ $seMem.smoothingWindow }}]))
+          )
+            > ( {{ $seMem.threshold }} / 100 )
+        for: {{ $seMem.timeout }}
+        labels:
+          severity: {{ $seMem.severity }}
+          group: ai-custom-alert-rules-dubnium
+        annotations:
+          summary: "service-endpoint pods in {{`{{`}} $labels.namespace {{`}}`}} are above {{ $seMem.threshold }}% of their combined memory limit"
+          description: "service-endpoint pods in namespace {{`{{`}} $labels.namespace {{`}}`}} of cluster {{`{{`}} $externalLabels.cluster {{`}}`}} have used {{`{{`}} $value | humanizePercentage {{`}}`}} of their combined memory limit for more than {{ $seMem.timeout }}. The deployment as a whole is short of memory; scale out or raise the memory limit, and check for a leak if usage keeps growing.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
       {{- end }}
   {{- end }}
 

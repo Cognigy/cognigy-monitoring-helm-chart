@@ -12,8 +12,8 @@ spec:
     rules:
     - alert: QdrantMemoryNearLimit
       annotations:
-        summary: Qdrant instance is close to its memory limit (cluster {{`{{`}} $labels.cluster }})
-        description: "Qdrant pod {{`{{`}} $labels.pod }} in cluster {{`{{`}} $labels.cluster }} is using {{`{{`}} $value | humanizePercentage {{`}}`}} of its memory limit.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: Qdrant instance is close to its memory limit (cluster {{`{{`}} $externalLabels.cluster }})
+        description: "Qdrant pod {{`{{`}} $labels.pod }} in cluster {{`{{`}} $externalLabels.cluster }} is using {{`{{`}} $value | humanizePercentage {{`}}`}} of its memory limit.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
       expr: |-
         max(container_memory_working_set_bytes{pod=~"qdrant.*", container=~"qdrant.*"}) by (cluster, pod)
           /

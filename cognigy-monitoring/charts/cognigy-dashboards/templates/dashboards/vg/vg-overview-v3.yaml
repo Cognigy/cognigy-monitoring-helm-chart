@@ -3378,6 +3378,126 @@ data:
           "type": "timeseries"
         },
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Calls active for more than 1h, per duration bucket (vg_feature_server_long_running_active_sessions, exclusive buckets: '1h' = 1h-2h, '24h' = 24h+). The gauge only counts calls still in the feature-server session tracker. Red bars: calls the tracker dropped (TTL expiry or 24h age ceiling) although they were not released, so they left the gauge while SIP/media may still be up (vg_feature_server_sessions_evicted_while_active_total). Any red bar needs investigation. CGY-42375, RCA 2026-063 Jetstar.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "lineWidth": 1,
+                "pointSize": 5,
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "normal"
+                }
+              },
+              "decimals": 0,
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byFrameRefID",
+                  "options": "B"
+                },
+                "properties": [
+                  {
+                    "id": "custom.drawStyle",
+                    "value": "bars"
+                  },
+                  {
+                    "id": "custom.fillOpacity",
+                    "value": 80
+                  },
+                  {
+                    "id": "custom.stacking",
+                    "value": {
+                      "group": "B",
+                      "mode": "none"
+                    }
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "red",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 160
+          },
+          "id": 219,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (duration_bucket) (vg_feature_server_long_running_active_sessions{cluster=\"$cluster\"})",
+              "legendFormat": "active {{`{{`}}duration_bucket{{`}}`}} bucket",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum by (reason) (increase(vg_feature_server_sessions_evicted_while_active_total{cluster=\"$cluster\"}[5m]))",
+              "legendFormat": "evicted while active ({{`{{`}}reason{{`}}`}}) / 5m",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Long-Running Calls",
+          "type": "timeseries"
+        },
+        {
           "collapsed": false,
           "datasource": {
             "type": "prometheus",
@@ -3387,7 +3507,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 160
+            "y": 168
           },
           "id": 206,
           "panels": [],
@@ -3435,7 +3555,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 161
+            "y": 169
           },
           "id": 207,
           "options": {
@@ -3508,7 +3628,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 161
+            "y": 169
           },
           "id": 208,
           "options": {
@@ -3581,7 +3701,7 @@ data:
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 169
+            "y": 177
           },
           "id": 209,
           "options": {
@@ -3623,7 +3743,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 177
+            "y": 185
           },
           "id": 210,
           "panels": [],
@@ -3671,7 +3791,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 178
+            "y": 186
           },
           "id": 211,
           "options": {
@@ -3744,7 +3864,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 178
+            "y": 186
           },
           "id": 212,
           "options": {
@@ -3817,7 +3937,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 186
+            "y": 194
           },
           "id": 213,
           "options": {
@@ -3901,7 +4021,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 186
+            "y": 194
           },
           "id": 214,
           "options": {
@@ -3985,7 +4105,7 @@ data:
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 194
+            "y": 202
           },
           "id": 215,
           "options": {
@@ -4027,7 +4147,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 202
+            "y": 210
           },
           "id": 216,
           "panels": [],
@@ -4075,7 +4195,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 203
+            "y": 211
           },
           "id": 217,
           "options": {
@@ -4172,7 +4292,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 203
+            "y": 211
           },
           "id": 218,
           "options": {
@@ -4582,7 +4702,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 211
+            "y": 219
           },
           "id": 310,
           "panels": [],
@@ -4623,7 +4743,7 @@ data:
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 212
+            "y": 220
           },
           "id": 311,
           "options": {
@@ -4691,7 +4811,7 @@ data:
             "h": 6,
             "w": 6,
             "x": 6,
-            "y": 212
+            "y": 220
           },
           "id": 312,
           "options": {
@@ -4759,7 +4879,7 @@ data:
             "h": 6,
             "w": 6,
             "x": 12,
-            "y": 212
+            "y": 220
           },
           "id": 313,
           "options": {
@@ -4827,7 +4947,7 @@ data:
             "h": 6,
             "w": 6,
             "x": 18,
-            "y": 212
+            "y": 220
           },
           "id": 314,
           "options": {
@@ -4919,7 +5039,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 218
+            "y": 226
           },
           "id": 315,
           "options": {
@@ -5033,7 +5153,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 218
+            "y": 226
           },
           "id": 316,
           "options": {
@@ -5136,7 +5256,7 @@ data:
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 226
+            "y": 234
           },
           "id": 317,
           "options": {

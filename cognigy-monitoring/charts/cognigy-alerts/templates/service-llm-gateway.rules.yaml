@@ -117,6 +117,122 @@ spec:
     {{- end }}
   {{- end }}
 
+  {{- if or .Values.rules.llmGateway.poolHydrationErrors.enabled .Values.rules.llmGateway.poolUnavailableErrors.enabled }}
+  - name: cognigy.alert.llm-gateway.pool-errors
+    rules:
+    {{- if .Values.rules.llmGateway.poolHydrationErrors.enabled }}
+    {{- $poolHydrationErrorsCount := printf `(sum by (provider, model) (increase(llm_gateway_config_set_failures_total{error_type="pool_hydration_error"}[%[1]s]) and llm_gateway_config_set_failures_total{error_type="pool_hydration_error"} offset %[1]s) + on (provider, model) sum by (provider, model) (last_over_time(llm_gateway_config_set_failures_total{error_type="pool_hydration_error"}[%[1]s]) unless llm_gateway_config_set_failures_total{error_type="pool_hydration_error"} offset %[1]s)) or sum by (provider, model) (increase(llm_gateway_config_set_failures_total{error_type="pool_hydration_error"}[%[1]s]) and llm_gateway_config_set_failures_total{error_type="pool_hydration_error"} offset %[1]s) or sum by (provider, model) (last_over_time(llm_gateway_config_set_failures_total{error_type="pool_hydration_error"}[%[1]s]) unless llm_gateway_config_set_failures_total{error_type="pool_hydration_error"} offset %[1]s)` .Values.rules.llmGateway.poolHydrationErrors.lookbackWindow }}
+    - alert: LlmGatewayPoolHydrationErrorDetected
+      expr: |-
+        ({{ $poolHydrationErrorsCount }})
+          >= {{ .Values.rules.llmGateway.poolHydrationErrors.warningThreshold }}
+      for: 0m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway config-set pool hydration error detected — likely an invalid config
+        description: "LLM Gateway recorded {{`{{`}} $value {{`}}`}} pool_hydration_error failures in the last {{ .Values.rules.llmGateway.poolHydrationErrors.lookbackWindow }} (threshold: {{ .Values.rules.llmGateway.poolHydrationErrors.warningThreshold }}). pool_hydration_error only occurs on an invalid config-set, and the affected pool member cools down after each failure.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    - alert: LlmGatewayPoolHydrationErrorRecurring
+      expr: |-
+        ({{ $poolHydrationErrorsCount }})
+          >= {{ .Values.rules.llmGateway.poolHydrationErrors.criticalThreshold }}
+      for: 0m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway config-set pool hydration is recurringly failing — likely an invalid config
+        description: "LLM Gateway recorded {{`{{`}} $value {{`}}`}} pool_hydration_error failures in the last {{ .Values.rules.llmGateway.poolHydrationErrors.lookbackWindow }} (threshold: {{ .Values.rules.llmGateway.poolHydrationErrors.criticalThreshold }}). pool_hydration_error only occurs on an invalid config-set, and the affected pool member cools down after each failure — recurrence within this window means the underlying config is still broken.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{- if .Values.rules.llmGateway.poolUnavailableErrors.enabled }}
+    - alert: LlmGatewayPoolUnavailableHigh
+      expr: |-
+        sum(rate(llm_gateway_config_set_failures_total{error_type="pool_unavailable"}[10m]))
+          /
+        sum(rate(llm_gateway_config_set_failures_total[10m]))
+          > {{ .Values.rules.llmGateway.poolUnavailableErrors.warningThreshold }}
+      for: 10m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway config-set pool is unavailable - the pool does not exist, or no valid members left to use
+        description: "{{`{{`}} $value | humanizePercentage {{`}}`}} of LLM Gateway config-set failures are pool_unavailable, above the {{ .Values.rules.llmGateway.poolUnavailableErrors.warningThreshold }} warning threshold. The named pool could not be resolved: it does not exist, has no valid (non-expired) members to attempt, or a member points to a config-set that no longer exists. This is distinct from pool_hydration_error, where members exist but fail to hydrate/authenticate.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    - alert: LlmGatewayPoolUnavailableCritical
+      expr: |-
+        sum(rate(llm_gateway_config_set_failures_total{error_type="pool_unavailable"}[10m]))
+          /
+        sum(rate(llm_gateway_config_set_failures_total[10m]))
+          > {{ .Values.rules.llmGateway.poolUnavailableErrors.criticalThreshold }}
+      for: 10m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway config-set pool unavailability is critical - the pool does not exist, or no valid members left to use
+        description: "{{`{{`}} $value | humanizePercentage {{`}}`}} of LLM Gateway config-set failures are pool_unavailable, above the {{ .Values.rules.llmGateway.poolUnavailableErrors.criticalThreshold }} critical threshold. The named pool could not be resolved: it does not exist, has no valid (non-expired) members to attempt, or a member points to a config-set that no longer exists. This is distinct from pool_hydration_error, where members exist but fail to hydrate/authenticate.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{- end }}
+
+  {{- if or .Values.rules.llmGateway.poolMemberRateLimitErrors.enabled .Values.rules.llmGateway.poolMemberAuthErrors.enabled }}
+  - name: cognigy.alert.llm-gateway.pool-member
+    rules:
+    {{- if .Values.rules.llmGateway.poolMemberRateLimitErrors.enabled }}
+    - alert: LlmGatewayPoolMemberProviderRateLimitHigh
+      expr: |-
+        sum(rate(llm_gateway_config_set_failures_total{error_type="rate_limit", pool_member="true"}[10m]))
+          /
+        sum(rate(llm_gateway_config_set_failures_total{pool_member="true"}[10m]))
+          > {{ .Values.rules.llmGateway.poolMemberRateLimitErrors.warningThreshold }}
+      for: 10m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway is experiencing provider rate limiting on NICE-provided (pool member) config sets
+        description: "{{`{{`}} $value | humanizePercentage {{`}}`}} of LLM Gateway config-set failures for NICE-provided (pool member) config sets are rate-limit errors, above the {{ .Values.rules.llmGateway.poolMemberRateLimitErrors.warningThreshold }} warning threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    - alert: LlmGatewayPoolMemberProviderRateLimitCritical
+      expr: |-
+        sum(rate(llm_gateway_config_set_failures_total{error_type="rate_limit", pool_member="true"}[10m]))
+          /
+        sum(rate(llm_gateway_config_set_failures_total{pool_member="true"}[10m]))
+          > {{ .Values.rules.llmGateway.poolMemberRateLimitErrors.criticalThreshold }}
+      for: 10m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway is experiencing critical provider rate limiting on NICE-provided (pool member) config sets
+        description: "{{`{{`}} $value | humanizePercentage {{`}}`}} of LLM Gateway config-set failures for NICE-provided (pool member) config sets are rate-limit errors, above the {{ .Values.rules.llmGateway.poolMemberRateLimitErrors.criticalThreshold }} critical threshold.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{- if .Values.rules.llmGateway.poolMemberAuthErrors.enabled }}
+    {{- $poolMemberAuthErrorsCount := printf `(sum by (provider, model) (increase(llm_gateway_config_set_failures_total{error_type="auth_error", pool_member="true"}[%[1]s]) and llm_gateway_config_set_failures_total{error_type="auth_error", pool_member="true"} offset %[1]s) + on (provider, model) sum by (provider, model) (last_over_time(llm_gateway_config_set_failures_total{error_type="auth_error", pool_member="true"}[%[1]s]) unless llm_gateway_config_set_failures_total{error_type="auth_error", pool_member="true"} offset %[1]s)) or sum by (provider, model) (increase(llm_gateway_config_set_failures_total{error_type="auth_error", pool_member="true"}[%[1]s]) and llm_gateway_config_set_failures_total{error_type="auth_error", pool_member="true"} offset %[1]s) or sum by (provider, model) (last_over_time(llm_gateway_config_set_failures_total{error_type="auth_error", pool_member="true"}[%[1]s]) unless llm_gateway_config_set_failures_total{error_type="auth_error", pool_member="true"} offset %[1]s)` .Values.rules.llmGateway.poolMemberAuthErrors.lookbackWindow }}
+    - alert: LlmGatewayPoolMemberAuthErrorDetected
+      expr: |-
+        ({{ $poolMemberAuthErrorsCount }})
+          >= {{ .Values.rules.llmGateway.poolMemberAuthErrors.warningThreshold }}
+      for: 0m
+      labels:
+        severity: warning
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway auth error detected on a NICE-provided (pool member) config set — invalid or wrong credentials
+        description: "LLM Gateway recorded {{`{{`}} $value {{`}}`}} auth_error failures for NICE-provided (pool member) config sets in the last {{ .Values.rules.llmGateway.poolMemberAuthErrors.lookbackWindow }} (threshold: {{ .Values.rules.llmGateway.poolMemberAuthErrors.warningThreshold }}). This indicates an invalid or wrong API key and will not self-resolve.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    - alert: LlmGatewayPoolMemberAuthErrorRecurring
+      expr: |-
+        ({{ $poolMemberAuthErrorsCount }})
+          >= {{ .Values.rules.llmGateway.poolMemberAuthErrors.criticalThreshold }}
+      for: 0m
+      labels:
+        severity: critical
+        group: ai-custom-alert-rules-carbon
+      annotations:
+        summary: LLM Gateway auth errors are recurring on a NICE-provided (pool member) config set — invalid or wrong credentials
+        description: "LLM Gateway recorded {{`{{`}} $value {{`}}`}} auth_error failures for NICE-provided (pool member) config sets in the last {{ .Values.rules.llmGateway.poolMemberAuthErrors.lookbackWindow }} (threshold: {{ .Values.rules.llmGateway.poolMemberAuthErrors.criticalThreshold }}). Recurrence confirms the credential is invalid or wrong and needs immediate attention.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{- end }}
+
   {{- if .Values.rules.llmGateway.timeToFirstToken.enabled }}
   - name: cognigy.alert.llm-gateway.streaming
     rules:

@@ -102,11 +102,11 @@ spec:
         expr: sum(increase(vg_feature_server_task_error[5m])) by (task) > {{$.Values.rules.vg.featureServer.taskErrors.threshold }}
         for: 0m
         labels:
-          severity: critical
+          severity: {{ $.Values.rules.vg.featureServer.taskErrors.severity }}
           group: vg-custom-alert-rules
         annotations:
-          summary: "Task: Error/min rate is high (instance {{`{{`}} $labels.instance }})"
-          description: "Task: Error/min rate has crossed {{$.Values.rules.vg.threshold }} threshold: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+          summary: "Task: Error rate is high (task {{`{{`}} $labels.task }})"
+          description: "Task: Errors in the last 5m have crossed the {{$.Values.rules.vg.featureServer.taskErrors.threshold }} threshold: \n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
       {{- end }}
 
       {{- if (.Values.rules.vg.featureServer.handoverErrors.enabled ) }}
@@ -198,6 +198,18 @@ spec:
           description: "VG gave up reconnecting to Cognigy AI. Calls will fail silently.\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
       {{- end }}
 
+      {{- if (.Values.rules.vg.featureServer.wsMaxReconnectsExceeded.enabled ) }}
+      - alert: WebSocketMaxReconnectsExceeded
+        expr: sum(increase(vg_feature_server_websocket_exceeded_max_reconnects_total[5m])) > 5
+        for: 0m
+        labels:
+          severity: {{ $.Values.rules.vg.featureServer.wsMaxReconnectsExceeded.severity }}
+          group: vg-custom-alert-rules
+        annotations:
+          summary: feature-server exhausted WebSocket reconnect attempts to Cognigy AI
+          description: "VG gave up reconnecting to Cognigy AI. Calls will fail silently.\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
       {{- if (.Values.rules.vg.featureServer.wsConnectionTimeouts.enabled ) }}
       - alert: WebSocketConnectionTimeouts
         expr: sum(increase(vg_feature_server__websocket_connection_timeout_after_retries[5m])) > 0
@@ -232,6 +244,21 @@ spec:
         annotations:
           summary: "gRPC TTS error rate is high ({{`{{`}} $value {{`}}`}} errors/min)"
           description: "Streaming TTS errors (ElevenLabs, PlayHT) exceeded {{$.Values.rules.vg.featureServer.grpcTtsErrors.threshold }}/min threshold.\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.internalDtlsNotDtls.enabled ) }}
+      # Only fires with INTERNAL_DTLS_ENABLED on: the counter is never incremented with the flag off.
+      # A not_dtls offer means FreeSWITCH offered plain or SDES RTP instead of DTLS-SRTP on the
+      # internal rtpengine <-> FreeSWITCH leg, so media on that leg is not DTLS-protected.
+      - alert: InternalDtlsOfferNotDtls
+        expr: sum by (namespace, site) (increase(vg_feature_server_internal_dtls_offer_total{outcome="not_dtls"}[5m])) > 0
+        for: 0m
+        labels:
+          severity: {{ $.Values.rules.vg.featureServer.internalDtlsNotDtls.severity }}
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "FreeSWITCH offered non-DTLS media on the internal leg ({{`{{`}} $labels.site {{`}}`}})"
+          description: "With INTERNAL_DTLS_ENABLED on, FreeSWITCH built an offer for the rtpengine <-> FreeSWITCH leg that is not DTLS-SRTP (no UDP/TLS/RTP/SAVP(F) with a fingerprint). Media on that leg is plain RTP or SDES. Check the internal_dtls_offer warn log for the same site (proto, hasFingerprint), then FreeSWITCH's dialplan and the fsmrf version. See docs/metrics/INTERNAL_DTLS_OFFER_METRICS.md in vg-feature-server.\n  VALUE = {{`{{`}} $value }}\n  LABELS = {{`{{`}} $labels }}"
       {{- end }}
 
       {{- if (.Values.rules.vg.featureServer.speechFallback.enabled ) }}
@@ -324,11 +351,121 @@ spec:
           ) > 0
         for: {{ $.Values.rules.vg.featureServer.eslEventLoopFreeze.timeout }}
         labels:
-          severity: critical
+          severity: {{ $.Values.rules.vg.featureServer.eslEventLoopFreeze.severity }}
           group: vg-custom-alert-rules
         annotations:
           summary: "Feature-server ESL event loop freeze detected on pod {{`{{`}} $labels.pod {{`}}`}}"
           description: "Pod {{`{{`}} $labels.pod {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}} is responding 481 (Call/Transaction Does Not Exist) to SIP CANCEL requests. This indicates the Node.js event loop is saturated and drachtio can no longer process SIP transactions — new calls hang indefinitely in createEndpoint() and time out with 408 after 3 minutes. Immediate action: kubectl rollout restart statefulset/feature-server -n {{`{{`}} $labels.namespace {{`}}`}}"
+      {{- end }}
+
+      {{/* The feature-server's drachtio connection stopped carrying traffic from the
+           app to drachtio while drachtio still delivers inbound SIP to the app. The
+           connection stays open, nothing is logged and the pod stays Ready, so every
+           new call on the pod fails in createEndpoint() with a media-server-failure 503
+           until the pod is restarted.
+
+           Fingerprint, per pod: drachtio sent nothing on the app's behalf in the
+           window, although INVITEs reached drachtio and the feature-server counted new
+           calls. CANCEL handling (200/481 CANCEL, 487 INVITE) is excluded because
+           drachtio's SIP stack answers it without the app, so it keeps flowing during
+           the failure. A quiet pod that rejects calls itself still sends 4xx/5xx
+           responses, and a freshly started pod whose counters have not been created
+           yet has no feature-server call increase, so neither matches. */}}
+      {{- $dw := .Values.rules.vg.featureServer.drachtioWedged }}
+      {{- if $dw.enabled }}
+      - alert: FeatureServerDrachtioWedged
+        expr: |-
+          sum by (namespace, pod) (
+            increase({__name__=~"drachtio_sip_(requests|responses)_out_total",
+              namespace=~"{{ $targetNamespace }}",
+              container="drachtio",
+              pod=~"feature-server-.*",
+              pod!~"{{ $dw.podExcludeRegex }}",
+              method!="CANCEL",
+              code!="487"
+            }[{{ $dw.window }}])
+          ) == 0
+          and on (namespace, pod)
+          sum by (namespace, pod) (
+            increase(drachtio_sip_requests_in_total{
+              namespace=~"{{ $targetNamespace }}",
+              container="drachtio",
+              pod=~"feature-server-.*",
+              method="INVITE"
+            }[{{ $dw.window }}])
+          ) > 0
+          and on (namespace, pod)
+          sum by (namespace, pod) (
+            increase(vg_feature_server_calls_total{
+              namespace=~"{{ $targetNamespace }}",
+              container="feature-server",
+              pod=~"feature-server-.*"
+            }[{{ $dw.window }}])
+          ) > 0
+          and on (namespace, pod)
+          sum by (namespace, pod) (
+            drachtio_app_connections{
+              namespace=~"{{ $targetNamespace }}",
+              container="drachtio",
+              pod=~"feature-server-.*"
+            }
+          ) >= 1
+        for: {{ $dw.timeout }}
+        labels:
+          severity: {{ $dw.severity }}
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "drachtio stopped sending for feature-server pod {{`{{`}} $labels.pod {{`}}`}} — new calls on it fail"
+          description: "Pod {{`{{`}} $labels.pod {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}} is receiving INVITEs and starting calls, but its drachtio has sent no SIP request or response on the feature-server's behalf for {{ $dw.window }}, while the app connection is still open. Every new call on this pod fails with createEndpoint timed out after 10000ms and a 503 (media_server_failure); the pod stays Ready, so it keeps receiving calls. Immediate action: kubectl delete pod {{`{{`}} $labels.pod {{`}}`}} -n {{`{{`}} $labels.namespace {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+          {{- with $dw.runbookUrl }}
+          runbook_url: {{ . }}
+          {{- end }}
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.freeSwitchHeartbeatLost.enabled ) }}
+      - alert: FeatureServerFreeSWITCHHeartbeatLost
+        expr: |-
+          changes(vg_feature_server_freeswitch_media_cpu_idle{
+            namespace=~"{{ $targetNamespace }}",
+            pod=~"feature-server-.*",
+            pod!~"feature-server-nightly-.*"
+          }[30m]) == 0
+          and
+          vg_feature_server_freeswitch_media_cpu_idle{
+            namespace=~"{{ $targetNamespace }}",
+            pod=~"feature-server-.*",
+            pod!~"feature-server-nightly-.*"
+          } > 0
+        for: {{ $.Values.rules.vg.featureServer.freeSwitchHeartbeatLost.timeout }}
+        labels:
+          severity: warning
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "FreeSWITCH HEARTBEAT subscription lost on pod {{`{{`}} $labels.pod {{`}}`}}"
+          description: "Pod {{`{{`}} $labels.pod {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}} has reported an unchanging vg_feature_server_freeswitch_media_cpu_idle value. This means the ESL HEARTBEAT subscription was lost after an ESL reconnect and the FeatureServer is reporting stale FreeSWITCH status. The pod will continue handling calls but is at risk of a FreeSWITCH sidecar deadlock (days later). Remediation: kubectl delete pod {{`{{`}} $labels.pod {{`}}`}} -n {{`{{`}} $labels.namespace {{`}}`}} during a low-traffic window."
+      {{- end }}
+
+      {{- if (.Values.rules.vg.featureServer.freeSwitchHeartbeatLostCritical.enabled ) }}
+      - alert: FeatureServerFreeSWITCHHeartbeatLostCritical
+        expr: |-
+          changes(vg_feature_server_freeswitch_media_cpu_idle{
+            namespace=~"{{ $targetNamespace }}",
+            pod=~"feature-server-.*",
+            pod!~"feature-server-nightly-.*"
+          }[{{ $.Values.rules.vg.featureServer.freeSwitchHeartbeatLostCritical.window }}]) == 0
+          and
+          vg_feature_server_freeswitch_media_cpu_idle{
+            namespace=~"{{ $targetNamespace }}",
+            pod=~"feature-server-.*",
+            pod!~"feature-server-nightly-.*"
+          } > 0
+        for: 10m
+        labels:
+          severity: {{ $.Values.rules.vg.featureServer.freeSwitchHeartbeatLostCritical.severity }}
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "FreeSWITCH HEARTBEAT subscription lost for days — pod {{`{{`}} $labels.pod {{`}}`}} at risk of deadlock"
+          description: "Pod {{`{{`}} $labels.pod {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}} has reported an unchanging vg_feature_server_freeswitch_media_cpu_idle value for an extended period. A warning alert was not acted on. The pod is approaching the window where FreeSWITCH is likely to deadlock. Immediate action required: kubectl delete pod {{`{{`}} $labels.pod {{`}}`}} -n {{`{{`}} $labels.namespace {{`}}`}}"
       {{- end }}
 
       {{/* Event-loop blocking, measured with nodejs_eventloop_lag_max_seconds.
@@ -386,41 +523,174 @@ spec:
           description: "Pod {{`{{`}} $labels.pod {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}} is exposing {{`{{`}} $value {{`}}`}} series, above the {{ $.Values.rules.vg.featureServer.metricsCardinalityHigh.threshold }} threshold. prom-client does not evict label sets, so this grows with the number of tenants the pod has ever served and only resets on restart. Each scrape blocks the event loop for roughly 12ns per byte of payload. Confirm with nodejs_eventloop_lag_max_seconds; a rollout restart clears it as a stopgap.\n  LABELS = {{`{{`}} $labels }}"
       {{- end }}
 
-      {{/* Media frame-rate stall alerts on the p10 of vg_freeswitch_{stt,tts}_frames_per_second.
-           p10 is the fps below which the worst 10% of per-second samples fall, so it drops as soon
-           as a meaningful share of sessions stall, before the median moves. Each alert is
-           traffic-gated to minTrafficFraction of the cluster's recent peak
-           (max_over_time(traffic[1d:5m])) so idle windows produce no series. */}}
-      {{- if (.Values.rules.vg.featureServer.sttFrameRateLow.enabled ) }}
-      - alert: VGFreeSWITCHSttFrameRateLow
+      {{/* Media frame-rate alerts, from vg_freeswitch_{stt,tts}_frames_per_second (one sample per
+           active stream per second, target 50 fps) and the stall / no-audio counters next to them.
+           FreeSWITCH records no samples while a stream is deliberately paused, so the histograms
+           only hold seconds in which audio was expected.
+
+           *FrameRateLow is about FreeSWITCH falling behind. Per pod, it is the share of non-zero
+           seconds outside the healthy band: at most 40 fps, or above 55 fps when a late media
+           thread catches up in a burst. Seconds at exactly 0 fps belong to the stall counters
+           below. Leaving them out also keeps older images, which record 0 fps during pauses,
+           from tripping these rules. Overload hits one pod, so the share is per pod, and only
+           counts once the pod streamed minActiveSeconds in the window: a stream's first second is
+           usually partial, which on a quiet pod with short sessions is a large share.
+
+           Prometheus 3 stores `le` as "40.0", older versions as "40"; the matchers accept both. */}}
+      {{- $sttFps := .Values.rules.vg.featureServer.sttFrameRateLow }}
+      {{- range $tier := list "warning" "critical" }}
+      {{- $t := index $sttFps $tier }}
+      {{- if and $sttFps.enabled $t.enabled }}
+      - alert: VGFreeSWITCHSttFrameRateLow{{ if eq $tier "critical" }}Critical{{ end }}
         expr: |-
-          (histogram_quantile(0.10, sum by (le) (rate(vg_freeswitch_stt_frames_per_second_bucket[5m]))) < {{ $.Values.rules.vg.featureServer.sttFrameRateLow.warningThreshold }})
-            and
-          (sum(rate(vg_freeswitch_stt_frames_per_second_count[5m])) > {{ $.Values.rules.vg.featureServer.sttFrameRateLow.minTrafficFraction }} * max_over_time(sum(rate(vg_freeswitch_stt_frames_per_second_count[5m]))[1d:5m]))
-        for: {{ $.Values.rules.vg.featureServer.sttFrameRateLow.timeout }}
+          (
+            (
+                sum by (namespace, pod) (increase(vg_freeswitch_stt_frames_per_second_bucket{le=~"40|40.0"}[{{ $sttFps.window }}]))
+              - sum by (namespace, pod) (increase(vg_freeswitch_stt_frames_per_second_bucket{le=~"0|0.0"}[{{ $sttFps.window }}]))
+              + sum by (namespace, pod) (increase(vg_freeswitch_stt_frames_per_second_count[{{ $sttFps.window }}]))
+              - sum by (namespace, pod) (increase(vg_freeswitch_stt_frames_per_second_bucket{le=~"55|55.0"}[{{ $sttFps.window }}]))
+            )
+            /
+            (
+              (
+                  sum by (namespace, pod) (increase(vg_freeswitch_stt_frames_per_second_count[{{ $sttFps.window }}]))
+                - sum by (namespace, pod) (increase(vg_freeswitch_stt_frames_per_second_bucket{le=~"0|0.0"}[{{ $sttFps.window }}]))
+              ) > {{ $sttFps.minActiveSeconds }}
+            )
+          ) > {{ $t.threshold }}
+        for: {{ $sttFps.timeout }}
         labels:
-          severity: warning
+          severity: {{ $t.severity }}
           group: vg-custom-alert-rules
-          priority: P5
+          priority: {{ $t.priority }}
         annotations:
-          summary: "FreeSWITCH inbound STT frame rate degraded (p10 below {{ $.Values.rules.vg.featureServer.sttFrameRateLow.warningThreshold }} fps)"
-          description: "The 10th-percentile inbound STT audio frame rate is below {{ $.Values.rules.vg.featureServer.sttFrameRateLow.warningThreshold }} fps (target 50): the worst 10% of sessions are delivering degraded audio to the recognizer. Check FreeSWITCH CPU / CFS throttling and the per-vendor p10 drill-down on the VG / FreeSWITCH board.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+          summary: "FreeSWITCH is falling behind on caller audio on pod {{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $value | humanizePercentage {{`}}`}} of STT seconds outside 40-55 fps)"
+          description: "On pod {{`{{`}} $labels.pod {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}}, {{`{{`}} $value | humanizePercentage {{`}}`}} of the seconds in which FreeSWITCH fed caller audio to a recognizer ran outside 40-55 fps (target 50) over the last {{ $sttFps.window }}, above the {{ $t.threshold | float64 | mulf 100 }}% threshold. FreeSWITCH is falling behind on this pod: too few frames per second, or catch-up bursts after its media thread was late. Callers' speech reaches the recognizer late or in bursts. Check the pod's CPU and CFS throttling, its call count against the other pods, and whether TTS playout on the same pod degrades too (VGFreeSWITCHTtsFrameRateLow). Seconds at 0 fps are not counted here; see VGFreeSWITCHSttStreamStalls.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+      {{- end }}
       {{- end }}
 
-      {{- if (.Values.rules.vg.featureServer.ttsFrameRateLow.enabled ) }}
-      - alert: VGFreeSWITCHTtsFrameRateLow
+      {{- $ttsFps := .Values.rules.vg.featureServer.ttsFrameRateLow }}
+      {{- range $tier := list "warning" "critical" }}
+      {{- $t := index $ttsFps $tier }}
+      {{- if and $ttsFps.enabled $t.enabled }}
+      - alert: VGFreeSWITCHTtsFrameRateLow{{ if eq $tier "critical" }}Critical{{ end }}
         expr: |-
-          (histogram_quantile(0.10, sum by (le) (rate(vg_freeswitch_tts_frames_per_second_bucket[5m]))) < {{ $.Values.rules.vg.featureServer.ttsFrameRateLow.warningThreshold }})
-            and
-          (sum(rate(vg_freeswitch_tts_frames_per_second_count[5m])) > {{ $.Values.rules.vg.featureServer.ttsFrameRateLow.minTrafficFraction }} * max_over_time(sum(rate(vg_freeswitch_tts_frames_per_second_count[5m]))[1d:5m]))
-        for: {{ $.Values.rules.vg.featureServer.ttsFrameRateLow.timeout }}
+          (
+            (
+                sum by (namespace, pod) (increase(vg_freeswitch_tts_frames_per_second_bucket{le=~"40|40.0"}[{{ $ttsFps.window }}]))
+              - sum by (namespace, pod) (increase(vg_freeswitch_tts_frames_per_second_bucket{le=~"0|0.0"}[{{ $ttsFps.window }}]))
+              + sum by (namespace, pod) (increase(vg_freeswitch_tts_frames_per_second_count[{{ $ttsFps.window }}]))
+              - sum by (namespace, pod) (increase(vg_freeswitch_tts_frames_per_second_bucket{le=~"55|55.0"}[{{ $ttsFps.window }}]))
+            )
+            /
+            (
+              (
+                  sum by (namespace, pod) (increase(vg_freeswitch_tts_frames_per_second_count[{{ $ttsFps.window }}]))
+                - sum by (namespace, pod) (increase(vg_freeswitch_tts_frames_per_second_bucket{le=~"0|0.0"}[{{ $ttsFps.window }}]))
+              ) > {{ $ttsFps.minActiveSeconds }}
+            )
+          ) > {{ $t.threshold }}
+        for: {{ $ttsFps.timeout }}
         labels:
-          severity: warning
+          severity: {{ $t.severity }}
           group: vg-custom-alert-rules
-          priority: P5
+          priority: {{ $t.priority }}
         annotations:
-          summary: "FreeSWITCH outbound TTS frame rate degraded (p10 below {{ $.Values.rules.vg.featureServer.ttsFrameRateLow.warningThreshold }} fps)"
-          description: "The 10th-percentile outbound TTS audio frame rate is below {{ $.Values.rules.vg.featureServer.ttsFrameRateLow.warningThreshold }} fps (target 50): the worst 10% of sessions have stuttering/stuck playout. Check FreeSWITCH CPU / CFS throttling and the per-vendor p10 drill-down on the VG / FreeSWITCH board.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+          summary: "TTS playout is uneven on pod {{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $value | humanizePercentage {{`}}`}} of TTS seconds outside 40-55 fps)"
+          description: "On pod {{`{{`}} $labels.pod {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}}, {{`{{`}} $value | humanizePercentage {{`}}`}} of the seconds in which FreeSWITCH played synthesized audio ran outside 40-55 fps (target 50) over the last {{ $ttsFps.window }}, above the {{ $t.threshold | float64 | mulf 100 }}% threshold. Either FreeSWITCH is falling behind on this pod, in which case STT on the same pod degrades too (VGFreeSWITCHSttFrameRateLow), or a TTS vendor delivers audio slower than real time so playout runs dry, in which case only that vendor's streams are affected (split vg_freeswitch_tts_frames_per_second by vendor). The partial seconds at the end of each utterance give TTS a higher baseline than STT, hence the higher threshold. Seconds at 0 fps are not counted here; see VGFreeSWITCHTtsStreamStalls.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+      {{- end }}
+      {{- end }}
+
+      {{/* Stall and no-audio counters. A stall is counted once per episode: 3 seconds without
+           frames on a stream that had been delivering audio and was not deliberately paused. A
+           TTS stream that never delivers any audio is not a stall; after 10 seconds it is counted
+           in *_no_audio_total instead. The gRPC proxies (mod_grpc_transcribe, mod_grpc_tts) have
+           their own series, folded in here as path="grpc".
+
+           The stall rules fire per vendor on more than `threshold` stalls in the window, and only
+           while the stalls also exceed rateThreshold per hour of active streaming, so a busy
+           cluster does not alert on a level that is normal for its volume. Images that predate
+           these counters do not export them, so the rules stay silent on those pods. FreeSWITCH
+           logs one WARNING per affected call, carrying the channel UUID and the call_sid. */}}
+      {{- $sttStalls := .Values.rules.vg.featureServer.sttStreamStalls }}
+      {{- if $sttStalls.enabled }}
+      - alert: VGFreeSWITCHSttStreamStalls
+        expr: |-
+          (
+              label_replace(sum by (vendor) (increase(vg_freeswitch_stt_stream_stalls_total[{{ $sttStalls.window }}])), "path", "native", "", "")
+            or
+              label_replace(sum by (vendor) (increase(vg_freeswitch_grpc_transcribe_stream_stalls_total[{{ $sttStalls.window }}])), "path", "grpc", "", "")
+          ) > {{ $sttStalls.threshold }}
+          and
+          (
+              label_replace(
+                sum by (vendor) (increase(vg_freeswitch_stt_stream_stalls_total[{{ $sttStalls.window }}]))
+                  / (sum by (vendor) (increase(vg_freeswitch_stt_frames_per_second_count[{{ $sttStalls.window }}])) / 3600),
+                "path", "native", "", "")
+            or
+              label_replace(
+                sum by (vendor) (increase(vg_freeswitch_grpc_transcribe_stream_stalls_total[{{ $sttStalls.window }}]))
+                  / (sum by (vendor) (increase(vg_freeswitch_grpc_transcribe_frames_per_second_count[{{ $sttStalls.window }}])) / 3600),
+                "path", "grpc", "", "")
+          ) > {{ $sttStalls.rateThreshold }}
+        for: {{ $sttStalls.timeout }}
+        labels:
+          severity: {{ $sttStalls.severity }}
+          group: vg-custom-alert-rules
+          priority: {{ $sttStalls.priority }}
+        annotations:
+          summary: "STT streams to {{`{{`}} $labels.vendor {{`}}`}} are stalling ({{`{{`}} $value | printf \"%.0f\" {{`}}`}} in {{ $sttStalls.window }})"
+          description: "FreeSWITCH stopped delivering caller audio to the {{`{{`}} $labels.vendor {{`}}`}} recognizer (path={{`{{`}} $labels.path {{`}}`}}) for 3 seconds or more on about {{`{{`}} $value | printf \"%.0f\" {{`}}`}} streams in the last {{ $sttStalls.window }}, while recognition was active. That is more than {{ $sttStalls.threshold }} stalls and more than {{ $sttStalls.rateThreshold }} per hour of active STT streaming. If one pod has most of them (sum by (pod) of the stall counter), suspect that pod's FreeSWITCH and check VGFreeSWITCHSttFrameRateLow and its CPU. If they are spread over all pods, suspect the vendor integration or the calls' media. Each affected call has one FreeSWITCH WARNING 'STT stream stalled vendor=...' with its channel UUID and call_sid.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+      {{- end }}
+
+      {{- $ttsStalls := .Values.rules.vg.featureServer.ttsStreamStalls }}
+      {{- if $ttsStalls.enabled }}
+      - alert: VGFreeSWITCHTtsStreamStalls
+        expr: |-
+          (
+              label_replace(sum by (vendor) (increase(vg_freeswitch_tts_stream_stalls_total[{{ $ttsStalls.window }}])), "path", "native", "", "")
+            or
+              label_replace(sum by (vendor) (increase(vg_freeswitch_grpc_tts_stream_stalls_total[{{ $ttsStalls.window }}])), "path", "grpc", "", "")
+          ) > {{ $ttsStalls.threshold }}
+          and
+          (
+              label_replace(
+                sum by (vendor) (increase(vg_freeswitch_tts_stream_stalls_total[{{ $ttsStalls.window }}]))
+                  / (sum by (vendor) (increase(vg_freeswitch_tts_frames_per_second_count[{{ $ttsStalls.window }}])) / 3600),
+                "path", "native", "", "")
+            or
+              label_replace(
+                sum by (vendor) (increase(vg_freeswitch_grpc_tts_stream_stalls_total[{{ $ttsStalls.window }}]))
+                  / (sum by (vendor) (increase(vg_freeswitch_grpc_tts_frames_per_second_count[{{ $ttsStalls.window }}])) / 3600),
+                "path", "grpc", "", "")
+          ) > {{ $ttsStalls.rateThreshold }}
+        for: {{ $ttsStalls.timeout }}
+        labels:
+          severity: {{ $ttsStalls.severity }}
+          group: vg-custom-alert-rules
+          priority: {{ $ttsStalls.priority }}
+        annotations:
+          summary: "TTS playout from {{`{{`}} $labels.vendor {{`}}`}} is stalling mid-utterance ({{`{{`}} $value | printf \"%.0f\" {{`}}`}} in {{ $ttsStalls.window }})"
+          description: "Synthesized audio from {{`{{`}} $labels.vendor {{`}}`}} (path={{`{{`}} $labels.path {{`}}`}}) stopped for 3 seconds or more after playout had started on about {{`{{`}} $value | printf \"%.0f\" {{`}}`}} streams in the last {{ $ttsStalls.window }}, so callers heard a gap in the middle of a prompt. That is more than {{ $ttsStalls.threshold }} stalls and more than {{ $ttsStalls.rateThreshold }} per hour of active TTS playout. If they are spread over all pods, the vendor stopped streaming mid-utterance; check its status and the TTS error alerts. If one pod has most of them, suspect that pod's FreeSWITCH and check VGFreeSWITCHTtsFrameRateLow. Each affected call has one FreeSWITCH WARNING 'TTS stream stalled vendor=...' with its channel UUID and call_sid.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+      {{- end }}
+
+      {{- $ttsNoAudio := .Values.rules.vg.featureServer.ttsNoAudio }}
+      {{- if $ttsNoAudio.enabled }}
+      - alert: VGFreeSWITCHTtsNoAudio
+        expr: |-
+          (
+              label_replace(sum by (vendor) (increase(vg_freeswitch_tts_no_audio_total[{{ $ttsNoAudio.window }}])), "path", "native", "", "")
+            or
+              label_replace(sum by (vendor) (increase(vg_freeswitch_grpc_tts_no_audio_total[{{ $ttsNoAudio.window }}])), "path", "grpc", "", "")
+          ) > {{ $ttsNoAudio.threshold }}
+        for: {{ $ttsNoAudio.timeout }}
+        labels:
+          severity: {{ $ttsNoAudio.severity }}
+          group: vg-custom-alert-rules
+          priority: {{ $ttsNoAudio.priority }}
+        annotations:
+          summary: "TTS requests to {{`{{`}} $labels.vendor {{`}}`}} are producing no audio ({{`{{`}} $value | printf \"%.0f\" {{`}}`}} in {{ $ttsNoAudio.window }})"
+          description: "About {{`{{`}} $value | printf \"%.0f\" {{`}}`}} TTS streams from {{`{{`}} $labels.vendor {{`}}`}} (path={{`{{`}} $labels.path {{`}}`}}) delivered no audio at all within 10 seconds of the request in the last {{ $ttsNoAudio.window }}, more than the threshold of {{ $ttsNoAudio.threshold }}. Streams that were flushed (barge-in) or hung up before then are not counted, so each of these is a caller who waited in silence for a prompt. Usually the vendor accepted the request but never streamed: check its status, credentials and the TTS error alerts. Each affected call has one FreeSWITCH WARNING 'TTS stream produced no audio vendor=...' with its channel UUID and call_sid.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
       {{- end }}
 
       {{/* Inbound RTP audio-quality alerts on the mod_prometheus per-call histograms. Metrics are
@@ -590,6 +860,125 @@ spec:
         annotations:
           summary: "resolveCallAdmission is erroring rather than deciding"
           description: "Call admission raised an error instead of returning a decision. This is distinct from a rejection — a rejection is a decision — so these are calls the resolver could not judge at all. Compare against the admission-outcome panels to see whether it is confined to one originator.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+      {{- end }}
+    {{- end }}
+
+    {{- $abs := .Values.rules.vg.apiBan.stale }}
+    {{- if and .Values.rules.vg.apiBan.enabled $abs.enabled }}
+    - name: cognigy.vg.alert.api-ban
+      rules:
+      {{- /* Reads the CronJob's own success timestamp: the per-Job metrics vanish once
+           ttlSecondsAfterFinished deletes the Job. Before the first success that series
+           does not exist, so the creation time stands in and a CronJob that never
+           succeeds still alerts. */}}
+      - alert: VGApiBanListStale
+        expr: |-
+          (
+            time() - (
+              kube_cronjob_status_last_successful_time{namespace=~"{{ $targetNamespace }}", cronjob="update-api-ban-list"}
+                or
+              kube_cronjob_created{namespace=~"{{ $targetNamespace }}", cronjob="update-api-ban-list"}
+            )
+          ) > {{ $abs.staleAfterSeconds | int }}
+        for: {{ $abs.timeout }}
+        labels:
+          severity: {{ $abs.severity }}
+          group: vg-custom-alert-rules
+          priority: {{ $abs.priority }}
+        annotations:
+          summary: "update-api-ban-list has not succeeded in namespace {{`{{`}} $labels.namespace {{`}}`}}"
+          description: "No successful update-api-ban-list run in namespace {{`{{`}} $labels.namespace {{`}}`}} for more than {{ $abs.staleAfterSeconds | int }} seconds, so the IP blocklist drachtio enforces is not being refreshed. Check the logs of the CronJob's latest Job: a failed feed download or an unreachable Redis both end the run with an error.\n  VALUE = {{`{{`}} $value {{`}}`}}"
+    {{- end }}
+    {{- $os := .Values.rules.vg.sbcSip.carrierOptionsStopped }}
+    {{- $ts := .Values.rules.vg.sbcSip.tportStallClosed }}
+    {{- $bl := .Values.rules.vg.sbcSip.banListRedisErrors }}
+    {{- if and .Values.rules.vg.sbcSip.enabled (or (and $os.enabled $os.carrierSids) $ts.enabled $bl.enabled) }}
+    # sbc-sip. VGCarrierOptionsStopped and VGSbcSipTportStallClosed are opt-in per cluster.
+    - name: cognigy.vg.alert.sbc-sip
+      rules:
+      {{/* A carrier that sends SIP OPTIONS keepalives stopped reaching one sbc-sip
+           pod. Grouped per pod: a single stuck inbound TCP connection silences only
+           the pod it is pinned to, so a sum across pods would hide it. The carrier
+           list is explicit rather than learned from history, so the alert keeps
+           firing for an outage of any length and does not depend on retention.
+           Needs vg_carrier_options_received_total from sbc-sip-sidecar
+           (CARRIER_OPTIONS_METRICS_ENABLED), which exports a 0 series per known
+           carrier so a pod that never receives OPTIONS after a restart still alerts. */}}
+      {{- if and $os.enabled $os.carrierSids }}
+      - alert: VGCarrierOptionsStopped
+        expr: |-
+          sum by (namespace, pod, carrier_sid) (
+            increase(vg_carrier_options_received_total{
+              namespace=~"{{ $targetNamespace }}",
+              carrier_sid=~"{{ $os.carrierSids }}"
+            }[{{ $os.window }}])
+          ) == 0
+        for: {{ $os.timeout }}
+        labels:
+          severity: {{ $os.severity }}
+          group: vg-custom-alert-rules
+        annotations:
+          summary: "No SIP OPTIONS from carrier {{`{{`}} $labels.carrier_sid {{`}}`}} on pod {{`{{`}} $labels.pod {{`}}`}}"
+          description: "Carrier {{`{{`}} $labels.carrier_sid {{`}}`}} normally sends SIP OPTIONS keepalives, but pod {{`{{`}} $labels.pod {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}} received none in the last {{ $os.window }}. Either the carrier stopped sending, or the pod stopped reading the carrier's connection (check the connection with ss -tnoie on that pod). Inbound calls from this carrier over that connection are likely failing.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+          {{- with $os.runbookUrl }}
+          runbook_url: {{ . }}
+          {{- end }}
+      {{- end }}
+
+      {{/* drachtio closed an inbound TCP connection on which it had stopped reading.
+           The connection has already been recovered; the alert asks for evidence
+           collection, since the stall cause is not understood. */}}
+      {{- if $ts.enabled }}
+      - alert: VGSbcSipTportStallClosed
+        expr: |-
+          sum by (namespace, pod) (
+            increase(drachtio_tport_stall_closed_total{
+              namespace=~"{{ $targetNamespace }}",
+              pod=~"sbc-sip-.*"
+            }[10m])
+          ) > 0
+        for: {{ $ts.timeout }}
+        labels:
+          severity: {{ $ts.severity }}
+          group: vg-custom-alert-rules
+          priority: {{ $ts.priority }}
+        annotations:
+          summary: "drachtio closed a stalled inbound TCP connection on pod {{`{{`}} $labels.pod {{`}}`}}"
+          description: "drachtio on pod {{`{{`}} $labels.pod {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}} stopped reading an inbound TCP connection and its stall watchdog closed it ({{`{{`}} $value {{`}}`}} in 10m). The peer is expected to reconnect. Collect drachtio logs around the close for root-cause analysis.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+          {{- with $ts.runbookUrl }}
+          runbook_url: {{ . }}
+          {{- end }}
+      {{- end }}
+
+      {{/* drachtio failed Redis calls of its ban-list path: the per-REGISTER spam counter
+           (op="register_spam"), the gateway allowlist check (op="gateway_check") and tmpban
+           writes (op="tmpban_write"). Each failure fails open. While Redis is unreachable
+           every REGISTER adds one error, so the count follows REGISTER volume and a count
+           threshold would depend on traffic. The rule instead asks for errors in every
+           window for `timeout`, which a Redis failover does not sustain. Per pod, since
+           sbc-sip runs on the host network and reachability can differ per node; per op,
+           so the alert names the protection that failed. The counter starts at 0 for
+           every op, and images that predate it do not export it. */}}
+      {{- if $bl.enabled }}
+      - alert: VGSbcSipBanListRedisErrors
+        expr: |-
+          sum by (namespace, pod, op) (
+            increase(drachtio_blacklist_redis_errors_total{
+              namespace=~"{{ $targetNamespace }}",
+              pod=~"sbc-sip-.*"
+            }[{{ $bl.window }}])
+          ) > {{ $bl.threshold }}
+        for: {{ $bl.timeout }}
+        labels:
+          severity: {{ $bl.severity }}
+          group: vg-custom-alert-rules
+          priority: {{ $bl.priority }}
+        annotations:
+          summary: "drachtio cannot reach its ban-list Redis on pod {{`{{`}} $labels.pod {{`}}`}} (op {{`{{`}} $labels.op {{`}}`}}); IP bans may not be enforced"
+          description: "drachtio on pod {{`{{`}} $labels.pod {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}} has kept failing Redis calls for op {{`{{`}} $labels.op {{`}}`}} for at least {{ $bl.timeout }} ({{`{{`}} $value {{`}}`}} errors in the last {{ $bl.window }}). These calls fail open: REGISTER-spam counting, the gateway allowlist check or tmpban writes are not taking effect, so IP bans may not be enforced. Check that redis-ha and its Sentinels are reachable from the sbc-sip pod (it runs on the host network), and the drachtio log for TLS handshake, certificate or authentication errors on the blacklist Redis connection.\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+          {{- with $bl.runbookUrl }}
+          runbook_url: {{ . }}
+          {{- end }}
       {{- end }}
     {{- end }}
 {{- end -}}
